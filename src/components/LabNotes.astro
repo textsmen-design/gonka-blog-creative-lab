@@ -1,0 +1,109 @@
+---
+// src/components/LabNotes.astro
+
+const notes = [
+  {
+    serial: "NOTE-04",
+    title: "От крипто-хайпа к действующей лаборатории: почему GONKA.BLOG переродился",
+    category: "MANIFESTO & STRATEGY",
+    date: "2026.09.27",
+    readTime: "4 мин",
+    excerpt: "Почему типичные портфолио разработчиков мертвы, и зачем нам понадобилась концепция цифрового верстака, где свет падает на работающие деплои, а не на красивые обещания.",
+    tag: "ТРАНСФОРМАЦИЯ"
+  },
+  {
+    serial: "NOTE-03",
+    title: "Честный разбор «не пошло»: ошибки архитектуры и почему мы закрыли проект",
+    category: "FAILURES & PIVOTS",
+    date: "2026.08.14",
+    readTime: "6 мин",
+    excerpt: "Попытка построить тяжелый SaaS без прямого контакта с пользователем стоила нам 3 недель работы. Главный урок: MVP должен запускаться в Telegram за 48 часов, иначе идея умирает.",
+    tag: "СЛЕД РУКИ"
+  },
+  {
+    serial: "NOTE-02",
+    title: "Vibe Coding: как собирать рабочие продукты с помощью AI-агентов без рутины",
+    category: "VIBE CODING & METHODOLOGY",
+    date: "2026.06.02",
+    readTime: "8 мин",
+    excerpt: "Наш реальный пайплайн: формулирование замысла, мгновенная генерация архитектурного каркаса и передача рутины умным агентам. Скорость как главное конкурентное преимущество.",
+    tag: "МЕТОД"
+  },
+  {
+    serial: "NOTE-01",
+    title: "Почему GOAT и MOODENG снова рвут чарты: анализ мем-нарративов [Архив v1.0]",
+    category: "MARKET RESEARCH / GENESIS",
+    date: "2026.05.04",
+    readTime: "12 мин",
+    excerpt: "Сохранено из первого релиза Гонки: глубокое погружение в механику виральности, новые мем-коины, психологию крипторынка и то, какие механики имеют потенциал ×10.",
+    tag: "АРХИВ v1"
+  }
+];
+---
+
+<section id="journal" class="py-16 border-t transition-colors duration-700"
+         style="background: var(--desk-base); border-color: var(--desk-border);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Заголовок журнала -->
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 pb-6 border-b"
+         style="border-color: var(--desk-border);">
+      <div>
+        <div class="font-['JetBrains_Mono'] text-xs uppercase tracking-widest text-orange-600 mb-1">
+          // ЖИВОЙ ЖУРНАЛ МАСТЕРСКОЙ [FIELD NOTES & LOGS]
+        </div>
+        <h2 class="font-['Space_Grotesk'] text-3xl sm:text-4xl font-bold tracking-tight"
+            style="color: var(--desk-text);">
+          Заметки по процессу, инсайты и разборы
+        </h2>
+      </div>
+      <div class="font-['JetBrains_Mono'] text-xs opacity-75" style="color: var(--desk-muted);">
+        ФИКСАЦИЯ ОПЫТА: БЕЗ ЦЕНЗУРЫ И ВОДЫ
+      </div>
+    </div>
+
+    <!-- Список заметок -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {notes.map((n) => (
+        <article class="group rounded-xl border p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                 style="background: var(--desk-card); border-color: var(--desk-border);">
+          
+          <div>
+            <div class="flex items-center justify-between font-['JetBrains_Mono'] text-[11px] mb-3"
+                 style="color: var(--desk-muted);">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-orange-600">{n.serial}</span>
+                <span>•</span>
+                <span class="uppercase tracking-wider">{n.category}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold border"
+                    style="background: var(--desk-base); border-color: var(--desk-border); color: var(--desk-text);">
+                {n.tag}
+              </span>
+            </div>
+
+            <h3 class="font-['Space_Grotesk'] text-xl font-bold tracking-tight group-hover:text-orange-600 transition-colors mt-2"
+                style="color: var(--desk-text);">
+              {n.title}
+            </h3>
+
+            <p class="mt-3 text-sm leading-relaxed" style="color: var(--desk-muted);">
+              {n.excerpt}
+            </p>
+          </div>
+
+          <div class="mt-6 pt-4 border-t flex items-center justify-between font-['JetBrains_Mono'] text-xs"
+               style="border-color: var(--desk-border); color: var(--desk-muted);">
+            <span>{n.date} • {n.readTime}</span>
+            <span class="font-semibold text-orange-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+              <span>Читать запись</span>
+              <span>→</span>
+            </span>
+          </div>
+
+        </article>
+      ))}
+    </div>
+
+  </div>
+</section>

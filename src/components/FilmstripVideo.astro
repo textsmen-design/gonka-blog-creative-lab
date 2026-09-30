@@ -1,0 +1,135 @@
+---
+// src/components/FilmstripVideo.astro
+
+const videoReels = [
+  {
+    frame: "FR-01",
+    tag: "AI VIDEO & AVATAR",
+    title: "Генеративные аватары и синтез речи в реальном времени",
+    duration: "01:24",
+    aspect: "16:9",
+    status: "RENDERED",
+    desc: "Эксперимент по объединению клонированного голоса и синхронизации движения губ на локальной нейросети."
+  },
+  {
+    frame: "FR-02",
+    tag: "YOUTUBE PRODUCTION",
+    title: "Как собрать бота с майнингом за 48 часов на Python и Aiogram",
+    duration: "14:50",
+    aspect: "16:9",
+    status: "READY FOR YOUTUBE",
+    desc: "Пошаговый разбор архитектуры Telegram-бота: от схемы базы данных в Redis до публикации на сервере."
+  },
+  {
+    frame: "FR-03",
+    tag: "REEL / SHORT DEMO",
+    title: "Vibe Coding: живая разработка лендинга с помощью AI-агентов",
+    duration: "00:58",
+    aspect: "9:16",
+    status: "SHORT FORM",
+    desc: "Динамичный процесс сборки интерфейса без единой строчки рутинного CSS. Только чистый поток идей."
+  },
+  {
+    frame: "FR-04",
+    tag: "CINEMATIC PROMO",
+    title: "Serbia Relocation: промо-ролик цифровой среды для эмигрантов",
+    duration: "02:15",
+    aspect: "21:9",
+    status: "POST-PRODUCTION",
+    desc: "Атмосферный тизер платформы с видами Белграда и Нови-Сада, снятый и смонтированный в авторском стиле."
+  }
+];
+---
+
+<section id="filmstrip" class="py-16 border-t transition-colors duration-700"
+         style="background: var(--desk-card); border-color: var(--desk-border);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Заголовок монтажного стола -->
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+      <div>
+        <div class="font-['JetBrains_Mono'] text-xs uppercase tracking-widest text-orange-600 mb-1">
+          // МОНТАЖНЫЙ СТОЛ [35-MM FILM & VIDEO ROOM]
+        </div>
+        <h2 class="font-['Space_Grotesk'] text-2xl sm:text-3xl font-bold tracking-tight"
+            style="color: var(--desk-text);">
+          Видео, демо-ролики и медиа-эксперименты
+        </h2>
+      </div>
+      <div class="font-['JetBrains_Mono'] text-xs opacity-75" style="color: var(--desk-muted);">
+        ФОРМАТ: 35-MM CONTACT STRIP • YOUTUBE / REELS / AI
+      </div>
+    </div>
+
+    <!-- Монтажная перфорированная лента -->
+    <div class="rounded-2xl p-6 sm:p-8 border shadow-lg relative overflow-hidden"
+         style="background: #0d0d0d; border-color: #262626; color: #fff;">
+      
+      <!-- Перфорация плёнки (Верхняя полоса) -->
+      <div class="flex justify-between items-center gap-2 mb-6 border-b border-zinc-800 pb-3 overflow-hidden">
+        {Array.from({ length: 16 }).map((_, i) => (
+          <div class="w-5 h-3 rounded-xs bg-zinc-800/80 border border-zinc-700/60 shrink-0"></div>
+        ))}
+      </div>
+
+      <!-- Кадры монтажного стола -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {videoReels.map((v) => (
+          <div class="group relative rounded-xl border border-zinc-800 bg-zinc-900/90 p-4 flex flex-col justify-between transition-all duration-300 hover:border-orange-500/80 hover:-translate-y-1">
+            
+            <div>
+              <!-- Служебная строка кадра -->
+              <div class="flex items-center justify-between font-['JetBrains_Mono'] text-[10px] text-zinc-400 mb-2">
+                <span class="text-orange-400 font-bold">{v.frame}</span>
+                <span>{v.duration}</span>
+                <span class="px-1.5 py-0.5 rounded bg-zinc-800 text-[9px]">{v.aspect}</span>
+              </div>
+
+              <!-- Превью-окно кадра -->
+              <div class="relative aspect-video rounded-lg overflow-hidden bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-3">
+                <div class="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
+                     style="background-image: url('/workbench.png'); background-position: 70% 30%;"></div>
+                
+                <!-- Кнопка Play -->
+                <div class="relative z-10 w-10 h-10 rounded-full bg-black/60 border border-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-orange-500 group-hover:border-orange-400 transition-colors">
+                  <svg class="w-4 h-4 text-white ml-0.5 fill-current" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+
+                <div class="absolute bottom-1.5 left-2 font-['JetBrains_Mono'] text-[9px] bg-black/70 px-1.5 py-0.5 rounded text-zinc-300">
+                  {v.tag}
+                </div>
+              </div>
+
+              <!-- Название -->
+              <h3 class="font-['Space_Grotesk'] text-sm font-bold text-zinc-100 group-hover:text-orange-400 transition-colors line-clamp-2">
+                {v.title}
+              </h3>
+
+              <!-- Описание -->
+              <p class="mt-2 text-xs text-zinc-400 leading-snug line-clamp-3">
+                {v.desc}
+              </p>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between font-['JetBrains_Mono'] text-[10px] text-zinc-400">
+              <span class="text-emerald-400 font-medium">● {v.status}</span>
+              <span class="group-hover:text-orange-400 transition-colors">Смотреть кадр ↗</span>
+            </div>
+
+          </div>
+        ))}
+      </div>
+
+      <!-- Перфорация плёнки (Нижняя полоса) -->
+      <div class="flex justify-between items-center gap-2 mt-6 border-t border-zinc-800 pt-3 overflow-hidden">
+        {Array.from({ length: 16 }).map((_, i) => (
+          <div class="w-5 h-3 rounded-xs bg-zinc-800/80 border border-zinc-700/60 shrink-0"></div>
+        ))}
+      </div>
+
+    </div>
+
+  </div>
+</section>

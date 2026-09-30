@@ -1,0 +1,71 @@
+---
+// src/components/LifecyclePipeline.astro
+
+const stages = [
+  { step: "01", name: "ИДЕЯ", count: "14", desc: "Гипотезы, черновики, зарисовки", active: false },
+  { step: "02", name: "ПРОТОТИП", count: "6", desc: "Быстрый код, проверка жизнеспособности", active: false },
+  { step: "03", name: "РАБОЧАЯ ВЕРСИЯ", count: "4", desc: "Собранный MVP, готовый к бою", active: true },
+  { step: "04", name: "DEPLOY", count: "9", desc: "Боевой сервер, поддомен, статус LIVE", active: true },
+  { step: "05", name: "ПОЛЬЗОВАТЕЛЬ", count: "12K+", desc: "Реальные люди в ботах и на сайтах", active: false },
+  { step: "06", name: "ОБРАТНАЯ СВЯЗЬ", count: "50+", desc: "Прямой диалог и сбор метрик", active: false },
+  { step: "07", name: "УЛУЧШЕНИЕ", count: "∞", desc: "Итерации, чистка кода, масштабирование", active: false }
+];
+---
+
+<section id="pipeline" class="py-12 border-y transition-colors duration-700"
+         style="background: var(--desk-card); border-color: var(--desk-border);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Шапка секции -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div>
+        <div class="font-['JetBrains_Mono'] text-xs uppercase tracking-widest text-orange-600 mb-1">
+          // КОНВЕЙЕР ПРОИЗВОДСТВА
+        </div>
+        <h2 class="font-['Space_Grotesk'] text-2xl sm:text-3xl font-bold tracking-tight"
+            style="color: var(--desk-text);">
+          Путь продукта: от первой мысли до живого пользователя
+        </h2>
+      </div>
+      <div class="font-['JetBrains_Mono'] text-xs opacity-75" style="color: var(--desk-muted);">
+        ПРИНЦИП: МЕНЬШЕ ТЕОРИИ → БОЛЬШЕ РАБОТАЮЩИХ ВЕЩЕЙ
+      </div>
+    </div>
+
+    <!-- Интерактивная лента стадий -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      {stages.map((st) => (
+        <div class={`relative rounded-xl p-4 border transition-all duration-300 hover:-translate-y-1 ${st.active ? 'ring-1 ring-orange-500' : ''}`}
+             style="background: var(--desk-base); border-color: var(--desk-border);">
+          
+          <div class="flex items-center justify-between font-['JetBrains_Mono'] text-[11px] mb-2"
+               style="color: var(--desk-muted);">
+            <span class={st.active ? "text-orange-600 font-bold" : ""}>{st.step}</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" 
+                  style={st.active ? "background: #ea580c; color: #fff;" : "background: var(--desk-card); color: var(--desk-muted);"}>
+              {st.count}
+            </span>
+          </div>
+
+          <div class="font-['Space_Grotesk'] text-sm font-bold tracking-tight mb-1"
+               style="color: var(--desk-text);">
+            {st.name}
+          </div>
+
+          <p class="font-['JetBrains_Mono'] text-[10px] leading-snug opacity-75"
+             style="color: var(--desk-muted);">
+            {st.desc}
+          </p>
+
+          {st.active && (
+            <div class="absolute bottom-1 right-2 flex items-center gap-1 font-['JetBrains_Mono'] text-[9px] text-orange-600 font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+              ФОКУС
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>

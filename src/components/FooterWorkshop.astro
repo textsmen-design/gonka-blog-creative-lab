@@ -1,0 +1,94 @@
+---
+// src/components/FooterWorkshop.astro
+---
+
+<footer class="py-16 border-t transition-colors duration-700 font-['JetBrains_Mono'] text-xs"
+        style="background: var(--desk-base); border-color: var(--desk-border);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-12 border-b"
+         style="border-color: var(--desk-border);">
+      
+      <!-- Паспорт мастерской -->
+      <div>
+        <div class="font-bold text-orange-600 uppercase tracking-widest text-[11px] mb-3">
+          // ПАСПОРТ МАСТЕРСКОЙ
+        </div>
+        <div class="space-y-1.5 opacity-80" style="color: var(--desk-muted);">
+          <div>ЛАБОРАТОРИЯ: <strong style="color: var(--desk-text);">GONKA.BLOG</strong></div>
+          <div>ФОРМАТ: ЦИФРОВОЙ ВЕРСТАК</div>
+          <div>ФИЛОСОФИЯ: VIBE CODING & SPEED</div>
+          <div>ВЕРСИЯ ЯДРА: 2.6.0 (2026)</div>
+        </div>
+      </div>
+
+      <!-- Локация и координаты -->
+      <div>
+        <div class="font-bold text-orange-600 uppercase tracking-widest text-[11px] mb-3">
+          // КООРДИНАТЫ & ВРЕМЯ
+        </div>
+        <div class="space-y-1.5 opacity-80" style="color: var(--desk-muted);">
+          <div>БАЗА: СЕРБИЯ (NOVI SAD / BELGRADE)</div>
+          <div>РЕЖИМ: ГЛОБАЛЬНЫЙ DEPLOY</div>
+          <div>СТАТУС СТАНЦИИ: <span class="text-emerald-500 font-bold">ONLINE ●</span></div>
+          <div>КОНТУР: GONKA LAB v2</div>
+        </div>
+      </div>
+
+      <!-- Быстрый доступ -->
+      <div>
+        <div class="font-bold text-orange-600 uppercase tracking-widest text-[11px] mb-3">
+          // НАВИГАЦИЯ ВЕРСТАКА
+        </div>
+        <div class="flex flex-col space-y-1.5" style="color: var(--desk-muted);">
+          <a href="#workbench" class="hover:text-orange-500 transition-colors">Верстак №1: Под светом</a>
+          <a href="#pipeline" class="hover:text-orange-500 transition-colors">Конвейер стадий (7 этапов)</a>
+          <a href="#projects" class="hover:text-orange-500 transition-colors">Реестр артефактов</a>
+          <a href="#filmstrip" class="hover:text-orange-500 transition-colors">Монтажный стол (35-мм видео)</a>
+          <a href="#journal" class="hover:text-orange-500 transition-colors">Полевой журнал инженера</a>
+          <a href="/archive-v1" class="hover:text-orange-500 transition-colors opacity-75">Архивная версия 1.0 ↗</a>
+        </div>
+      </div>
+
+      <!-- Прямая линия связи -->
+      <div>
+        <div class="font-bold text-orange-600 uppercase tracking-widest text-[11px] mb-3">
+          // ПРЯМАЯ СВЯЗЬ (DIRECT WIRE)
+        </div>
+        <p class="leading-relaxed mb-4 opacity-80" style="color: var(--desk-muted);">
+          Идеи для продуктов, предложения коллабораций и обратная связь по запущенным проектам:
+        </p>
+        <div class="space-y-2">
+          <a href="https://t.me/GNKGONKAAI" target="_blank" rel="noopener noreferrer"
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold shadow transition-all hover:brightness-110"
+             style="background: #2AABEE;">
+            <span>Telegram: @GNKGONKAAI</span>
+            <span>↗</span>
+          </a>
+          <div>
+            <a href="https://t.me/GonkaAI_Mining_Bot?start=4507c724-549a-4972-9862-5ae3051dc96" 
+               target="_blank" rel="noopener noreferrer"
+               class="text-[11px] text-orange-600 hover:underline">
+              → Запустить бота @GonkaAI_Mining_Bot
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Нижняя полоса копирайта и статуса -->
+    <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 opacity-75"
+         style="color: var(--desk-muted);">
+      <div>
+        © 2026 GONKA.BLOG — Личная цифровая лаборатория. Все продукты действуют в реальном времени.
+      </div>
+      <div class="flex items-center gap-4 text-[11px]">
+        <span>СВЕТ ПОКАЗЫВАЕТ ГЛАВНОЕ</span>
+        <span>•</span>
+        <span>NO TRACKING • ZERO FLUFF</span>
+      </div>
+    </div>
+
+  </div>
+</footer>

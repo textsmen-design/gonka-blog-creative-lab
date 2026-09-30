@@ -1,0 +1,71 @@
+---
+// src/components/HeaderNav.astro
+---
+
+<header class="sticky top-0 z-50 backdrop-blur-md border-b transition-colors duration-700" 
+        style="background: var(--nav-bg); border-color: var(--desk-border);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    
+    <!-- Бренд GONKA.BLOG -->
+    <a href="#" class="group flex items-center gap-3 text-decoration-none">
+      <div class="relative w-8 h-8 rounded-full border flex items-center justify-center transition-transform group-hover:scale-105"
+           style="border-color: var(--desk-border); background: var(--desk-card);">
+        <div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 shadow-sm"></div>
+        <div class="absolute -inset-1 rounded-full border border-dashed opacity-40 animate-[spin_12s_linear_infinite]"
+             style="border-color: var(--desk-accent);"></div>
+      </div>
+      <div class="flex flex-col">
+        <span class="font-['Space_Grotesk'] text-xl font-bold tracking-tight" style="color: var(--desk-text);">
+          GONKA<span class="text-orange-500">.BLOG</span>
+        </span>
+        <span class="font-['JetBrains_Mono'] text-[9px] tracking-widest uppercase opacity-60" style="color: var(--desk-muted);">
+          Digital Lab & Workshop
+        </span>
+      </div>
+    </a>
+
+    <!-- Центральный статус лаборатории -->
+    <div class="hidden md:flex items-center gap-6 font-['JetBrains_Mono'] text-xs">
+      <div class="flex items-center gap-2 px-3 py-1 rounded-full border"
+           style="background: var(--desk-card); border-color: var(--desk-border); color: var(--desk-muted);">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span>СТОЛ: <strong style="color: var(--desk-text);">ПОД СВЕТОМ</strong></span>
+      </div>
+
+      <nav class="flex items-center gap-5 text-xs tracking-wider" style="color: var(--desk-muted);">
+        <a href="#workbench" class="hover:text-orange-500 transition-colors">ВЕРСТАК</a>
+        <a href="#pipeline" class="hover:text-orange-500 transition-colors">ЦИКЛ</a>
+        <a href="#projects" class="hover:text-orange-500 transition-colors">АРТЕФАКТЫ</a>
+        <a href="#filmstrip" class="hover:text-orange-500 transition-colors">ПЛЁНКА</a>
+        <a href="#journal" class="hover:text-orange-500 transition-colors">ЖУРНАЛ</a>
+        <a href="#ecosystem" class="hover:text-orange-500 transition-colors">СЕТЬ</a>
+      </nav>
+    </div>
+
+    <!-- Правая группа: Тумблер День/Ночь + Прямая связь -->
+    <div class="flex items-center gap-3">
+      <!-- Переключатель режима стола -->
+      <button id="theme-toggle" 
+              class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-['JetBrains_Mono'] transition-all hover:scale-105"
+              style="background: var(--desk-card); border-color: var(--desk-border); color: var(--desk-text);"
+              title="Переключить режим освещения стола">
+        <span id="theme-icon">☼</span>
+        <span id="theme-text" class="hidden sm:inline">ДЕНЬ</span>
+      </button>
+
+      <!-- Telegram -->
+      <a href="https://t.me/GNKGONKAAI" target="_blank" rel="noopener noreferrer"
+         class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm transition-all hover:brightness-110 active:scale-95"
+         style="background: #2AABEE; color: #ffffff;">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+        </svg>
+        <span>@GNKGONKAAI</span>
+      </a>
+    </div>
+
+  </div>
+</header>

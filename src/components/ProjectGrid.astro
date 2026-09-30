@@ -1,0 +1,228 @@
+---
+// src/components/ProjectGrid.astro
+
+const projects = [
+  {
+    id: "G-014",
+    title: "GONKA.BLOG Core",
+    category: "web",
+    categoryLabel: "WEB & SYSTEM",
+    status: "LIVE / IN PRODUCTION",
+    statusType: "live",
+    description: "Центральная цифровая мастерская: архитектурный световой стол, живой конвейер создания продуктов и витрина действующих сервисов.",
+    stack: ["Astro 6", "Tailwind", "CSS Variables", "Vibe Coding"],
+    link: "#workbench",
+    linkLabel: "НА ВЕРСТАКЕ",
+    isExternal: false,
+    date: "2026.09"
+  },
+  {
+    id: "G-008",
+    title: "Serbia Relocation",
+    category: "spinoff",
+    categoryLabel: "BIG PRODUCT SPINOFF",
+    status: "САМОСТОЯТЕЛЬНЫЙ ПРОДУКТ",
+    statusType: "highlight",
+    description: "Масштабная цифровая система для переезда и жизни в Сербии. Продукт, который был спроектирован в GONKA.BLOG и вырос в независимую экосистему.",
+    stack: ["Knowledge Base", "Telegram Bot", "Fullstack Web", "Community"],
+    link: "https://reloca.gonka.blog",
+    linkLabel: "ОТКРЫТЬ СИСТЕМУ ↗",
+    isExternal: true,
+    date: "2025–2026"
+  },
+  {
+    id: "G-017",
+    title: "Gonka AI Mining Bot",
+    category: "bot",
+    categoryLabel: "TELEGRAM BOT",
+    status: "LIVE BOT • 10K+ USERS",
+    statusType: "live",
+    description: "Игровой и инфраструктурный Telegram-бот экосистемы Гонки: механика майнинга, реферальная сеть и распределение заданий среди участников.",
+    stack: ["Python", "Aiogram", "Telegram API", "Redis"],
+    link: "https://t.me/GonkaAI_Mining_Bot?start=4507c724-549a-4972-9862-5ae3051dc96",
+    linkLabel: "ЗАПУСТИТЬ БОТА ↗",
+    isExternal: true,
+    date: "2025"
+  },
+  {
+    id: "G-021",
+    title: "Gonka Deploy Agent",
+    category: "ai",
+    categoryLabel: "AUTOMATION & DEVOPS",
+    status: "INTERNAL AGENT",
+    statusType: "active",
+    description: "Автономный агент развертывания и самовосстановления проектов на выделенных серверах. Синхронизирует Git-репозитории и валидирует сборки.",
+    stack: ["Python", "Shell / Bash", "SSH Keys", "Systemd"],
+    link: "#journal",
+    linkLabel: "ЧИТАТЬ ЛОГ СБОРКИ →",
+    isExternal: false,
+    date: "2026.04"
+  },
+  {
+    id: "G-033",
+    title: "English Gonka Voice AI",
+    category: "ai",
+    categoryLabel: "AI & VOICE INTERFACE",
+    status: "PROTOTYPE / TESTING",
+    statusType: "prototype",
+    description: "Персональный AI-собеседник для преодоления языкового барьера. Фокус на спонтанной речи без страха сделать ошибку.",
+    stack: ["Web Audio API", "Voice LLM", "FastAPI", "TTS/STT"],
+    link: "https://english.gonka.blog",
+    linkLabel: "ТЕСТОВЫЙ СТЕНД ↗",
+    isExternal: true,
+    date: "2026.03"
+  },
+  {
+    id: "G-002",
+    title: "Gonka Genesis Archive v1",
+    category: "archive",
+    categoryLabel: "ARCHIVE / FOUNDATION",
+    status: "СОХРАНЕНО В АРХИВЕ",
+    statusType: "archive",
+    description: "Первая версия Гонки: исследования крипто-мемов (GOAT, MOODENG), поиск формулы скорости и ранние прототипы брендинга.",
+    stack: ["Genesis Build", "Crypto Analytics", "v1 Index"],
+    link: "/archive-v1",
+    linkLabel: "ОТКРЫТЬ ВЕРСИЮ 1.0 ↗",
+    isExternal: false,
+    date: "2025–2026"
+  }
+];
+---
+
+<section id="projects" class="py-16 transition-colors duration-700"
+         style="background: var(--desk-base);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Заголовок и фильтры -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 border-b"
+         style="border-color: var(--desk-border);">
+      <div>
+        <div class="font-['JetBrains_Mono'] text-xs uppercase tracking-widest text-orange-600 mb-2">
+          // РЕЕСТР АРТЕФАКТОВ
+        </div>
+        <h2 class="font-['Space_Grotesk'] text-3xl sm:text-4xl font-bold tracking-tight"
+            style="color: var(--desk-text);">
+          Действующие продукты и разработки
+        </h2>
+      </div>
+
+      <!-- Фильтр по типам проектов -->
+      <div class="flex flex-wrap items-center gap-2 font-['JetBrains_Mono'] text-xs">
+        <button class="project-filter-btn px-3 py-1.5 rounded-lg border font-bold transition-all active-filter"
+                data-filter="all">ВСЕ (6)</button>
+        <button class="project-filter-btn px-3 py-1.5 rounded-lg border transition-all"
+                data-filter="web">WEB (2)</button>
+        <button class="project-filter-btn px-3 py-1.5 rounded-lg border transition-all"
+                data-filter="bot">БОТЫ (1)</button>
+        <button class="project-filter-btn px-3 py-1.5 rounded-lg border transition-all"
+                data-filter="ai">AI / АВТОМАТИЗАЦИЯ (2)</button>
+        <button class="project-filter-btn px-3 py-1.5 rounded-lg border transition-all"
+                data-filter="archive">АРХИВ (1)</button>
+      </div>
+    </div>
+
+    <!-- Сетка карточек-планшетов -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {projects.map((p) => (
+        <article class={`project-card group relative rounded-xl border p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl`}
+                 data-category={p.category}
+                 style="background: var(--desk-card); border-color: var(--desk-border);">
+          
+          <!-- Верхний служебный шильдик -->
+          <div>
+            <div class="flex items-center justify-between font-['JetBrains_Mono'] text-[11px] pb-3 mb-4 border-b"
+                 style="border-color: var(--desk-border); color: var(--desk-muted);">
+              <div class="flex items-center gap-2">
+                <span class="uppercase tracking-wider font-semibold text-orange-600">{p.categoryLabel}</span>
+              </div>
+              <span>{p.date}</span>
+            </div>
+
+            <!-- Заголовок карточки -->
+            <h3 class="font-['Space_Grotesk'] text-xl font-bold tracking-tight group-hover:text-orange-600 transition-colors"
+                style="color: var(--desk-text);">
+              {p.title}
+            </h3>
+
+            <!-- Статус деплоя -->
+            <div class="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-['JetBrains_Mono'] font-semibold"
+                 style={
+                   p.statusType === 'live' ? 'background: #dcfce7; color: #15803d;' :
+                   p.statusType === 'highlight' ? 'background: #ffedd5; color: #c2410c;' :
+                   p.statusType === 'prototype' ? 'background: #e0f2fe; color: #0369a1;' :
+                   'background: var(--desk-base); color: var(--desk-muted);'
+                 }>
+              <span class="w-1.5 h-1.5 rounded-full" 
+                    style={p.statusType === 'live' ? 'background: #22c55e;' : 'background: currentColor;'}></span>
+              <span>{p.status}</span>
+            </div>
+
+            <!-- Описание -->
+            <p class="mt-4 text-sm leading-relaxed" style="color: var(--desk-muted);">
+              {p.description}
+            </p>
+          </div>
+
+          <!-- Нижняя панель: стек и действие -->
+          <div class="mt-6 pt-4 border-t" style="border-color: var(--desk-border);">
+            <!-- Теги технологий -->
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              {p.stack.map((tag) => (
+                <span class="px-2 py-0.5 rounded font-['JetBrains_Mono'] text-[10px] border"
+                      style="background: var(--desk-base); border-color: var(--desk-border); color: var(--desk-muted);">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <!-- Ссылка на запуск или разбор -->
+            <a href={p.link}
+               target={p.isExternal ? "_blank" : "_self"}
+               rel={p.isExternal ? "noopener noreferrer" : ""}
+               class="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-lg font-['JetBrains_Mono'] text-xs font-semibold border transition-all group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600"
+               style="background: var(--desk-base); border-color: var(--desk-border); color: var(--desk-text);">
+              <span>{p.linkLabel}</span>
+              <span class="transition-transform group-hover:translate-x-1">→</span>
+            </a>
+          </div>
+
+        </article>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<script>
+  // Интерактивная фильтрация карточек
+  const filterButtons = document.querySelectorAll('.project-filter-btn');
+  const cards = document.querySelectorAll('.project-card');
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filter = btn.getAttribute('data-filter');
+
+      filterButtons.forEach((b) => {
+        b.classList.remove('active-filter');
+      });
+      btn.classList.add('active-filter');
+
+      cards.forEach((card) => {
+        const cat = card.getAttribute('data-category');
+        if (filter === 'all' || cat === filter) {
+          (card as HTMLElement).style.display = 'flex';
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .active-filter {
+    background: #ea580c !important;
+    color: #ffffff !important;
+    border-color: #ea580c !important;
+  }
+</style>

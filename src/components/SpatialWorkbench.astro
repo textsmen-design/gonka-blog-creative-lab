@@ -1,0 +1,5263 @@
+---
+// src/components/SpatialWorkbench.astro
+---
+
+<div id="spatial-canvas-container" class="spatial-root select-none">
+
+  <!-- ВЕРХНЯЯ РАМА ВЕРСТАКА -->
+  <header class="desk-topbar">
+    
+    <!-- Левая группа: Статус лаборатории и время -->
+    <div class="topbar-left">
+      <div class="status-pill">
+        <span class="live-pulse-wrapper">
+          <span class="pulse-ring"></span>
+          <span class="pulse-dot"></span>
+        </span>
+        <span class="status-text">СТОЛ В РАБОТЕ</span>
+      </div>
+
+      <div class="meta-coords">
+        <span>ВРЕМЯ: <strong id="live-clock">22:15:00 CET</strong></span>
+        <span>•</span>
+        <span>45°15'N 19°51'E</span>
+        <span>•</span>
+        <span>VIBE CODING</span>
+      </div>
+    </div>
+
+    <!-- Центр: бренд GONKA.BLOG -->
+    <a href="/" class="topbar-brand" title="GONKA.BLOG">
+      <span class="brand-title">GONKA<span class="brand-orange">.BLOG</span></span>
+      <span class="brand-sub">// digital lab</span>
+    </a>
+
+    <!-- Правая группа: Тумблер освещения + Соцсети/Связь -->
+    <div class="topbar-right">
+      <button id="desk-theme-toggle" class="theme-btn" type="button" title="Переключить свет в лаборатории">
+        <span id="desk-theme-icon">☼</span>
+        <span id="desk-theme-label">ДЕНЬ</span>
+      </button>
+
+      <div class="topbar-links-group" aria-label="Контакты и социальные сети">
+        <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="topbar-social-btn topbar-btn-tg" title="Связаться в Telegram (@lonelysvobodny)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+          </svg>
+          <span>Telegram</span>
+        </a>
+
+        <a href="mailto:textsmen@gmail.com" class="topbar-social-btn topbar-btn-email" title="Написать на Email (textsmen@gmail.com)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="16" x="2" y="4" rx="2"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+          <span>Email</span>
+        </a>
+
+        <a href="#youtube" class="topbar-social-btn topbar-btn-yt" title="YouTube канал (в разработке)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+          <span>YouTube</span>
+        </a>
+
+        <a href="#instagram" class="topbar-social-btn topbar-btn-ig" title="Instagram профиль (в разработке)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+          </svg>
+          <span>Instagram</span>
+        </a>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- ЦЕНТРАЛЬНЫЙ СВЕТОВОЙ СТОЛ -->
+  <main class="workbench-viewport">
+    
+    <div id="workbench-canvas" class="workbench-frame">
+      
+      <!-- Фоновое изображение верстака -->
+      <img src="/logo2.png" alt="GONKA.BLOG Digital Laboratory Workbench" class="workbench-bg-image" />
+
+      <!-- ФИЗИЧЕСКАЯ ГЕОМЕТРИЯ И ГРАНИЦЫ СТОЛЕШНИЦЫ -->
+      <div class="workbench-tabletop-geometry" aria-hidden="true">
+        <!-- 1. Контактный стык со стойкой шкафа справа -->
+        <div class="tabletop-right-junction"></div>
+
+        <!-- 2. Передний торец столешницы: фаска, толщина деревянного массива и тень глубины к зрителю -->
+        <div class="tabletop-front-edge">
+          <div class="front-edge-bevel"></div>
+          <div class="front-edge-thickness"></div>
+        </div>
+      </div>
+
+      <!-- Рассеянный световой луч заката -->
+      <div id="ambient-light-beam" class="workbench-light-overlay"></div>
+
+      <!-- ЛОГОТИП GONKA.BLOG НА СТОЛЕ (ССЫЛКА НА ГЛАВНУЮ) -->
+      <a 
+        href="/" 
+        class="workbench-table-logo-link" 
+        title="GONKA.BLOG — Главная страница"
+        aria-label="GONKA.BLOG: цифровая лаборатория — на главную"
+      >
+        <span class="sr-only">GONKA.BLOG: цифровая лаборатория // проекты • эксперименты • идеи</span>
+      </a>
+
+      <!-- ССЫЛКИ В ПРАВОМ ВЕРХНЕМ УГЛУ СТОЛА (TELEGRAM, EMAIL, YOUTUBE, INSTAGRAM) -->
+      <a 
+        href="https://t.me/lonelysvobodny" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        class="workbench-corner-link corner-link-telegram" 
+        title="Telegram (@lonelysvobodny)"
+        aria-label="Связаться в Telegram: @lonelysvobodny"
+      >
+        <span class="corner-link-tooltip">Telegram</span>
+        <span class="corner-link-aura"></span>
+      </a>
+
+      <a 
+        href="mailto:textsmen@gmail.com" 
+        class="workbench-corner-link corner-link-email" 
+        title="Email (textsmen@gmail.com)"
+        aria-label="Написать на почту: textsmen@gmail.com"
+      >
+        <span class="corner-link-tooltip">Email</span>
+        <span class="corner-link-aura"></span>
+      </a>
+
+      <a 
+        href="#youtube" 
+        class="workbench-corner-link corner-link-youtube" 
+        title="YouTube канал (в разработке)"
+        aria-label="YouTube канал GONKA.BLOG (в разработке)"
+      >
+        <svg class="corner-svg-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+        </svg>
+        <span class="corner-link-tooltip">YouTube</span>
+        <span class="corner-link-aura"></span>
+      </a>
+
+      <a 
+        href="#instagram" 
+        class="workbench-corner-link corner-link-instagram" 
+        title="Instagram профиль (в разработке)"
+        aria-label="Instagram профиль GONKA.BLOG (в разработке)"
+      >
+        <svg class="corner-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+        </svg>
+        <span class="corner-link-tooltip">Instagram</span>
+        <span class="corner-link-aura"></span>
+      </a>
+
+      <!-- ИНТЕРАКТИВНЫЕ ОБЪЕКТЫ НА СТОЛЕ -->
+
+      <!-- 1. ВХОДЯЩИЙ (Винтажный красный телефон — точка прямой связи) -->
+      <button type="button" class="hotspot hotspot-phone" data-target="modal-incoming" aria-label="Входящий: Есть задача? Давай обсудим">
+        <div class="hotspot-aura"></div>
+        <div class="phone-pulse-ring"></div>
+        <div class="editorial-float-label label-switchboard-card label-below-left">
+          <span class="editorial-tag">ПРЯМАЯ ЛИНИЯ</span>
+          <span class="editorial-statement">«Есть задача? Снимем трубку.»</span>
+        </div>
+      </button>
+
+      <!-- 2. ЧЕРНОВИК (Блокнот на спирали слева) -->
+      <button type="button" class="hotspot hotspot-notebook" data-target="modal-draft" aria-label="Черновик лаборатории">
+        <div class="hotspot-aura"></div>
+        <div class="editorial-float-label label-draft-parchment label-above-left">
+          <span class="parchment-tag">ЧЕРНОВИК // ЭСКИЗ</span>
+          <span class="parchment-statement">«Сначала был один лист и карандаш.»</span>
+        </div>
+      </button>
+
+      <!-- 3. НЕ ПОШЛО (Блокнот закрытых экспериментов) -->
+      <button type="button" class="hotspot hotspot-failures" data-target="modal-failures" aria-label="Архив закрытых гипотез: НЕ ПОШЛО">
+        <div class="hotspot-aura"></div>
+        <div class="editorial-float-label label-failures-card label-above-left">
+          <span class="editorial-tag tag-crimson-seal">АРХИВ ОШИБОК</span>
+          <span class="editorial-statement">«Эту версию чуть не выбросил. Зато понял главное.»</span>
+        </div>
+      </button>
+
+      <!-- 4. СВИТОК «САЙТЫ / ЛЕНДИНГИ» (ГОРИЗОНТАЛЬНЫЙ ФИЗИЧЕСКИЙ СВИТОК) -->
+      <div 
+        class="hotspot hotspot-scroll-sites physical-scroll-horizontal" 
+        data-target="modal-sites" 
+        role="button"
+        tabindex="0"
+        aria-label="Сайты / Лендинги: Каталог действующих веб-проектов"
+        title="Сайты / Лендинги"
+      >
+        <!-- 1. Закрытый рулон (в исходном состоянии лежит на листе стола) -->
+        <div class="sites-closed-wrapper">
+          <img src="/svitok-closed.png" alt="Свиток Сайты / Лендинги (закрытый)" class="sites-closed-img" />
+          <div class="sites-closed-tag">
+            <span>САЙТЫ / ЛЕНДИНГИ</span>
+          </div>
+          <div class="sites-pulse-seal"></div>
+        </div>
+
+        <!-- 2. Развёрнутый свиток (плавно разворачивается по горизонтали в обе стороны влево и вправо) -->
+        <div class="sites-unrolled-wrapper">
+          <div class="scroll-roll-left">
+            <div class="scroll-roll-finial finial-top"></div>
+            <div class="scroll-roll-cylinder"></div>
+            <div class="scroll-roll-finial finial-bottom"></div>
+          </div>
+          <div class="scroll-parchment-sheet">
+            <div class="sites-parchment-content">
+              <div class="sites-parchment-header">
+                <span class="sites-parchment-tag">САЙТЫ / ЛЕНДИНГИ</span>
+                <span class="sites-parchment-badge">6 РАБОТ</span>
+              </div>
+
+              <!-- Мини-меню проектов: клик сразу открывает персональное досье -->
+              <div class="sites-screens-strip">
+                <button 
+                  type="button" 
+                  class="sites-screen-chip" 
+                  data-open-drawer="modal-english-teacher" 
+                  title="English Teacher — открыть досье"
+                  aria-label="English Teacher: открыть персональное досье проекта"
+                >
+                  <img src="/previews/preview-english-teacher.jpg" alt="English Teacher — первый экран" />
+                  <span class="chip-label">ENG</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="sites-screen-chip" 
+                  data-open-drawer="modal-twohearts" 
+                  title="TwoHearts — открыть досье"
+                  aria-label="TwoHearts: открыть персональное досье проекта"
+                >
+                  <img src="/previews/preview-twohearts.jpg" alt="TwoHearts — первый экран" />
+                  <span class="chip-label">2H</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="sites-screen-chip" 
+                  data-open-drawer="modal-siteviza" 
+                  title="Siteviza — открыть досье"
+                  aria-label="Siteviza: открыть персональное досье проекта"
+                >
+                  <img src="/previews/preview-siteviza.jpg" alt="Siteviza — первый экран" />
+                  <span class="chip-label">VZN</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="sites-screen-chip" 
+                  data-open-drawer="modal-atelier" 
+                  title="Atelier — открыть досье"
+                  aria-label="Atelier: открыть персональное досье проекта"
+                >
+                  <img src="/previews/preview-atelier.jpg" alt="Atelier — первый экран" />
+                  <span class="chip-label">ATL</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="sites-screen-chip" 
+                  data-open-drawer="modal-landasset5" 
+                  title="LandAsset5 — открыть досье"
+                  aria-label="LandAsset5: открыть персональное досье проекта"
+                >
+                  <img src="/previews/preview-landasset5.jpg" alt="LandAsset5 — первый экран" />
+                  <span class="chip-label">LND</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="sites-screen-chip" 
+                  data-open-drawer="modal-tracker01" 
+                  title="Tracker_01 — открыть досье"
+                  aria-label="Tracker_01: открыть персональное досье проекта"
+                >
+                  <img src="/previews/preview-tracker01.jpg" alt="Tracker_01 — первый экран" />
+                  <span class="chip-label">TRK</span>
+                </button>
+              </div>
+
+              <div class="sites-parchment-sub">
+                Каталог действующих проектов <span class="sites-arrow">➔</span>
+              </div>
+            </div>
+            <div class="sites-wax-seal"></div>
+          </div>
+          <div class="scroll-roll-right">
+            <div class="scroll-roll-finial finial-top"></div>
+            <div class="scroll-roll-cylinder"></div>
+            <div class="scroll-roll-finial finial-bottom"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. СИСТЕМА // GONKA.BLOG (Центральный чертёж со связями) -->
+      <button type="button" class="hotspot hotspot-core" data-target="modal-core" aria-label="GONKA.BLOG Система и Ядро">
+        <div class="hotspot-aura"></div>
+        <div class="editorial-float-label label-schematic-vellum label-above-center">
+          <span class="editorial-tag">СИСТЕМА</span>
+          <span class="editorial-statement">«Личная лаборатория. Всё собрано на одном столе.»</span>
+        </div>
+      </button>
+
+      <!-- 6. СВИТОК «БОТЫ // TELEGRAM» (ФИЗИЧЕСКИЙ СВИТОК СО СМАРТФОНОМ ВНУТРИ) -->
+      <div 
+        class="hotspot hotspot-scroll-bots physical-scroll-bots" 
+        data-target="modal-myasnaya-troitsa" 
+        role="button"
+        tabindex="0"
+        aria-label="Боты: Telegram-боты лаборатории"
+        title="Свиток ботов: Мясная Троица и Бот Детектив"
+      >
+        <!-- 1. Закрытый свиток (в исходном состоянии лежит на столе, телефон полностью скрыт внутри) -->
+        <div class="bots-closed-wrapper">
+          <img src="/svitok-closed.png" alt="Свиток Боты (закрытый)" class="bots-closed-img" />
+          <div class="bots-closed-tag">
+            <span>БОТЫ // TELEGRAM</span>
+          </div>
+          <div class="bots-pulse-seal"></div>
+        </div>
+
+        <!-- 2. Развёрнутый свиток (физически разворачивается, на нём лежит настоящий смартфон с работающими ботами) -->
+        <div class="bots-unrolled-wrapper">
+          <img 
+            src="/svitok-bots-open.png" 
+            alt="Раскрытый свиток с физическим смартфоном и Telegram-ботами" 
+            class="bots-unrolled-img" 
+          />
+          
+          <!-- Интерактивные кликабельные зоны поверх карточек ботов на экране смартфона -->
+          <button 
+            type="button" 
+            class="phone-interactive-hotspot hotspot-meat" 
+            data-open-drawer="modal-myasnaya-troitsa"
+            title="Мясная Троица — открыть досье"
+            aria-label="Мясная Троица: открыть персональное досье проекта"
+          ></button>
+
+          <button 
+            type="button" 
+            class="phone-interactive-hotspot hotspot-detective" 
+            data-open-drawer="modal-aichatbot"
+            title="Бот Детектив — открыть досье"
+            aria-label="Бот Детектив: открыть персональное досье проекта"
+          ></button>
+        </div>
+      </div>
+
+
+      <!-- 8. ВИДЕО (35-мм киноплёнка монтажного стола) -->
+      <button type="button" class="hotspot hotspot-video" data-target="modal-video" aria-label="Видео и монтаж">
+        <div class="hotspot-aura"></div>
+        <div class="editorial-float-label label-celluloid-strip label-above-filmstrip">
+          <span class="editorial-tag">КИНОПЛЁНКА</span>
+          <span class="editorial-statement">«От черновика до кадра.»</span>
+        </div>
+      </button>
+
+      <!-- 9. ИНСТРУМЕНТЫ (Звёздная карта связей и технологий) -->
+      <button type="button" class="hotspot hotspot-network" data-target="modal-network" aria-label="Инструменты: связи, технологии, инструменты">
+        <div class="hotspot-aura"></div>
+        <div class="editorial-float-label label-starchart-card label-above-center">
+          <span class="editorial-tag tag-blue">ИНСТРУМЕНТЫ</span>
+          <span class="editorial-statement">«Связи, стек и инструменты.»</span>
+        </div>
+      </button>
+
+      <!-- 10. РЕЛОКАНТ СЕРБИЯ (Открытка — В РАБОТЕ) -->
+      <button type="button" class="hotspot hotspot-serbia-wip" data-target="modal-serbia-wip" aria-label="Релокант Сербия: В работе">
+        <div class="hotspot-aura"></div>
+        <div class="editorial-float-label label-field-dispatch label-above-right">
+          <span class="editorial-tag">РЕЛОКАНТ СЕРБИЯ</span>
+          <span class="editorial-statement">«Полевое исследование и личный R&D.»</span>
+        </div>
+      </button>
+
+      <!-- 11. СВИТОК «АВТОР» (Физический интерактивный свиток на столе) -->
+      <button 
+        type="button" 
+        class="hotspot hotspot-scroll physical-scroll-object" 
+        data-target="modal-about" 
+        aria-label="Автор: «Хорошие идеи приходят не по расписанию.»"
+      >
+        <!-- 1. Закрытый рулон (в исходном состоянии лежит на столе) -->
+        <div class="scroll-closed-wrapper">
+          <img src="/svitok-closed.png" alt="Свиток Автор (закрытый)" class="scroll-closed-img" />
+          <div class="scroll-closed-tag">
+            <span>АВТОР</span>
+          </div>
+          <div class="scroll-pulse-seal"></div>
+        </div>
+
+        <!-- 2. Развёрнутый свиток (физически разворачивается в свободную зону при наведении) -->
+        <div class="scroll-unrolled-wrapper">
+          <img src="/svitok-open.png" alt="Развёрнутый свиток: Хорошие идеи приходят не по расписанию" class="scroll-open-img" />
+        </div>
+      </button>
+
+      <!-- 12. КРУЖКА «IDEAS BUILD TEST REPEAT» -->
+      <button type="button" class="hotspot hotspot-mug" data-target="modal-manifesto" aria-label="Манифест действия: IDEAS BUILD TEST REPEAT">
+        <div class="hotspot-aura"></div>
+        <div class="editorial-float-label label-coaster-tile label-above-right">
+          <span class="editorial-tag">IDEAS BUILD TEST REPEAT</span>
+          <span class="editorial-statement">«Меньше теории — больше работающих вещей.»</span>
+        </div>
+      </button>
+
+      <!-- 13. ПРАВАЯ ВЕРТИКАЛЬНАЯ НАВИГАЦИЯ (ОГЛАВЛЕНИЕ СТОЛА ИЗ 8 ОСНОВНЫХ РАЗДЕЛОВ) -->
+      <nav class="cabinet-menu-nav" aria-label="Оглавление интерактивного стола">
+        <div class="cabinet-nav-backdrop" aria-hidden="true"></div>
+
+        <!-- 1. ЧЕРНОВИК -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-draft" aria-label="Черновик: открыть лабораторные записи и эскизы">
+          <span class="cabinet-nav-label">ЧЕРНОВИК</span>
+        </button>
+
+        <!-- 2. ЛЕНДИНГИ -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-sites" aria-label="Лендинги: открыть каталог действующих веб-проектов">
+          <span class="cabinet-nav-label">ЛЕНДИНГИ</span>
+        </button>
+
+        <!-- 3. СИСТЕМА -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-core" aria-label="Система: открыть архитектуру и ядро GONKA.BLOG">
+          <span class="cabinet-nav-label">СИСТЕМА</span>
+        </button>
+
+        <!-- 4. МЯСНАЯ ТРОИЦА -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-myasnaya-troitsa" aria-label="Мясная Троица: открыть досье Telegram-бота">
+          <span class="cabinet-nav-label">МЯСНАЯ ТРОИЦА</span>
+        </button>
+
+        <!-- 5. НЕ ПОШЛО -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-failures" aria-label="Не пошло: открыть архив закрытых гипотез">
+          <span class="cabinet-nav-label">НЕ ПОШЛО</span>
+        </button>
+
+        <!-- 6. ВИДЕО -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-video" aria-label="Видео: открыть монтаж и кадры рабочего процесса">
+          <span class="cabinet-nav-label">ВИДЕО</span>
+        </button>
+
+        <!-- 7. ИНСТРУМЕНТЫ -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-network" aria-label="Инструменты: открыть стек технологий и связи">
+          <span class="cabinet-nav-label">ИНСТРУМЕНТЫ</span>
+        </button>
+
+        <!-- 8. БОТЫ -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-bots" aria-label="Боты: открыть каталог Telegram-ботов лаборатории">
+          <span class="cabinet-nav-label">БОТЫ</span>
+        </button>
+      </nav>
+
+    </div>
+  </main>
+
+  <!-- НИЖНЯЯ ПАНЕЛЬ РАМЫ ВЕРСТАКА (Точки связи и соцсети) -->
+  <footer class="desk-bottombar">
+    <div class="bottombar-left-zone">
+      <span class="hint-bold">GONKA.BLOG</span>
+      <span class="hint-divider">•</span>
+      <span class="hint-sub">Свет показывает главное. Кликайте на названия и предметы верстака.</span>
+    </div>
+
+    <!-- Единые точки связи -->
+    <div class="bottombar-actions">
+      <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="contact-wire-btn" title="Написать в Telegram (@lonelysvobodny)">
+        <span class="wire-dot dot-sky"></span>
+        <span>TELEGRAM</span>
+      </a>
+
+      <a href="mailto:textsmen@gmail.com" class="contact-wire-btn" title="Отправить email (textsmen@gmail.com)">
+        <span class="wire-dot dot-amber"></span>
+        <span>EMAIL</span>
+      </a>
+
+      <a href="#youtube" class="contact-wire-btn" title="YouTube канал (в разработке)">
+        <span class="wire-dot dot-rose"></span>
+        <span>YOUTUBE</span>
+      </a>
+
+      <a href="#instagram" class="contact-wire-btn" title="Instagram профиль (в разработке)">
+        <span class="wire-dot dot-purple"></span>
+        <span>INSTAGRAM</span>
+      </a>
+    </div>
+  </footer>
+
+  <!-- ВЫДВИЖНЫЕ ПРАВЫЕ ПАНЕЛИ (КРАТКИЕ ФАКТЫ, БЕЗ ВОДЫ И МАРКЕТИНГА) -->
+
+  <!-- 1. СИСТЕМА // GONKA.BLOG CORE -->
+  <aside id="modal-core" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-orange">[ СИСТЕМА // GONKA.BLOG ]</span>
+          <span class="case-badge">РАБОЧИЙ СТОЛ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● ДЕЙСТВУЮЩАЯ СИСТЕМА</div>
+          <h2 class="case-title">GONKA.BLOG</h2>
+          <p class="case-lead">Личная цифровая лаборатория и рабочий стол действующих проектов.</p>
+          <div class="case-actions">
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              НАПИСАТЬ В TELEGRAM ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
+              <p class="section-text">
+                GONKA.BLOG собирает в одном месте проекты, эксперименты и инструменты мастерской. Готовые продукты можно открыть и проверить. Незаконченные остаются частью рабочего процесса.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// КАК УСТРОЕН СТОЛ</h3>
+              <ul class="facts-list">
+                <li>Каждый объект на столе связан с отдельным проектом или экспериментом.</li>
+                <li>По клику открывается его рабочая запись.</li>
+                <li>В записи — задача, реализация, технологии, результат и ссылка.</li>
+                <li>Проекты можно возвращать на стол и продолжать исследовать следующий.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО ЗДЕСЬ ПОКАЗАНО</h3>
+              <div class="lab-dossier-card">
+                <p class="dossier-text">
+                  Готовые сайты, Telegram-боты, веб-сервисы, эксперименты и проекты в разработке.
+                </p>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// СИСТЕМНЫЕ ПАРАМЕТРЫ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Формат:</span><strong>Личная цифровая лаборатория</strong></div>
+                <div class="spec-row"><span>Среда:</span><strong>Интерактивный верстак</strong></div>
+                <div class="spec-row"><span>Доступ:</span><strong>Действующие live-проекты</strong></div>
+                <div class="spec-row"><span>Статус:</span><strong>Постоянное обновление</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 2. МЯСНАЯ ТРОИЦА (TELEGRAM-БОТ) -->
+  <aside id="modal-myasnaya-troitsa" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-emerald">[ АРХИВ // МЯСНАЯ ТРОИЦА ]</span>
+          <span class="case-badge">TELEGRAM-БОТ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: БОТ РАБОТАЕТ В TELEGRAM</div>
+          <h2 class="case-title">Мясная Троица</h2>
+          <p class="case-lead">Telegram-бот для мониторинга цен на мясо по городам и подбора рецептов.</p>
+          <div class="case-actions">
+            <a href="https://t.me/myasnaya_troitsa_bot" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ЗАПУСТИТЬ В TELEGRAM (@myasnaya_troitsa_bot) ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">
+              ← К КАТАЛОГУ БОТОВ
+            </button>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
+              <p class="section-text">
+                Telegram-бот экосистемы «Мясная Троица». Помогает ориентироваться в ценах на основные виды мяса (курица, свинина, говядина) в разных городах и регионах, сравнивать стоимость и получать практические рекомендации шефа.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <ul class="facts-list">
+                <li>Выбор города и просмотр актуального среза цен на мясо.</li>
+                <li>Механика сравнения стоимости базовой мясной корзины между городами.</li>
+                <li>Советы от шеф-повара и подбор рецептов под конкретный отруб.</li>
+                <li>Фирменная механика общения от лица трёх персонажей бренда.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Язык:</span><strong>Python 3</strong></div>
+                <div class="spec-row"><span>Фреймворк:</span><strong>Telegram Bot API / Asyncio</strong></div>
+                <div class="spec-row"><span>База данных:</span><strong>SQLite / Local Storage</strong></div>
+                <div class="spec-row"><span>Сервер:</span><strong>Ubuntu Linux VPS</strong></div>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
+              <div class="result-status-box">
+                Бот развёрнут на сервере и доступен по адресу @myasnaya_troitsa_bot.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 2.5 КАТАЛОГ TELEGRAM-БОТОВ (ОТКРЫВАЕТСЯ ИЗ ПРАВОГО МЕНЮ «БОТЫ») -->
+  <aside id="modal-bots" class="workbench-drawer drawer-bots-catalog">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-emerald">[ КАТАЛОГ // TELEGRAM-БОТЫ ]</span>
+          <span class="case-badge">2 ДЕЙСТВУЮЩИХ БОТА</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● ДЕЙСТВУЮЩИЕ БОТЫ МАСТЕРСКОЙ</div>
+          <h2 class="case-title">Telegram-боты</h2>
+          <p class="case-lead">Действующие боты и интерактивные сценарии в Telegram. Выберите проект, чтобы изучить подробное досье или запустить бота в Telegram.</p>
+        </div>
+
+        <div class="sites-catalog-grid bots-catalog-grid">
+          <!-- 1. Мясная Троица -->
+          <div class="catalog-project-card bot-card-meat">
+            <div class="catalog-card-screen">
+              <img src="/previews/preview-myasnaya-troitsa.png" alt="Мясная Троица — Telegram-бот" class="catalog-screen-img" loading="lazy" />
+              <div class="catalog-screen-overlay">
+                <span class="screen-url-badge">@myasnaya_troitsa_bot</span>
+              </div>
+            </div>
+            <div class="catalog-card-header">
+              <span class="catalog-project-name">Мясная Троица</span>
+              <span class="catalog-badge badge-emerald">TELEGRAM-БОТ</span>
+            </div>
+            <p class="catalog-project-desc">Telegram-бот для мониторинга цен на мясо по городам и подбора рецептов шефа.</p>
+            
+            <div class="catalog-card-block">
+              <span class="catalog-block-title">// ЧТО ДЕЛАЕТ БОТ:</span>
+              <p class="catalog-block-text">Помогает ориентироваться в ценах на основные виды мяса (курица, свинина, говядина) в разных городах и регионах, сравнивать стоимость и получать практические рекомендации шефа.</p>
+            </div>
+
+            <div class="catalog-card-block">
+              <span class="catalog-block-title">// ОСНОВНЫЕ ОСОБЕННОСТИ:</span>
+              <ul class="catalog-features-list">
+                <li>Выбор города и просмотр актуального среза цен на мясо</li>
+                <li>Сравнение стоимости базовой мясной корзины между городами</li>
+                <li>Советы от шеф-повара и подбор рецептов под конкретный отруб</li>
+                <li>Фирменная механика общения от лица трёх персонажей бренда</li>
+              </ul>
+            </div>
+
+            <div class="catalog-project-actions">
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-myasnaya-troitsa">
+                ОТКРЫТЬ ДОСЬЕ ➔
+              </button>
+              <a href="https://t.me/myasnaya_troitsa_bot" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Запустить бота @myasnaya_troitsa_bot в Telegram">
+                В TELEGRAM ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- 2. Бот Детектив -->
+          <div class="catalog-project-card bot-card-detective">
+            <div class="catalog-card-screen">
+              <img src="/previews/preview-bot-detective.png" alt="Бот Детектив — интерактивные детективные истории" class="catalog-screen-img" loading="lazy" />
+              <div class="catalog-screen-overlay">
+                <span class="screen-url-badge">@AI_CH_BOT_univers_bot</span>
+              </div>
+            </div>
+            <div class="catalog-card-header">
+              <span class="catalog-project-name">Бот Детектив</span>
+              <span class="catalog-badge badge-purple">КВЕСТ-БОТ</span>
+            </div>
+            <p class="catalog-project-desc">Игровой Telegram-бот с интерактивными текстовыми квестами-расследованиями.</p>
+
+            <div class="catalog-card-block">
+              <span class="catalog-block-title">// ЧТО ДЕЛАЕТ БОТ:</span>
+              <p class="catalog-block-text">Игрок выступает в роли сыщика: выбирает дело, изучает улики, допрашивает свидетелей, сверяет алиби и решает, кому предъявить обвинение.</p>
+            </div>
+
+            <div class="catalog-card-block">
+              <span class="catalog-block-title">// ОСНОВНЫЕ ОСОБЕННОСТИ:</span>
+              <ul class="catalog-features-list">
+                <li>Система нелинейных детективных дел разной сложности</li>
+                <li>Команды расследования: /cases, /evidence, /interrog, /alibi, /hint, /accuse</li>
+                <li>Доставка улик с медиа-файлами (фото, аудио, видео) и текстовым fallback</li>
+                <li>Сохранение игрового прогресса, профиль игрока и система достижений</li>
+              </ul>
+            </div>
+
+            <div class="catalog-project-actions">
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-aichatbot">
+                ОТКРЫТЬ ДОСЬЕ ➔
+              </button>
+              <a href="https://t.me/AI_CH_BOT_univers_bot" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Запустить бота @AI_CH_BOT_univers_bot в Telegram">
+                В TELEGRAM ↗
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- КАТАЛОГ САЙТОВ И ЛЕНДИНГОВ (ОТКРЫВАЕТСЯ ПРИ КЛИКЕ НА СВИТОК «САЙТЫ / ЛЕНДИНГИ») -->
+  <aside id="modal-sites" class="workbench-drawer drawer-sites-catalog">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-orange">[ КАТАЛОГ // САЙТЫ И ЛЕНДИНГИ ]</span>
+          <span class="case-badge">6 ДЕЙСТВУЮЩИХ ПРОЕКТОВ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● ДЕЙСТВУЮЩИЙ КАТАЛОГ МАСТЕРСКОЙ</div>
+          <h2 class="case-title">Сайты и лендинги</h2>
+          <p class="case-lead">Каталог готовых и опубликованных веб-проектов лаборатории. Выберите проект, чтобы изучить рабочую запись или перейти к сайту.</p>
+        </div>
+
+        <div class="sites-catalog-grid">
+          <!-- 1. English Teacher -->
+          <div class="catalog-project-card">
+            <div class="catalog-card-screen">
+              <img src="/previews/preview-english-teacher.jpg" alt="English Teacher — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <div class="catalog-screen-overlay">
+                <span class="screen-url-badge">english.gonka.blog</span>
+              </div>
+            </div>
+            <div class="catalog-card-header">
+              <span class="catalog-project-name">English Teacher</span>
+              <span class="catalog-badge badge-blue">ЛЕНДИНГ</span>
+            </div>
+            <p class="catalog-project-desc">Презентационный лендинг частного преподавателя английского языка с формой записи на вводный урок.</p>
+            <div class="catalog-project-actions">
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-english-teacher">
+                ОТКРЫТЬ ДОСЬЕ ➔
+              </button>
+              <a href="https://english.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт english.gonka.blog">
+                НА САЙТ ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- 2. TwoHearts -->
+          <div class="catalog-project-card">
+            <div class="catalog-card-screen">
+              <img src="/previews/preview-twohearts.jpg" alt="TwoHearts — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <div class="catalog-screen-overlay">
+                <span class="screen-url-badge">twohearts.gonka.blog</span>
+              </div>
+            </div>
+            <div class="catalog-card-header">
+              <span class="catalog-project-name">TwoHearts</span>
+              <span class="catalog-badge badge-pink">ДЕЙТИНГ-ЛЕНДИНГ</span>
+            </div>
+            <p class="catalog-project-desc">Лендинг серии камерных офлайн-вечеров знакомств на Патриарших прудах в Москве.</p>
+            <div class="catalog-project-actions">
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-twohearts">
+                ОТКРЫТЬ ДОСЬЕ ➔
+              </button>
+              <a href="https://twohearts.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт twohearts.gonka.blog">
+                НА САЙТ ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- 3. Siteviza -->
+          <div class="catalog-project-card">
+            <div class="catalog-card-screen">
+              <img src="/previews/preview-siteviza.jpg" alt="Siteviza — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <div class="catalog-screen-overlay">
+                <span class="screen-url-badge">siteviza.gonka.blog</span>
+              </div>
+            </div>
+            <div class="catalog-card-header">
+              <span class="catalog-project-name">Siteviza</span>
+              <span class="catalog-badge badge-cyan">САЙТ-ВИЗИТКА</span>
+            </div>
+            <p class="catalog-project-desc">Персональный сайт-визитка публичного трейдера и автора YouTube-канала с формой подписки на рассылку.</p>
+            <div class="catalog-project-actions">
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-siteviza">
+                ОТКРЫТЬ ДОСЬЕ ➔
+              </button>
+              <a href="https://siteviza.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт siteviza.gonka.blog">
+                НА САЙТ ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- 4. Atelier -->
+          <div class="catalog-project-card">
+            <div class="catalog-card-screen">
+              <img src="/previews/preview-atelier.jpg" alt="Atelier — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <div class="catalog-screen-overlay">
+                <span class="screen-url-badge">atelier.gonka.blog</span>
+              </div>
+            </div>
+            <div class="catalog-card-header">
+              <span class="catalog-project-name">Atelier</span>
+              <span class="catalog-badge badge-amber">СТУДИЯ ПОШИВА</span>
+            </div>
+            <p class="catalog-project-desc">Лендинг московской студии индивидуального пошива мужской и женской одежды премиального класса.</p>
+            <div class="catalog-project-actions">
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-atelier">
+                ОТКРЫТЬ ДОСЬЕ ➔
+              </button>
+              <a href="https://atelier.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт atelier.gonka.blog">
+                НА САЙТ ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- 5. LandAsset5 -->
+          <div class="catalog-project-card">
+            <div class="catalog-card-screen">
+              <img src="/previews/preview-landasset5.jpg" alt="LandAsset5 — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <div class="catalog-screen-overlay">
+                <span class="screen-url-badge">landasset5.gonka.blog</span>
+              </div>
+            </div>
+            <div class="catalog-card-header">
+              <span class="catalog-project-name">LandAsset5</span>
+              <span class="catalog-badge badge-emerald">ИНВЕСТ-АКТИВ</span>
+            </div>
+            <p class="catalog-project-desc">Инвестиционный лендинг крупного земельного актива 26,118 га: 3 участка, 49 лет аренды, форма связи с собственником.</p>
+            <div class="catalog-project-actions">
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-landasset5">
+                ОТКРЫТЬ ДОСЬЕ ➔
+              </button>
+              <a href="https://landasset5.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт landasset5.gonka.blog">
+                НА САЙТ ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- 6. Tracker_01 -->
+          <div class="catalog-project-card">
+            <div class="catalog-card-screen">
+              <img src="/previews/preview-tracker01.jpg" alt="Tracker_01 — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <div class="catalog-screen-overlay">
+                <span class="screen-url-badge">tracker-01.gonka.blog</span>
+              </div>
+            </div>
+            <div class="catalog-card-header">
+              <span class="catalog-project-name"><span class="tracker-led-mini"></span>Tracker_01</span>
+              <span class="catalog-badge badge-amber">РАБОЧИЙ ПРОДУКТ</span>
+            </div>
+            <p class="catalog-project-desc">Полнофункциональный веб-трекер задач для сервисных команд: Канбан Drag & Drop, PHP 8.3, 14/14 тестов пройдены.</p>
+            <div class="catalog-project-actions">
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-tracker01">
+                ОТКРЫТЬ ДОСЬЕ ➔
+              </button>
+              <a href="https://tracker-01.gonka.blog/" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Открыть демо трекера">
+                НА САЙТ ↗
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 3. ENGLISH TEACHER (ЛЕНДИНГ) -->
+  <aside id="modal-english-teacher" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-blue">[ АРХИВ // ENGLISH TEACHER ]</span>
+          <span class="case-badge">ЛЕНДИНГ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: ЛЕНДИНГ ГОТОВ</div>
+          <h2 class="case-title">English Teacher</h2>
+          <p class="case-lead">Презентационный лендинг преподавателя английского языка с формой записи.</p>
+          <div class="case-actions">
+            <a href="https://english.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ОТКРЫТЬ ЛЕНДИНГ ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
+              ← К КАТАЛОГУ САЙТОВ
+            </button>
+          </div>
+        </div>
+
+        <!-- Реальный первый экран проекта -->
+        <div class="dossier-screen-preview">
+          <img src="/previews/preview-english-teacher.jpg" alt="English Teacher — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <div class="dossier-screen-caption">
+            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // english.gonka.blog
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
+              <p class="section-text">
+                Одностраничный сайт для частного преподавателя английского языка. Сайт представляет методику, форматы индивидуальных занятий и помогает будущему ученику записаться на вводный урок.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <ul class="facts-list">
+                <li>Спроектирована чёткая структура: позиционирование, форматы уроков, подход.</li>
+                <li>Спокойный академический дизайн с фокусом на читаемость и доверие.</li>
+                <li>Интерактивная форма записи на консультацию.</li>
+                <li>Адаптивная вёрстка для удобного просмотра со смартфона.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
+                <div class="spec-row"><span>Форма заявки:</span><strong>Google Apps Script</strong></div>
+                <div class="spec-row"><span>База лидов:</span><strong>Google Таблицы</strong></div>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
+              <div class="result-status-box">
+                Лендинг свёрстан, форма подключена, проект готов к приёму заявок.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 4. TWOHEARTS (ЛЕНДИНГ) -->
+  <aside id="modal-twohearts" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-pink">[ АРХИВ // TWOHEARTS ]</span>
+          <span class="case-badge">ЛЕНДИНГ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: ЛЕНДИНГ ГОТОВ</div>
+          <h2 class="case-title">TwoHearts</h2>
+          <p class="case-lead">Лендинг серии камерных офлайн-вечеров знакомств на Патриарших прудах.</p>
+          <div class="case-actions">
+            <a href="https://twohearts.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ОТКРЫТЬ ЛЕНДИНГ ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
+              ← К КАТАЛОГУ САЙТОВ
+            </button>
+          </div>
+        </div>
+
+        <!-- Реальный первый экран проекта -->
+        <div class="dossier-screen-preview">
+          <img src="/previews/preview-twohearts.jpg" alt="TwoHearts — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <div class="dossier-screen-caption">
+            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // twohearts.gonka.blog
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
+              <p class="section-text">
+                Сайт для камерных офлайн-вечеров знакомств в Москве (Патриаршие пруды). Задача лендинга — передать тёплую атмосферу живого общения и предложить комфортную альтернативу приложениям для дейтинга.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <ul class="facts-list">
+                <li>Создана кинематографичная эстетика вечерней Москвы и тёплого ресторанного света.</li>
+                <li>Описаны концепция встреч, правила участия и расписание ближайших дат.</li>
+                <li>Реализована форма бронирования участия на вечер.</li>
+                <li>Полная мобильная адаптация под экраны смартфонов.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
+                <div class="spec-row"><span>Стиль:</span><strong>Editorial Typography + Night Moscow</strong></div>
+                <div class="spec-row"><span>Адаптивность:</span><strong>Mobile First</strong></div>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
+              <div class="result-status-box">
+                Лендинг свёрстан, опубликован и готов к приёму участников.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 5. SITEVIZA (САЙТ-ВИЗИТКА) -->
+  <aside id="modal-siteviza" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-cyan">[ АРХИВ // SITEVIZA ]</span>
+          <span class="case-badge">САЙТ-ВИЗИТКА</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: САЙТ ГОТОВ</div>
+          <h2 class="case-title">Siteviza</h2>
+          <p class="case-lead">Персональный сайт-визитка публичного трейдера и автора YouTube-канала.</p>
+          <div class="case-actions">
+            <a href="https://siteviza.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ОТКРЫТЬ САЙТ ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
+              ← К КАТАЛОГУ САЙТОВ
+            </button>
+          </div>
+        </div>
+
+        <!-- Реальный первый экран проекта -->
+        <div class="dossier-screen-preview">
+          <img src="/previews/preview-siteviza.jpg" alt="Siteviza — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <div class="dossier-screen-caption">
+            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // siteviza.gonka.blog
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
+              <p class="section-text">
+                Одностраничный сайт для публичного трейдера и автора видеоконтента о финансовых рынках. Задача — представить стиль торговли автора, показать ключевые результаты и привлечь аудиторию к подписке.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <ul class="facts-list">
+                <li>Спроектирован строгий тёмный дизайн в стилистике финансовых медиа.</li>
+                <li>Оформлены блоки о торговой стратегии, результатах и YouTube-выпусках.</li>
+                <li>Встроена форма сбора email-подписчиков на аналитическую рассылку.</li>
+                <li>Быстрая навигация по якорным разделам страницы.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
+                <div class="spec-row"><span>Формат:</span><strong>One-Page Landing</strong></div>
+                <div class="spec-row"><span>Подписка:</span><strong>Email Lead Capture Form</strong></div>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
+              <div class="result-status-box">
+                Сайт собран, протестирован и подготовлен к публикации.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 6. ATELIER (ЛЕНДИНГ) -->
+  <aside id="modal-atelier" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-amber">[ АРХИВ // ATELIER ]</span>
+          <span class="case-badge">ЛЕНДИНГ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: ЛЕНДИНГ ГОТОВ</div>
+          <h2 class="case-title">Atelier</h2>
+          <p class="case-lead">Лендинг московской студии индивидуального пошива мужской и женской одежды.</p>
+          <div class="case-actions">
+            <a href="https://atelier.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ОТКРЫТЬ ЛЕНДИНГ ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
+              ← К КАТАЛОГУ САЙТОВ
+            </button>
+          </div>
+        </div>
+
+        <!-- Реальный первый экран проекта -->
+        <div class="dossier-screen-preview">
+          <img src="/previews/preview-atelier.jpg" alt="Atelier — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <div class="dossier-screen-caption">
+            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // atelier.gonka.blog
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
+              <p class="section-text">
+                Сайт-презентация премиального ателье в Москве. Решает задачу демонстрации услуг пошива: деловые костюмы, вечерние наряды, качественные ткани и индивидуальный крой под клиента.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <ul class="facts-list">
+                <li>Премиальный минималистичный дизайн с упором на эстетику тканей и кроя.</li>
+                <li>Наглядная пошаговая схема работы: от снятия мерок до готового изделия.</li>
+                <li>Демонстрационное портфолио выполненных работ по категориям.</li>
+                <li>Форма быстрой записи на примерку и консультацию мастера.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
+                <div class="spec-row"><span>Типографика:</span><strong>Премиальный акцидентный стиль</strong></div>
+                <div class="spec-row"><span>Адаптивность:</span><strong>Mobile First</strong></div>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
+              <div class="result-status-box">
+                Адаптивный лендинг готов и опубликован.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 7. LANDASSET5 (ИНВЕСТИЦИОННЫЙ ЛЕНДИНГ) -->
+  <aside id="modal-landasset5" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-emerald">[ АРХИВ // LANDASSET5 ]</span>
+          <span class="case-badge">ИНВЕСТ-АКТИВ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: ИНВЕСТИЦИОННЫЙ ЛЕНДИНГ ГОТОВ</div>
+          <h2 class="case-title">LandAsset5</h2>
+          <p class="case-lead">Инвестиционный лендинг крупного земельного актива 26,118 га под развитие.</p>
+          <div class="case-actions">
+            <a href="https://landasset5.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ОТКРЫТЬ ЛЕНДИНГ ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
+              ← К КАТАЛОГУ САЙТОВ
+            </button>
+          </div>
+        </div>
+
+        <!-- Реальный первый экран проекта -->
+        <div class="dossier-screen-preview">
+          <img src="/previews/preview-landasset5.jpg" alt="LandAsset5 — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <div class="dossier-screen-caption">
+            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // landasset5.gonka.blog
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
+              <p class="section-text">
+                Инвестиционная страница конкретного земельного актива. Без абстрактных лозунгов: на странице собраны все ключевые характеристики, необходимые инвестору для оценки объекта.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ФАКТЫ ОБ АКТИВЕ</h3>
+              <ul class="facts-list">
+                <li>Площадь актива: 26,118 га.</li>
+                <li>Структура: 3 смежных земельных участка.</li>
+                <li>Юридический статус: право долгосрочной аренды на 49 лет.</li>
+                <li>Интерактивная карта расположения и рельефа.</li>
+                <li>Кадастровые номера и документация для юридической проверки.</li>
+                <li>Концепция перспективного развития территории.</li>
+                <li>Прямая форма связи с собственником.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
+                <div class="spec-row"><span>Бэкенд заявок:</span><strong>Google Apps Script</strong></div>
+                <div class="spec-row"><span>База данных:</span><strong>Google Таблицы</strong></div>
+                <div class="spec-row"><span>Уведомления:</span><strong>Email textsmen@gmail.com</strong></div>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
+              <div class="result-status-box">
+                Лендинг свёрстан, бэкенд настроен, отправка заявок протестирована.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 8. TRACKER_01 (КОМАНДНЫЙ ТРЕКЕР) -->
+  <aside id="modal-tracker01" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-amber">[ АРХИВ // TRACKER_01 ]</span>
+          <span class="case-badge">РАБОЧИЙ ПРОДУКТ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: РАБОЧИЙ ПРОДУКТ • ТЕСТЫ 14/14 PASS</div>
+          <h2 class="case-title">Tracker_01</h2>
+          <p class="case-lead">Полнофункциональный веб-трекер задач для малых сервисных команд (айдентика Stopa).</p>
+          <div class="case-actions">
+            <a href="https://tracker-01.gonka.blog/" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ОТКРЫТЬ ДЕМО ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
+              ← К КАТАЛОГУ САЙТОВ
+            </button>
+          </div>
+        </div>
+
+        <!-- Реальный первый экран Канбан-доски -->
+        <div class="dossier-screen-preview">
+          <img src="/previews/preview-tracker01.jpg" alt="Tracker_01 — реальный экран Канбан-доски" class="dossier-screen-img" loading="lazy" />
+          <div class="dossier-screen-caption">
+            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ИНТЕРФЕЙС СЕРВИСА // tracker-01.gonka.blog
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// ДЛЯ КОГО И ЗАЧЕМ</h3>
+              <p class="section-text">
+                Сервис разработан для небольших сервисных служб (выгул и передержка животных, клининг, локальные команды). Помогает вести задачи без путаницы в мессенджерах и без дорогой подписки на корпоративные таск-трекеры.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО РЕАЛЬНО СДЕЛАНО</h3>
+              <ul class="facts-list">
+                <li>Интерактивный Канбан на 5 колонок с native HTML5 Drag & Drop.</li>
+                <li>Ролевая модель доступа: Администратор, Руководитель, Сотрудник.</li>
+                <li>Управление дедлайнами, приоритетами и подсветка просроченных задач.</li>
+                <li>Комментарии к карточкам с прикреплением ссылок и история изменений.</li>
+                <li>Безопасная сессионная авторизация и CSRF-защита форм.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Бэкенд:</span><strong>PHP 8.3 (чистая архитектура)</strong></div>
+                <div class="spec-row"><span>База данных:</span><strong>MySQL / MariaDB (10 таблиц)</strong></div>
+                <div class="spec-row"><span>Фронтенд:</span><strong>HTML5, CSS3, Vanilla JS</strong></div>
+                <div class="spec-row"><span>Сервер:</span><strong>Ubuntu Linux, Nginx</strong></div>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
+              <div class="result-status-box">
+                Сервис полностью работает, 14 приёмочных тестов пройдены успешно.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 9. БОТ ДЕТЕКТИВ (TELEGRAM-БОТ) -->
+  <aside id="modal-aichatbot" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-purple">[ АРХИВ // БОТ ДЕТЕКТИВ ]</span>
+          <span class="case-badge">TELEGRAM-БОТ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: БОТ РАБОТАЕТ В TELEGRAM</div>
+          <h2 class="case-title">Бот Детектив</h2>
+          <p class="case-lead">Игровой Telegram-бот с интерактивными текстовыми квестами-расследованиями.</p>
+          <div class="case-actions">
+            <a href="https://t.me/AI_CH_BOT_univers_bot" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ЗАПУСТИТЬ В TELEGRAM (@AI_CH_BOT_univers_bot) ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">
+              ← К КАТАЛОГУ БОТОВ
+            </button>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
+              <p class="section-text">
+                Интерактивный бот в Telegram. Игрок выступает в роли сыщика: выбирает дело, изучает улики, допрашивает свидетелей, сверяет алиби и решает, кому предъявить обвинение.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <ul class="facts-list">
+                <li>Система нелинейных детективных дел разной сложности.</li>
+                <li>Игровые команды: /cases, /evidence, /interrog, /alibi, /hint, /accuse.</li>
+                <li>Сохранение игрового прогресса, профиль игрока и система достижений.</li>
+                <li>Доставка улик с медиа-файлами (фото, аудио, видео) и текстовым fallback.</li>
+                <li>175 автоматических тестов для проверки надёжности движка.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Бэкенд:</span><strong>Node.js, TypeScript</strong></div>
+                <div class="spec-row"><span>Платформа:</span><strong>Telegram Bot API</strong></div>
+                <div class="spec-row"><span>Тесты:</span><strong>175 unit/integration tests</strong></div>
+                <div class="spec-row"><span>Сервер:</span><strong>Linux VPS</strong></div>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
+              <div class="result-status-box">
+                Бот опубликован и доступен в Telegram: @AI_CH_BOT_univers_bot.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 10. РЕЛОКАНТ СЕРБИЯ (ПОЛЕВОЕ ИССЛЕДОВАНИЕ / ЛИЧНЫЙ R&D) -->
+  <aside id="modal-serbia-wip" class="workbench-drawer drawer-serbia">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-amber">[ ПОЛЕВОЕ ИССЛЕДОВАНИЕ ]</span>
+          <span class="case-badge">В РАБОТЕ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● ПОЛЕВОЕ ИССЛЕДОВАНИЕ // В РАБОТЕ</div>
+          <h2 class="case-title">Релокант Сербия</h2>
+          <p class="case-lead">Полевое исследование среды, сервисов и реальных бытовых задач.</p>
+          <div class="case-actions">
+            <a href="https://reloca.gonka.blog/" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" title="Открыть проект reloca.gonka.blog">
+              ОТКРЫТЬ ПРОЕКТ (reloca.gonka.blog) ↗
+            </a>
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+              ОБСУДИТЬ В TELEGRAM (@lonelysvobodny) ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО ИССЛЕДУЮ</h3>
+              <p class="section-text">
+                Собираю информацию о среде, сервисах, документах, жилье, бытовых задачах и цифровых инструментах.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// КАК ИДУ</h3>
+              <div class="tech-spec-box" style="font-size: 13px; color: #ede8df; line-height: 1.55;">
+                Наблюдение → сбор фактов → проверка → фиксация → гипотеза.
+              </div>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ТЕКУЩИЙ ЭТАП</h3>
+              <div class="lab-dossier-card">
+                <p class="dossier-text">
+                  Исследование продолжается. Материалы появляются по мере проверки и использования на практике.
+                </p>
+              </div>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ПОЛЕВЫЕ ДАННЫЕ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Проект:</span><strong><a href="https://reloca.gonka.blog/" target="_blank" rel="noopener noreferrer" style="color: #f59e0b; text-decoration: underline;">reloca.gonka.blog ↗</a></strong></div>
+                <div class="spec-row"><span>Статус:</span><strong class="text-amber-400">[ В РАБОТЕ // ИССЛЕДОВАНИЕ ]</strong></div>
+                <div class="spec-row"><span>Характер:</span><strong>Личный R&D-проект</strong></div>
+                <div class="spec-row"><span>Локация:</span><strong>Белград • Нови-Сад</strong></div>
+                <div class="spec-row"><span>Связь:</span><strong>@lonelysvobodny</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 11. ВХОДЯЩИЙ (ПРЯМАЯ СВЯЗЬ) -->
+  <aside id="modal-incoming" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-orange">[ ПРЯМАЯ ЛИНИЯ // КОНТАКТ ]</span>
+          <span class="case-badge">СВЯЗЬ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: НА СВЯЗИ</div>
+          <h2 class="case-title">Прямая связь</h2>
+          <p class="case-lead">Есть задача или идея цифрового продукта? Давайте обсудим напрямую.</p>
+          <div class="case-actions">
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              НАПИСАТЬ В TELEGRAM (@lonelysvobodny) ↗
+            </a>
+            <a href="mailto:textsmen@gmail.com" class="case-action-btn btn-secondary">
+              ОТПРАВИТЬ EMAIL ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// С ЧЕМ МОЖНО ОБРАТИТЬСЯ</h3>
+              <ul class="facts-list">
+                <li>Разработка Telegram-ботов для заказов, каталогов и сервисов.</li>
+                <li>Создание презентационных сайтов и адаптивных лендингов.</li>
+                <li>Внутренние рабочие инструменты, таск-трекеры и автоматизации.</li>
+                <li>Быстрая сборка работающих прототипов (MVP).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// КОНТАКТЫ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Telegram:</span><strong>@lonelysvobodny</strong></div>
+                <div class="spec-row"><span>Email:</span><strong>textsmen@gmail.com</strong></div>
+                <div class="spec-row"><span>Формат:</span><strong>Обсудили задачу ➔ собрали ➔ запустили</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 12. ЧЕРНОВИК (ПРОЦЕСС) -->
+  <aside id="modal-draft" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-amber">[ ПРОЦЕСС // ЧЕРНОВИК ]</span>
+          <span class="case-badge">РОЖДЕНИЕ ПРОЕКТА</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● ПРОВЕРКА ЦЕЛЕСООБРАЗНОСТИ</div>
+          <h2 class="case-title">Черновик</h2>
+          <p class="case-lead">Место, где идея превращается в первую рабочую версию.</p>
+          <div class="case-actions">
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              ОБСУДИТЬ ИДЕЮ В TELEGRAM ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// КАК РОЖДАЕТСЯ ПРОЕКТ</h3>
+              <p class="section-text">
+                Сначала фиксирую задачу. Потом собираю структуру и сценарий. Затем делаю минимальный рабочий прототип. Если прототип проходит проверку — проект идёт дальше.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ЭТАПЫ СБОРКИ</h3>
+              <ul class="facts-list">
+                <li>1. Задача и сценарий.</li>
+                <li>2. Черновая структура.</li>
+                <li>3. Первый рабочий прототип.</li>
+                <li>4. Проверка на реальных данных.</li>
+                <li>5. Решение: развивать или закрыть.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ГЛАВНАЯ МЫСЛЬ</h3>
+              <blockquote class="quote-box">
+                «Здесь проект ещё не готов. Здесь проверяется, стоит ли его вообще собирать.»
+              </blockquote>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// ПАРАМЕТРЫ ЭТАПА</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Фокус:</span><strong>Проверка жизнеспособности</strong></div>
+                <div class="spec-row"><span>Инструмент:</span><strong>Блокнот, схема, быстрый код</strong></div>
+                <div class="spec-row"><span>Критерий:</span><strong>Понятная польза сценария</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 13. НЕ ПОШЛО (ЗАКРЫТЫЕ ЭКСПЕРИМЕНТЫ) -->
+  <aside id="modal-failures" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-red">[ АРХИВ ОШИБОК // НЕ ПОШЛО ]</span>
+          <span class="case-badge">ПОСТМОРТЕМ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live text-red">● ЗАКРЫТЫЕ ЭКСПЕРИМЕНТЫ</div>
+          <h2 class="case-title">Не пошло</h2>
+          <p class="case-lead">Честный постмортем закрытых гипотез мастерской.</p>
+        </div>
+
+        <div class="case-section">
+          <h3 class="section-heading">// ЧЕМУ НАУЧИЛИ ОШИБКИ</h3>
+          <p class="section-text">
+            В живой лаборатории не каждый эксперимент превращается в продукт. Если идея не даёт практического результата или спроса — правильнее закрыть её сразу, чем тянуть месяцами.
+          </p>
+        </div>
+
+        <div class="failures-list">
+          <div class="failure-item">
+            <div class="failure-title">➔ Тяжелый микросервисный SaaS без клиентов</div>
+            <p class="failure-desc">
+              Слишком сложная архитектура до проверки спроса. Урок: сначала простой MVP и тест на живых людях, затем усложнение.
+            </p>
+          </div>
+
+          <div class="failure-item">
+            <div class="failure-title">➔ DEX Liquidity Sniffer в криптовалютах</div>
+            <p class="failure-desc">
+              Эксперимент с ончейн-аналитикой криптобирж. Закрыт из-за отсутствия долгосрочной практической пользы.
+            </p>
+          </div>
+
+          <div class="failure-item">
+            <div class="failure-title">➔ Автоматический суммаризатор новостей</div>
+            <p class="failure-desc">
+              Парсер работал отлично, но людям не нужны общие выжимки — им нужны конкретные ответы под их прикладную задачу.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 14. ВИДЕО (КИНОПЛЁНКА) -->
+  <aside id="modal-video" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-amber">[ АРХИВ // ВИДЕО & МОНТАЖ ]</span>
+          <span class="case-badge">ВИДЕОЦЕХ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● СТАТУС: ВИДЕОЦЕХ</div>
+          <h2 class="case-title">Видео и процесс</h2>
+          <p class="case-lead">Фиксация процесса сборки продуктов, скринкасты и визуальные материалы.</p>
+          <div class="case-actions">
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// О ФОРМАТЕ</h3>
+              <p class="section-text">
+                Видео-материалы по разработке цифровых продуктов: запись живой сборки интерфейсов, демонстрация работы ботов и разбор архитектурных решений.
+              </p>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ИНСТРУМЕНТЫ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Монтаж:</span><strong>DaVinci Resolve</strong></div>
+                <div class="spec-row"><span>Запись экрана:</span><strong>OBS Studio</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 15. СЕТЬ & ИНСТРУМЕНТЫ -->
+  <aside id="modal-network" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-blue">[ ИНФРАСТРУКТУРА // СЕТЬ ]</span>
+          <span class="case-badge">ТЕХНИЧЕСКАЯ ОСНОВА</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● ТЕХНИЧЕСКАЯ ОСНОВА</div>
+          <h2 class="case-title">Инструменты</h2>
+          <p class="case-lead">Техническая основа, на которой работают проекты мастерской.</p>
+          <div class="case-actions">
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              СВЯЗАТЬСЯ В TELEGRAM ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+            <div class="case-section">
+              <h3 class="section-heading">// ПРИНЦИП ВЫБОРА</h3>
+              <p class="section-text">
+                Инструмент выбирается под задачу проекта. Для простого сайта не нужна сложная инфраструктура. Для бота или сервиса важны стабильность, база данных и постоянная работа.
+              </p>
+            </div>
+
+            <div class="case-section">
+              <h3 class="section-heading">// КАК ЭТО РАБОТАЕТ</h3>
+              <ul class="facts-list">
+                <li>Сайт → веб-сервер → данные.</li>
+                <li>Бот → сервер → внешние API → база данных.</li>
+                <li>Каждый проект получает только ту инфраструктуру, которая ему действительно нужна.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="case-col-right">
+            <div class="case-section">
+              <h3 class="section-heading">// ЧТО ИСПОЛЬЗУЕТСЯ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Веб:</span><strong>Astro, HTML, CSS, JavaScript</strong></div>
+                <div class="spec-row"><span>Боты и сервисы:</span><strong>Python, Node.js, PHP</strong></div>
+                <div class="spec-row"><span>Данные:</span><strong>MySQL, SQLite, PostgreSQL</strong></div>
+                <div class="spec-row"><span>Инфраструктура:</span><strong>Linux VPS, Nginx, systemd</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 16. ПРАВИЛА МАСТЕРСКОЙ (КОДЕКС) -->
+  <aside id="modal-manifesto" class="workbench-drawer">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-orange">[ ПРАВИЛА // КАК Я РАБОТАЮ ]</span>
+          <span class="case-badge">РАБОЧИЙ ЦИКЛ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● РАБОЧИЙ ЦИКЛ РАЗРАБОТКИ</div>
+          <h2 class="case-title">Как я работаю</h2>
+          <p class="case-lead">Рабочий цикл создания реального цифрового продукта.</p>
+        </div>
+
+        <div class="rules-stack">
+          <div class="rule-card">
+            <span class="rule-num">01</span>
+            <div class="rule-content">
+              <strong>РАЗОБРАТЬ ЗАДАЧУ</strong>
+              <p>Понять, что нужно сделать, для кого и какой результат нужен.</p>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <span class="rule-num">02</span>
+            <div class="rule-content">
+              <strong>СОБРАТЬ ПЕРВУЮ ВЕРСИЮ</strong>
+              <p>Сначала рабочий прототип, потом детализация.</p>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <span class="rule-num">03</span>
+            <div class="rule-content">
+              <strong>ПРОВЕРИТЬ</strong>
+              <p>Запустить, проверить сценарии, ссылки, данные и реальное поведение.</p>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <span class="rule-num">04</span>
+            <div class="rule-content">
+              <strong>ДОВЕСТИ ДО ЗАПУСКА</strong>
+              <p>Исправить найденное, подключить необходимые сервисы и вывести проект в работу.</p>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <span class="rule-num">05</span>
+            <div class="rule-content">
+              <strong>ЗАФИКСИРОВАТЬ РЕЗУЛЬТАТ</strong>
+              <p>Что получилось — оставить как рабочий продукт. Что не получилось — честно отметить и не выдавать за готовое.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 17. ОБО МНЕ (СВИТОК ВЕРСТАКА) -->
+  <aside id="modal-about" class="workbench-drawer drawer-about">
+    <div class="drawer-content">
+      
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-amber">[ ЗАПИСЬ АВТОРА // ОБО МНЕ ]</span>
+          <span class="case-badge">АРТЕФАКТ</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">● ЦИФРОВАЯ ЛАБОРАТОРИЯ // ЗАПИСЬ АВТОРА</div>
+          <h2 class="case-title">Олег // GONKA.BLOG</h2>
+          <p class="case-lead">Личная мастерская действующих цифровых продуктов.</p>
+          <div class="case-actions">
+            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+              НАПИСАТЬ В TELEGRAM (@lonelysvobodny) ↗
+            </a>
+            <a href="mailto:textsmen@gmail.com" class="case-action-btn btn-secondary">
+              ОТПРАВИТЬ EMAIL ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="case-grid">
+          <div class="case-col-left">
+
+            <!-- АВТОРСКОЕ ДОСЬЕ -->
+            <div class="case-section">
+              <h3 class="section-heading">// ЛАБОРАТОРНАЯ ЗАПИСЬ АВТОРА</h3>
+              <div class="lab-dossier-card">
+                <div class="dossier-badge-row">
+                  <span class="dossier-tag">ЗАПИСЬ АВТОРА</span>
+                  <span class="dossier-status">● В СЕТИ</span>
+                </div>
+
+                <div class="dossier-block">
+                  <div class="author-greeting">Привет! Я Олег.</div>
+                  <p class="dossier-text">
+                    Создаю цифровые решения под задачи бизнеса: лендинги, Telegram-боты и веб-сервисы.
+                  </p>
+                </div>
+
+                <div class="dossier-divider"></div>
+
+                <div class="dossier-block">
+                  <span class="dossier-subheading">// ПОДХОД К ЗАДАЧЕ</span>
+                  <p class="dossier-text">
+                    Помогаю превратить задачу в понятный готовый продукт: продумываю структуру, реализую согласованный функционал и довожу проект до готового результата.
+                  </p>
+                </div>
+
+                <div class="dossier-divider"></div>
+
+                <div class="dossier-block">
+                  <span class="dossier-subheading">// ПРИНЦИП РАБОТЫ</span>
+                  <p class="dossier-text">
+                    Работаю по согласованному объёму, соблюдаю сроки и внимательно отношусь к деталям.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="case-col-right">
+
+            <!-- ВИЗУАЛЬНЫЙ АРТЕФАКТ СВИТКА В СТИЛЕ ЦИФРОВОЙ ЛАБОРАТОРИИ -->
+            <div class="case-section">
+              <h3 class="section-heading">// АРТЕФАКТ СО СТОЛА</h3>
+              <div class="lab-scroll-artifact">
+                <div class="scroll-artifact-top">
+                  <div class="wax-seal-icon">
+                    <span class="seal-core"></span>
+                    <span class="seal-text">СВИТОК ВЕРСТАКА</span>
+                  </div>
+                  <span class="scroll-tag">ПЕРГАМЕНТ</span>
+                </div>
+                
+                <blockquote class="scroll-handwritten-text">
+                  «Хорошие идеи приходят не по расписанию.»
+                </blockquote>
+                
+                <div class="scroll-artifact-bottom">
+                  <span class="artifact-geo">45°15'N 19°51'E</span>
+                  <span class="artifact-signature">GONKA.BLOG // DIGITAL LAB</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- СПЕЦИФИКАЦИЯ И СВЯЗЬ -->
+            <div class="case-section">
+              <h3 class="section-heading">// ПАРАМЕТРЫ & СВЯЗЬ</h3>
+              <div class="tech-spec-box">
+                <div class="spec-row"><span>Создатель:</span><strong>Олег</strong></div>
+                <div class="spec-row"><span>Профиль:</span><strong>Лендинги • Боты • Сервисы</strong></div>
+                <div class="spec-row"><span>Формат:</span><strong>Согласованный объём и сроки</strong></div>
+                <div class="spec-row"><span>Telegram:</span><strong>@lonelysvobodny</strong></div>
+                <div class="spec-row"><span>Email:</span><strong>textsmen@gmail.com</strong></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- БЭКДРОП ДЛЯ ЗАКРЫТИЯ ДОСЬЕ -->
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+</div>
+
+<!-- СТИЛИ ПРОСТРАНСТВЕННОГО ВЕРСТАКА И ПРАВЫХ ВЫДВИЖНЫХ ПАНЕЛЕЙ -->
+<style>
+  .spatial-root {
+    width: 100vw;
+    min-height: 100vh;
+    display: block;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--desk-base);
+    color: var(--desk-text);
+  }
+
+  /* ВЕРХНЯЯ ШАПКА */
+  .desk-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 42px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--desk-border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    z-index: 50;
+    flex-shrink: 0;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    background: var(--desk-card);
+    border: 1px solid var(--desk-border);
+    font-weight: 700;
+  }
+
+  .live-pulse-wrapper {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    background-color: #34d399;
+    opacity: 0.75;
+    animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #10b981;
+  }
+
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  .meta-coords {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    color: #a8a29e;
+    font-size: 10px;
+  }
+  @media (min-width: 768px) {
+    .meta-coords { display: flex; }
+  }
+
+  .topbar-brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .topbar-brand:hover {
+    text-decoration: none;
+    color: #ffffff;
+  }
+  .brand-orange { color: #f97316; }
+  .brand-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: #a8a29e;
+    margin-left: 6px;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--desk-card);
+    border: 1px solid var(--desk-border);
+    color: var(--desk-text);
+    cursor: pointer;
+    font-size: 10px;
+  }
+
+  .topbar-links-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .topbar-social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--desk-card);
+    border: 1px solid var(--desk-border);
+    color: var(--desk-text);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .topbar-social-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .topbar-btn-tg:hover {
+    border-color: #2aabee;
+    color: #2aabee;
+  }
+
+  .topbar-btn-email:hover {
+    border-color: #f59e0b;
+    color: #f59e0b;
+  }
+
+  .topbar-btn-yt:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
+  .topbar-btn-ig:hover {
+    border-color: #ec4899;
+    color: #ec4899;
+  }
+
+  /* ХОЛСТ ВЕРСТАКА */
+  .workbench-viewport {
+    width: 100vw;
+    height: auto;
+    min-height: 100vh;
+    padding-top: 42px;
+    padding-bottom: 60px;
+    margin: 0;
+    box-sizing: border-box;
+    display: block;
+    overflow: visible;
+    position: relative;
+    background: var(--desk-base);
+  }
+
+  .workbench-viewport::before {
+    display: none;
+  }
+
+  .workbench-frame {
+    position: relative;
+    z-index: 10;
+    width: 100vw;
+    max-width: 100vw;
+    height: calc(100vw * 971 / 1619);
+    aspect-ratio: 1619 / 971;
+    flex-shrink: 0;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .workbench-bg-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+  }
+
+  .workbench-light-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 12%, rgba(254, 215, 170, 0.18) 0%, rgba(249, 115, 22, 0.04) 45%, transparent 75%);
+    mix-blend-mode: screen;
+  }
+
+  /* ЕСТЕСТВЕННАЯ ФИЗИЧЕСКАЯ ГЕОМЕТРИЯ И ГРАНИЦЫ СТОЛЕШНИЦЫ */
+  .workbench-tabletop-geometry {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 18;
+  }
+
+  /* 1. Правая граница: контактная тень прямо по линии стыка с вертикальной стойкой */
+  .tabletop-right-junction {
+    position: absolute;
+    top: 6.5%;
+    bottom: 0;
+    left: 84.75%;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.65);
+    box-shadow: -2px 0 6px rgba(0, 0, 0, 0.35), 1px 0 2px rgba(255, 215, 140, 0.2);
+    pointer-events: none;
+  }
+
+  /* 2. Передний торец столешницы: фаска и толщина массива дерева к зрителю */
+  .tabletop-front-edge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+    z-index: 22;
+  }
+
+  /* Верхняя микро-фаска торца (теплый закатный блик по передней кромке дерева) */
+  .front-edge-bevel {
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      rgba(217, 119, 6, 0.4) 0%, 
+      rgba(255, 235, 190, 0.95) 15%, 
+      rgba(255, 245, 215, 1.0) 50%, 
+      rgba(255, 230, 175, 0.95) 85%, 
+      rgba(217, 119, 6, 0.4) 100%
+    );
+    box-shadow: 0 -3px 12px rgba(255, 205, 130, 0.6), 0 1px 3px rgba(0, 0, 0, 0.9);
+  }
+
+  /* Массивный торец деревянной плиты со спадом в глубокую тень */
+  .front-edge-thickness {
+    width: 100%;
+    height: 42px;
+    background: 
+      repeating-linear-gradient(180deg, 
+        rgba(255, 255, 255, 0.03) 0px, 
+        rgba(255, 255, 255, 0.03) 1px, 
+        transparent 1px, 
+        transparent 4px
+      ),
+      linear-gradient(180deg, 
+        #3b271a 0%, 
+        #2a1c12 25%, 
+        #1e130b 55%, 
+        #120a06 85%,
+        #080402 100%
+      );
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.98);
+  }
+
+  /* ЛОГОТИП GONKA.BLOG НА ГЛАВНОМ СТОЛЕ (ССЫЛКА НА /) */
+  .workbench-table-logo-link {
+    position: absolute;
+    top: 0.8%;
+    left: 15.6%;
+    width: 21.5%;
+    height: 13.0%;
+    z-index: 45;
+    display: block;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    text-decoration: none;
+  }
+  .workbench-table-logo-link:hover,
+  .workbench-table-logo-link:active,
+  .workbench-table-logo-link:focus {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* ССЫЛКИ В ПРАВОМ ВЕРХНЕМ УГЛУ СТОЛА: TELEGRAM, EMAIL, YOUTUBE, INSTAGRAM */
+  .workbench-corner-link {
+    position: absolute;
+    z-index: 45;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 6px;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    pointer-events: auto;
+  }
+
+  .corner-link-telegram {
+    top: 2.2%;
+    left: 85.0%;
+    width: 2.2%;
+    height: 3.2%;
+  }
+
+  .corner-link-email {
+    top: 2.2%;
+    left: 88.0%;
+    width: 2.2%;
+    height: 3.2%;
+  }
+
+  .corner-link-youtube {
+    top: 2.2%;
+    left: 91.0%;
+    width: 2.2%;
+    height: 3.2%;
+  }
+
+  .corner-link-instagram {
+    top: 2.2%;
+    left: 94.0%;
+    width: 2.2%;
+    height: 3.2%;
+  }
+
+  .corner-svg-icon {
+    width: 17px;
+    height: 17px;
+    color: #ffffff;
+    opacity: 0.95;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+    transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+  }
+
+  .corner-link-tooltip {
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: rgba(18, 14, 11, 0.95);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fdfbf7;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    z-index: 50;
+  }
+
+  .workbench-corner-link:hover .corner-link-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .workbench-corner-link:hover .corner-svg-icon {
+    opacity: 1;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.85));
+  }
+
+  .corner-link-aura {
+    position: absolute;
+    inset: -3px;
+    border-radius: 8px;
+    border: 1px dashed transparent;
+    opacity: 0;
+    transition: opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    pointer-events: none;
+  }
+
+  .workbench-corner-link:hover .corner-link-aura {
+    opacity: 1;
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.35), inset 0 0 8px rgba(245, 158, 11, 0.15);
+  }
+
+  .workbench-corner-link:hover {
+    transform: scale(1.08);
+  }
+
+  /* Accessibility screen-reader only utility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* ИНТЕРАКТИВНЫЕ ХОТСПОТЫ */
+  .hotspot {
+    position: absolute;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 20;
+    outline: none;
+  }
+
+  .hotspot-aura {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.25s ease, box-shadow 0.25s ease;
+    pointer-events: none;
+  }
+
+  .hotspot:hover .hotspot-aura,
+  .hotspot.is-hovered .hotspot-aura {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.4), inset 0 0 10px rgba(249, 115, 22, 0.15);
+  }
+
+  /* 1. ТЕЛЕФОН */
+  .hotspot-phone {
+    top: 3.5%;
+    left: 0.8%;
+    width: 23.5%;
+    height: 30.0%;
+    border-radius: 16px;
+  }
+  .phone-pulse-ring {
+    position: absolute;
+    top: 22%;
+    left: 48%;
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: 2px solid rgba(249, 115, 22, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .hotspot-phone:hover .phone-pulse-ring,
+  .hotspot-phone.is-hovered .phone-pulse-ring {
+    opacity: 1;
+    animation: ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* 2. БЛОКНОТ СЛЕВА */
+  .hotspot-notebook {
+    top: 34.0%;
+    left: 2.0%;
+    width: 22.0%;
+    height: 29.5%;
+    border-radius: 10px;
+    border: 1px dashed transparent;
+  }
+  .hotspot-notebook:hover,
+  .hotspot-notebook.is-hovered {
+    border-color: rgba(245, 158, 11, 0.5);
+    transform: translateY(-2px);
+  }
+
+  /* 3. НЕ ПОШЛО */
+  .hotspot-failures {
+    top: 64.5%;
+    left: 1.5%;
+    width: 19.5%;
+    height: 23.0%;
+    border-radius: 8px;
+    border: 1px dashed transparent;
+  }
+  .hotspot-failures:hover,
+  .hotspot-failures.is-hovered {
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: translateY(-2px);
+  }
+  .hotspot-failures:hover .hotspot-aura,
+  .hotspot-failures.is-hovered .hotspot-aura {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.35), inset 0 0 10px rgba(239, 68, 68, 0.15);
+  }
+
+  /* 4. СВИТОК «САЙТЫ / ЛЕНДИНГИ» (ГОРИЗОНТАЛЬНЫЙ ФИЗИЧЕСКИЙ СВИТОК НА СТОЛЕ) */
+  .hotspot-scroll-sites.physical-scroll-horizontal {
+    position: absolute;
+    top: 40.0%;
+    left: 24.8%;
+    width: 15.6%;
+    height: 13.5%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 35;
+    outline: none;
+    box-shadow: none;
+    transform: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hotspot-scroll-sites.physical-scroll-horizontal:hover,
+  .hotspot-scroll-sites.physical-scroll-horizontal.is-hovered {
+    border: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .hotspot-scroll-sites.physical-scroll-horizontal:focus-visible {
+    outline: 2px dashed rgba(245, 158, 11, 0.7);
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
+
+  /* 1. Закрытый рулон на листе стола (исходное состояние) */
+  .sites-closed-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 66%;
+    max-width: 135px;
+    height: auto;
+    pointer-events: auto;
+    transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: center center;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.75));
+  }
+
+  .sites-closed-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Крафтовая бирка «САЙТЫ / ЛЕНДИНГИ», закрепленная на свернутом свитке */
+  .sites-closed-tag {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    padding: 2.5px 8px;
+    background: #eadebe;
+    background-image: linear-gradient(135deg, #f5ebd2 0%, #d8be92 100%);
+    border: 1px solid rgba(120, 75, 30, 0.5);
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  .sites-closed-tag span {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: #431407;
+    text-transform: uppercase;
+    display: block;
+  }
+
+  /* Пульсирующий отблеск на сургучной печати закрытого рулона */
+  .sites-pulse-seal {
+    position: absolute;
+    top: 36%;
+    left: 58%;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.5) 0%, rgba(220, 38, 38, 0.15) 50%, rgba(0, 0, 0, 0) 70%);
+    pointer-events: none;
+    animation: scroll-seal-shimmer 3.2s infinite ease-in-out;
+  }
+
+  /* 2. Развёрнутый свиток (плавно разворачивается в обе стороны влево и вправо по горизонтали) */
+  .sites-unrolled-wrapper {
+    position: absolute;
+    top: 4%;
+    left: 0;
+    width: 100%;
+    height: 92%;
+    display: flex;
+    align-items: stretch;
+    pointer-events: none;
+    opacity: 0;
+    transform: scaleX(0.18);
+    transform-origin: center center;
+    clip-path: inset(0 41% 0 41%);
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.8));
+    transition: opacity 0.3s ease,
+                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                clip-path 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.4s ease;
+  }
+
+  .hotspot-scroll-sites.physical-scroll-horizontal:hover .sites-closed-wrapper,
+  .hotspot-scroll-sites.physical-scroll-horizontal.is-hovered .sites-closed-wrapper {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+    pointer-events: none;
+  }
+
+  .hotspot-scroll-sites.physical-scroll-horizontal:hover .sites-unrolled-wrapper,
+  .hotspot-scroll-sites.physical-scroll-horizontal.is-hovered .sites-unrolled-wrapper {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scaleX(1);
+    clip-path: inset(0 0 0 0);
+    filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.9));
+  }
+
+  /* Боковые валики свитка (левый и правый) */
+  .scroll-roll-left,
+  .scroll-roll-right {
+    width: 12px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 3;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+  }
+
+  .scroll-roll-left {
+    margin-right: -2px;
+  }
+
+  .scroll-roll-right {
+    margin-left: -2px;
+  }
+
+  .scroll-roll-cylinder {
+    flex: 1;
+    width: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #3d2212 0%, #7c4720 18%, #c99859 40%, #faecd5 58%, #8e5425 80%, #351c0d 100%);
+    box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.4), inset 0 -2px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .scroll-roll-finial {
+    width: 14px;
+    height: 5px;
+    background: linear-gradient(180deg, #5a3215 0%, #2b1406 100%);
+    border: 1px solid rgba(201, 152, 89, 0.4);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+  .finial-top {
+    border-radius: 4px 4px 1px 1px;
+    margin-bottom: -1px;
+  }
+  .finial-bottom {
+    border-radius: 1px 1px 4px 4px;
+    margin-top: -1px;
+  }
+
+  /* Центральное полотно пергамента */
+  .scroll-parchment-sheet {
+    flex: 1;
+    position: relative;
+    background: #fbf5e7;
+    background-image: 
+      radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.6) 0%, transparent 80%),
+      linear-gradient(180deg, #ede1c6 0%, #fcf7ec 14%, #fbf5e8 50%, #f6ecd3 85%, #e1ceab 100%);
+    border-top: 1.5px solid rgba(220, 195, 155, 0.85);
+    border-bottom: 1.5px solid rgba(130, 85, 40, 0.4);
+    box-shadow: 
+      inset 0 3px 5px rgba(255, 255, 255, 0.9),
+      inset 0 -3px 5px rgba(80, 45, 15, 0.25),
+      inset 8px 0 10px -4px rgba(60, 30, 10, 0.35),
+      inset -8px 0 10px -4px rgba(60, 30, 10, 0.35);
+    padding: 6px 11px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 2;
+  }
+
+  :global([data-theme="night"]) .scroll-parchment-sheet {
+    background: #f4e3c3;
+    background-image: 
+      radial-gradient(ellipse at 50% 50%, rgba(255, 248, 230, 0.4) 0%, transparent 80%),
+      linear-gradient(180deg, #ebd6b0 0%, #faecd7 15%, #f4e2be 50%, #ebd3a8 85%, #d4b88b 100%);
+    border-top-color: rgba(235, 214, 176, 0.9);
+    border-bottom-color: rgba(140, 95, 50, 0.5);
+  }
+
+  .sites-parchment-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+  }
+
+  .sites-parchment-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .sites-parchment-tag {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: #431407;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  :global([data-theme="night"]) .sites-parchment-tag {
+    color: #381204;
+  }
+
+  .sites-parchment-badge {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #9a3412;
+    background: rgba(234, 88, 12, 0.12);
+    border: 1px solid rgba(154, 52, 18, 0.35);
+    padding: 1.5px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  /* Реальные визуальные следы: контактная полоса первых экранов на пергаменте */
+  .sites-screens-strip {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin: 3px 0 2px 0;
+    width: 100%;
+  }
+
+  .sites-screen-chip {
+    flex: 1;
+    min-width: 0;
+    aspect-ratio: 16 / 10;
+    border-radius: 2px;
+    overflow: hidden;
+    border: 1px solid rgba(120, 60, 20, 0.45);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    position: relative;
+    background: #14100c;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    outline: none;
+    display: block;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .sites-screen-chip img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    filter: saturate(0.92) contrast(1.05);
+    pointer-events: none;
+  }
+
+  .sites-screen-chip .chip-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 10, 8, 0.9);
+    color: #fde68a;
+    font-size: 6px;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    letter-spacing: 0.04em;
+    padding: 0.5px 0;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .hotspot-scroll-sites.physical-scroll-horizontal:hover .sites-screen-chip:hover,
+  .sites-screen-chip:focus-visible {
+    transform: translateY(-2px) scale(1.15);
+    z-index: 5;
+    border-color: #ea580c;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  }
+
+  .sites-parchment-sub {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 9.5px;
+    font-style: italic;
+    font-weight: 600;
+    color: #78350f;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+
+  :global([data-theme="night"]) .sites-parchment-sub {
+    color: #682c0b;
+  }
+
+  .sites-arrow {
+    font-style: normal;
+    font-weight: 700;
+    color: #c2410c;
+    margin-left: 2px;
+    display: inline-block;
+    transition: transform 0.2s ease;
+  }
+
+  .hotspot-scroll-sites.physical-scroll-horizontal:hover .sites-arrow,
+  .hotspot-scroll-sites.physical-scroll-horizontal.is-hovered .sites-arrow {
+    transform: translateX(3px);
+  }
+
+  .sites-wax-seal {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ef4444 0%, #b91c1c 65%, #7f1d1d 100%);
+    box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+    border: 1px solid #7f1d1d;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+
+  /* 5. СИСТЕМА */
+  .hotspot-core {
+    top: 28.5%;
+    left: 41.5%;
+    width: 20.5%;
+    height: 36.5%;
+    border-radius: 12px;
+    border: 1px dashed transparent;
+  }
+  .hotspot-core:hover,
+  .hotspot-core.is-hovered {
+    border-color: rgba(249, 115, 22, 0.5);
+    transform: translateY(-2px);
+  }
+
+  /* 6. СВИТОК «БОТЫ // TELEGRAM» (ФИЗИЧЕСКИЙ СВИТОК СО СМАРТФОНОМ ВНУТРИ) */
+  .hotspot-scroll-bots.physical-scroll-bots {
+    position: absolute;
+    top: 26.0%;
+    left: 63.0%;
+    width: 17.0%;
+    height: 47.0%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 35;
+    outline: none;
+    box-shadow: none;
+    transform: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hotspot-scroll-bots.physical-scroll-bots:hover,
+  .hotspot-scroll-bots.physical-scroll-bots.is-hovered {
+    border: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .hotspot-scroll-bots.physical-scroll-bots:focus-visible {
+    outline: 2px dashed rgba(16, 185, 129, 0.7);
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
+
+  /* 1. Закрытый свиток на столе (телефон полностью скрыт) */
+  .bots-closed-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 78%;
+    max-width: 155px;
+    height: auto;
+    pointer-events: auto;
+    transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: center center;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.75));
+  }
+
+  .bots-closed-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    pointer-events: none;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Крафтовая бирка «БОТЫ // TELEGRAM», закрепленная на свернутом свитке */
+  .bots-closed-tag {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2.5deg);
+    padding: 2.5px 8px;
+    background: #eadebe;
+    background-image: linear-gradient(135deg, #f5ebd2 0%, #d8be92 100%);
+    border: 1px solid rgba(120, 75, 30, 0.5);
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 3;
+  }
+
+  .bots-closed-tag span {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: #064e3b;
+    text-transform: uppercase;
+    display: block;
+  }
+
+  /* Пульсирующий отблеск на сургучной печати закрытого рулона */
+  .bots-pulse-seal {
+    position: absolute;
+    top: 36%;
+    left: 58%;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.55) 0%, rgba(5, 150, 105, 0.15) 50%, rgba(0, 0, 0, 0) 70%);
+    pointer-events: none;
+    animation: scroll-seal-shimmer 3.2s infinite ease-in-out;
+    z-index: 3;
+  }
+
+  /* 2. Развёрнутый свиток (физически разворачивается, на нём лежит настоящий смартфон) */
+  .bots-unrolled-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.92) rotate(-1.5deg);
+    transform-origin: center center;
+    width: 100%;
+    max-width: 275px;
+    height: auto;
+    aspect-ratio: 400 / 658;
+    pointer-events: none;
+    opacity: 0;
+    filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.9));
+    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.38s ease;
+    z-index: 45;
+  }
+
+  .hotspot-scroll-bots:hover .bots-closed-wrapper,
+  .hotspot-scroll-bots:focus-within .bots-closed-wrapper,
+  .hotspot-scroll-bots.is-hovered .bots-closed-wrapper {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.88);
+    pointer-events: none;
+  }
+
+  .hotspot-scroll-bots:hover .bots-unrolled-wrapper,
+  .hotspot-scroll-bots:focus-within .bots-unrolled-wrapper,
+  .hotspot-scroll-bots.is-hovered .bots-unrolled-wrapper {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1) rotate(-1.5deg);
+    filter: drop-shadow(0 26px 52px rgba(0, 0, 0, 0.95));
+  }
+
+  .bots-unrolled-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Интерактивные кликабельные зоны поверх карточек ботов на экране смартфона */
+  .phone-interactive-hotspot {
+    position: absolute;
+    background: transparent;
+    border: 1.5px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    z-index: 10;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .phone-interactive-hotspot.hotspot-meat {
+    top: 25.5%;
+    left: 21.0%;
+    width: 58.0%;
+    height: 17.5%;
+  }
+
+  .phone-interactive-hotspot.hotspot-meat:hover,
+  .phone-interactive-hotspot.hotspot-meat:focus-visible {
+    border-color: rgba(34, 197, 94, 0.85);
+    background: rgba(34, 197, 94, 0.12);
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.35);
+    transform: scale(1.02);
+  }
+
+  .phone-interactive-hotspot.hotspot-detective {
+    top: 44.5%;
+    left: 21.0%;
+    width: 58.0%;
+    height: 17.5%;
+  }
+
+  .phone-interactive-hotspot.hotspot-detective:hover,
+  .phone-interactive-hotspot.hotspot-detective:focus-visible {
+    border-color: rgba(168, 85, 247, 0.85);
+    background: rgba(168, 85, 247, 0.12);
+    box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
+    transform: scale(1.02);
+  }
+
+
+
+  /* 8. ВИДЕО */
+  .hotspot-video {
+    top: 64.5%;
+    left: 22.5%;
+    width: 26.5%;
+    height: 29.5%;
+    border-radius: 8px;
+    border: 1px dashed transparent;
+  }
+  .hotspot-video:hover,
+  .hotspot-video.is-hovered {
+    border-color: rgba(245, 158, 11, 0.5);
+    transform: translateY(-2px);
+  }
+
+  /* 9. СЕТЬ */
+  .hotspot-network {
+    top: 63.0%;
+    left: 48.5%;
+    width: 17.5%;
+    height: 33.5%;
+    border-radius: 8px;
+    border: 1px dashed transparent;
+  }
+  .hotspot-network:hover,
+  .hotspot-network.is-hovered {
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: translateY(-2px);
+  }
+  .hotspot-network:hover .hotspot-aura,
+  .hotspot-network.is-hovered .hotspot-aura {
+    box-shadow: 0 0 26px rgba(59, 130, 246, 0.4), inset 0 0 14px rgba(59, 130, 246, 0.2);
+  }
+
+  /* 10. РЕЛОКАНТ СЕРБИЯ (В РАБОТЕ) */
+  .hotspot-serbia-wip {
+    top: 64.0%;
+    left: 65.5%;
+    width: 19.0%;
+    height: 32.5%;
+    border-radius: 8px;
+    border: 1px dashed transparent;
+    background: transparent;
+    overflow: visible;
+    transition: all 0.3s ease;
+  }
+  .hotspot-serbia-wip:hover,
+  .hotspot-serbia-wip.is-hovered {
+    border-color: rgba(245, 158, 11, 0.9);
+    background: rgba(245, 158, 11, 0.04);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+  }
+  .hotspot-serbia-wip:hover .hotspot-aura,
+  .hotspot-serbia-wip.is-hovered .hotspot-aura {
+    opacity: 1;
+    box-shadow: 0 0 28px rgba(245, 158, 11, 0.35), inset 0 0 14px rgba(245, 158, 11, 0.15);
+  }
+
+  /* 11. СВИТОК «ОБО МНЕ» (ФИЗИЧЕСКИЙ АРТЕФАКТ НА СТОЛЕ) */
+  .hotspot-scroll.physical-scroll-object {
+    position: absolute;
+    top: 6.0%;
+    left: 23.0%;
+    width: 13.8%;
+    height: 21.8%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 35;
+    outline: none;
+    box-shadow: none;
+    transform: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hotspot-scroll.physical-scroll-object:hover,
+  .hotspot-scroll.physical-scroll-object.is-hovered {
+    border: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .hotspot-scroll.physical-scroll-object:focus-visible {
+    outline: 2px dashed rgba(245, 158, 11, 0.7);
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
+
+  /* 1. Закрытый рулон на столе (исходное состояние) */
+  .scroll-closed-wrapper {
+    position: absolute;
+    top: 14%;
+    left: 5%;
+    width: 90%;
+    height: auto;
+    pointer-events: auto;
+    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: center center;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.75));
+  }
+
+  .scroll-closed-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Крафтовая бирка «АВТОР», закрепленная на свернутом свитке */
+  .scroll-closed-tag {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-4deg);
+    padding: 2.5px 8px;
+    background: #eadebe;
+    background-image: linear-gradient(135deg, #f5ebd2 0%, #d8be92 100%);
+    border: 1px solid rgba(120, 75, 30, 0.5);
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  .scroll-closed-tag span {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: #431407;
+    text-transform: uppercase;
+    display: block;
+  }
+
+  /* Деликатный пульсирующий отблеск на сургучной печати */
+  .scroll-pulse-seal {
+    position: absolute;
+    top: 36%;
+    left: 58%;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.5) 0%, rgba(220, 38, 38, 0.15) 50%, rgba(0, 0, 0, 0) 70%);
+    pointer-events: none;
+    animation: scroll-seal-shimmer 3.2s infinite ease-in-out;
+  }
+
+  @keyframes scroll-seal-shimmer {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(0.9);
+      opacity: 0.35;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.35);
+      opacity: 0.85;
+    }
+  }
+
+  /* 2. Развёрнутый свиток (разворачивается вниз строго в свободной области, не закрывая лендинги) */
+  .scroll-unrolled-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transform: scaleY(0.18) translateY(-10px);
+    transform-origin: top center;
+    clip-path: inset(0 0 82% 0);
+    filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.85));
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                clip-path 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.42s ease;
+  }
+
+  .scroll-open-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: top center;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Штамп «ОБО МНЕ» на развёрнутом пергаменте */
+  .scroll-unrolled-stamp {
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2.5deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .scroll-stamp-tag {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    color: #431407;
+    background: rgba(245, 230, 203, 0.88);
+    border: 1px dashed rgba(120, 53, 15, 0.5);
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    box-shadow: 0 1px 4px rgba(67, 20, 7, 0.2);
+    backdrop-filter: blur(2px);
+  }
+
+  /* Реакция на hover и is-hovered */
+  .hotspot-scroll.physical-scroll-object:hover .scroll-closed-wrapper,
+  .hotspot-scroll.physical-scroll-object.is-hovered .scroll-closed-wrapper {
+    opacity: 0;
+    transform: scale(0.94) translateY(-4px);
+    pointer-events: none;
+  }
+
+  .hotspot-scroll.physical-scroll-object:hover .scroll-unrolled-wrapper,
+  .hotspot-scroll.physical-scroll-object.is-hovered .scroll-unrolled-wrapper {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scaleY(1) translateY(0);
+    clip-path: inset(0 0 0 0);
+    filter: drop-shadow(0 22px 38px rgba(0, 0, 0, 0.9));
+  }
+
+  /* 12. КРУЖКА */
+  .hotspot-mug {
+    top: 11.0%;
+    left: 68.0%;
+    width: 10.5%;
+    height: 18.0%;
+    border-radius: 50%;
+  }
+
+  /* 13. ПРАВАЯ ВЕРТИКАЛЬНАЯ НАВИГАЦИЯ (ОГЛАВЛЕНИЕ СТОЛА — 8 РАЗДЕЛОВ) */
+  .cabinet-menu-nav {
+    position: absolute;
+    top: 27.5%;
+    left: 86.6%;
+    width: 12.0%;
+    height: 46.5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 5px;
+    z-index: 28;
+    pointer-events: auto;
+  }
+
+  /* Фоновые темные деревянные рейки под меню — надежно закрывают старые фоновые надписи */
+  .cabinet-nav-backdrop {
+    position: absolute;
+    inset: -4px 0;
+    background: #17110c;
+    background-image: 
+      repeating-linear-gradient(180deg, 
+        #17110c 0px, 
+        #211812 3px, 
+        #2a1e16 24px, 
+        #1b130e 45px, 
+        #0e0a07 48px, 
+        #050403 50px
+      );
+    border-radius: 3px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ 8 ПУНКТОВ МЕНЮ */
+  .cabinet-nav-item {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 32px;
+    max-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #ede3d2 0%, #dfd3bd 100%);
+    border: 1px solid rgba(130, 85, 45, 0.45);
+    border-radius: 4px;
+    box-shadow: 
+      0 2px 5px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    padding: 0 6px;
+  }
+
+  /* Латунные заклепки по углам планок */
+  .cabinet-nav-item::before,
+  .cabinet-nav-item::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #55331c;
+    border-radius: 50%;
+    box-shadow: 0 0.5px 1px rgba(255, 255, 255, 0.5);
+    opacity: 0.6;
+  }
+  .cabinet-nav-item::before { top: 4px; left: 6px; }
+  .cabinet-nav-item::after { top: 4px; right: 6px; }
+
+  /* Одинаковая типографика для всех 8 пунктов */
+  .cabinet-nav-label {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #2b180d;
+    text-transform: uppercase;
+    text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.45);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* Одинаковый Hover для всех 8 пунктов */
+  .cabinet-nav-item:hover,
+  .cabinet-nav-item:focus-visible,
+  .cabinet-nav-item.is-hovered {
+    background: linear-gradient(180deg, #f5ebd9 0%, #ede0c9 100%);
+    border-color: rgba(245, 158, 11, 0.8);
+    box-shadow: 
+      0 0 16px rgba(245, 158, 11, 0.4),
+      0 3px 8px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    transform: translateX(-2.5px);
+  }
+
+  /* Одинаковое активное состояние для всех 8 пунктов */
+  .cabinet-nav-item.is-active,
+  .cabinet-nav-item:active {
+    background: linear-gradient(180deg, #dfd3bd 0%, #cfc1a7 100%);
+    border-color: #ea580c;
+    box-shadow: 
+      0 0 12px rgba(234, 88, 12, 0.4),
+      inset 0 2px 4px rgba(0, 0, 0, 0.25);
+    transform: translateX(-1px);
+  }
+
+  /* ==================================================
+     СИСТЕМА HOVER-ПОДСКАЗОК (ФИЗИЧЕСКИЕ АРТЕФАКТЫ НА СТОЛЕ)
+     ================================================== */
+  .editorial-float-label {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 50;
+    white-space: nowrap;
+  }
+
+  .editorial-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #f97316;
+  }
+  .tag-red { color: #f87171; }
+  .tag-emerald { color: #34d399; }
+  .tag-purple { color: #c084fc; }
+  .tag-blue { color: #60a5fa; }
+
+  .editorial-statement {
+    font-family: 'Literata', Georgia, serif;
+    font-style: italic;
+    font-size: 11.5px;
+    color: #f5f5f4;
+    line-height: 1.25;
+  }
+  .statement-red { color: #fca5a5; }
+
+  /* 1. ЧЕРНОВИК: Кусок старого тёплого пергамента с неровным краем и отчётливой рукописной фразой */
+  .label-draft-parchment {
+    padding: 11px 18px;
+    background: #eadebe;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35) 0%, transparent 60%),
+      radial-gradient(circle at 80% 70%, rgba(138, 90, 43, 0.15) 0%, transparent 70%),
+      linear-gradient(135deg, #f5ebd2 0%, #e1d0ab 100%);
+    border: 1px solid #b89d70;
+    border-radius: 3px 14px 4px 18px / 16px 4px 14px 3px;
+    box-shadow: 
+      0 14px 30px -4px rgba(35, 20, 10, 0.6),
+      0 4px 10px rgba(0, 0, 0, 0.25),
+      inset 0 0 20px rgba(160, 115, 60, 0.22);
+    transform: rotate(-2.2deg) translateY(-6px);
+  }
+  .label-draft-parchment .parchment-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #6d330c;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    display: block;
+  }
+  .label-draft-parchment .parchment-statement {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f1610;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+    display: block;
+  }
+
+  /* 2. НЕ ПОШЛО: Архивный штемпельный талон закрытых гипотез */
+  .label-failures-card {
+    padding: 9px 15px;
+    background: #f4e8e6;
+    background-image: linear-gradient(135deg, #faf0ee 0%, #ebd7d4 100%);
+    border: 1px solid #d99994;
+    border-left: 4px solid #dc2626;
+    border-radius: 4px;
+    box-shadow: 0 12px 26px -4px rgba(60, 15, 15, 0.5), 0 3px 8px rgba(0, 0, 0, 0.2);
+    transform: rotate(1.5deg) translateY(-6px);
+  }
+  .label-failures-card .tag-crimson-seal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #991b1b;
+    letter-spacing: 0.1em;
+  }
+  .label-failures-card .editorial-statement {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #3b1111;
+  }
+
+  /* 3. САЙТЫ / ЛЕНДИНГИ: Физическая пергаментная карточка-закладка проекта */
+  .label-blueprint-strip {
+    padding: 9px 16px;
+    background: #f4ecdc;
+    background-image: 
+      radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.5) 0%, transparent 55%),
+      radial-gradient(circle at 85% 80%, rgba(150, 105, 55, 0.14) 0%, transparent 65%),
+      linear-gradient(135deg, #f9f2e3 0%, #ebe0ca 100%);
+    border: 1px solid rgba(150, 110, 65, 0.45);
+    border-left: 3.5px solid #a1440d;
+    border-radius: 3px 10px 4px 12px / 12px 3px 10px 4px;
+    box-shadow: 
+      0 12px 28px -4px rgba(45, 25, 10, 0.5),
+      0 3px 8px rgba(0, 0, 0, 0.22),
+      inset 0 0 14px rgba(175, 130, 75, 0.18);
+    transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .label-blueprint-strip .editorial-tag {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #6d280a;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    display: block;
+  }
+
+  .label-blueprint-strip .editorial-statement {
+    font-family: 'Literata', Georgia, serif;
+    font-style: italic;
+    font-size: 13px;
+    font-weight: 600;
+    color: #24140a;
+    line-height: 1.3;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+    display: block;
+  }
+
+  /* Сохранение теплой бумажной фактуры и читаемого тёмного текста в режиме НОЧЬ */
+  :global([data-theme="night"]) .label-blueprint-strip {
+    background: #f1e7d2;
+    background-image: 
+      radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 55%),
+      radial-gradient(circle at 85% 80%, rgba(150, 105, 55, 0.15) 0%, transparent 65%),
+      linear-gradient(135deg, #f7efe0 0%, #e8d9bd 100%);
+    border: 1px solid rgba(160, 115, 65, 0.5);
+    border-left: 3.5px solid #d97706;
+    box-shadow: 
+      0 14px 32px -4px rgba(0, 0, 0, 0.8),
+      0 4px 10px rgba(0, 0, 0, 0.35),
+      0 0 20px rgba(245, 158, 11, 0.18),
+      inset 0 0 14px rgba(175, 130, 75, 0.22);
+  }
+
+  :global([data-theme="night"]) .label-blueprint-strip .editorial-tag {
+    color: #78350f;
+  }
+
+  :global([data-theme="night"]) .label-blueprint-strip .editorial-statement {
+    color: #24140a;
+  }
+
+  /* 4. БОТЫ: Терминальная перфолента / электронный билет диспетчера */
+  .label-terminal-ticket {
+    padding: 8px 15px;
+    background: #0d1512;
+    background-image: linear-gradient(180deg, #131c18 0%, #0a0f0d 100%);
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    border-left: 3.5px solid #10b981;
+    border-radius: 4px;
+    box-shadow: 0 10px 25px -4px rgba(6, 78, 59, 0.4), 0 0 16px rgba(16, 185, 129, 0.12);
+  }
+  .label-terminal-ticket .editorial-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+  .label-terminal-ticket .editorial-statement {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #d1fae5;
+  }
+
+  /* 5. ВИДЕО: Кадр 35-мм киноплёнки монтажного стола */
+  .label-celluloid-strip {
+    padding: 8px 15px;
+    background: #14110e;
+    background-image: 
+      radial-gradient(circle at 12px 4px, rgba(255, 255, 255, 0.22) 1.5px, transparent 2px),
+      radial-gradient(circle at 12px calc(100% - 4px), rgba(255, 255, 255, 0.22) 1.5px, transparent 2px);
+    background-repeat: repeat-x;
+    background-size: 16px 100%;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-top: 2px solid rgba(245, 158, 11, 0.65);
+    border-bottom: 2px solid rgba(245, 158, 11, 0.65);
+    border-radius: 3px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 0 14px rgba(245, 158, 11, 0.18);
+  }
+  .label-celluloid-strip .editorial-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 800;
+    color: #f59e0b;
+    letter-spacing: 0.12em;
+  }
+  .label-celluloid-strip .editorial-statement {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #fef3c7;
+  }
+
+  /* 6. СЕТЬ: Карточка звездных координат и топологии связей */
+  .label-starchart-card {
+    padding: 8px 15px;
+    background: #0f172a;
+    background-image: 
+      radial-gradient(circle at 80% 20%, rgba(96, 165, 250, 0.22) 0%, transparent 60%),
+      linear-gradient(135deg, #111e38 0%, #090d16 100%);
+    border: 1px solid rgba(96, 165, 250, 0.4);
+    border-radius: 4px;
+    box-shadow: 0 10px 26px -4px rgba(15, 23, 42, 0.8), 0 0 16px rgba(59, 130, 246, 0.18);
+  }
+  .label-starchart-card .editorial-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #60a5fa;
+    letter-spacing: 0.12em;
+  }
+  .label-starchart-card .editorial-statement {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #e0f2fe;
+  }
+
+  /* 7. СИСТЕМА // CORE: Архитектурный веленевый чертёж */
+  .label-schematic-vellum {
+    padding: 8px 15px;
+    background: #fbf7ee;
+    background-image: 
+      linear-gradient(rgba(249, 115, 22, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249, 115, 22, 0.05) 1px, transparent 1px);
+    background-size: 10px 10px;
+    border: 1px solid #c9b497;
+    border-left: 3.5px solid #f97316;
+    border-radius: 4px;
+    box-shadow: 0 10px 24px -4px rgba(45, 30, 15, 0.45);
+  }
+  .label-schematic-vellum .editorial-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 800;
+    color: #ea580c;
+    letter-spacing: 0.12em;
+  }
+  .label-schematic-vellum .editorial-statement {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #271e17;
+  }
+
+  /* 8. СЕРБИЯ: Почтовая полевая карточка экспедиции */
+  .label-field-dispatch {
+    padding: 8px 15px;
+    background: #f5eedb;
+    background-image: linear-gradient(135deg, #faf3e4 0%, #ebe0c6 100%);
+    border: 1px dashed #bfa57a;
+    border-left: 3.5px solid #d97706;
+    border-radius: 4px;
+    box-shadow: 0 10px 24px -4px rgba(40, 28, 15, 0.45);
+    transform: rotate(-1.2deg) translateY(-6px);
+  }
+  .label-field-dispatch .editorial-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #b45309;
+    letter-spacing: 0.1em;
+  }
+  .label-field-dispatch .editorial-statement {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #261e14;
+  }
+
+  /* 9. ВХОДЯЩИЙ: Телефонный коммутатор / прямая линия */
+  .label-switchboard-card {
+    padding: 8px 15px;
+    background: #1c1414;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-left: 3.5px solid #ef4444;
+    border-radius: 4px;
+    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.7), 0 0 14px rgba(239, 68, 68, 0.22);
+  }
+  .label-switchboard-card .editorial-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 800;
+    color: #f87171;
+    letter-spacing: 0.12em;
+  }
+  .label-switchboard-card .editorial-statement {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #fef2f2;
+  }
+
+  /* 10. КРУЖКА: Пробковый костер манифеста */
+  .label-coaster-tile {
+    padding: 8px 15px;
+    background: #e9dcbe;
+    background-image: radial-gradient(circle at 50% 50%, rgba(180, 140, 90, 0.2) 0%, transparent 80%);
+    border: 1px solid #bfab80;
+    border-radius: 8px;
+    box-shadow: 0 10px 24px -4px rgba(45, 30, 15, 0.45);
+  }
+  .label-coaster-tile .editorial-tag {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #573919;
+    letter-spacing: 0.1em;
+  }
+  .label-coaster-tile .editorial-statement {
+    font-family: 'Caveat', cursive;
+    font-size: 15px;
+    font-weight: 700;
+    color: #271a0c;
+  }
+
+  /* ПОЗИЦИОНИРОВАНИЕ АРТЕФАКТОВ ПО ОТНОШЕНИЮ К ПРЕДМЕТАМ */
+  .label-below-left {
+    bottom: -36px;
+    left: 10px;
+    transform: translateY(6px);
+  }
+  .label-above-left {
+    top: -42px;
+    left: 10px;
+    transform: translateY(-6px);
+  }
+  .label-above-center {
+    top: -42px;
+    left: 50%;
+    transform: translate(-50%, -6px);
+  }
+  .label-above-right {
+    top: -42px;
+    right: 10px;
+    transform: translateY(-6px);
+  }
+  .label-above-filmstrip {
+    top: -42px;
+    left: 20px;
+    transform: translateY(-6px);
+  }
+  .label-left-side {
+    top: 50%;
+    right: calc(100% + 12px);
+    transform: translateY(-50%) translateX(6px);
+  }
+
+  .hotspot:hover .editorial-float-label,
+  .hotspot.is-hovered .editorial-float-label {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  .hotspot-notebook:hover .label-draft-parchment,
+  .hotspot-notebook.is-hovered .label-draft-parchment {
+    transform: rotate(-2.2deg) translateY(0);
+  }
+  .hotspot-failures:hover .label-failures-card,
+  .hotspot-failures.is-hovered .label-failures-card {
+    transform: rotate(1.5deg) translateY(0);
+  }
+  .hotspot-serbia-wip:hover .label-field-dispatch,
+  .hotspot-serbia-wip.is-hovered .label-field-dispatch {
+    transform: rotate(-1.2deg) translateY(0);
+  }
+  .hotspot-core:hover .editorial-float-label,
+  .hotspot-core.is-hovered .editorial-float-label {
+    transform: translate(-50%, 0);
+  }
+
+
+  /* НИЖНЯЯ ПАНЕЛЬ */
+  .desk-bottombar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(245, 158, 11, 0.2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    z-index: 50;
+    flex-shrink: 0;
+  }
+
+  .bottombar-left-zone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hint-bold { font-weight: 700; color: #ea580c; }
+  .hint-divider { color: #5e5950; }
+  .hint-sub { color: #a8a29e; }
+
+  .bottombar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .contact-wire-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--desk-card);
+    border: 1px solid var(--desk-border);
+    color: var(--desk-text);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .contact-wire-btn:hover {
+    border-color: #ea580c;
+    color: #ea580c;
+    transform: translateY(-1px);
+  }
+
+  .wire-dot { width: 5px; height: 5px; border-radius: 9999px; }
+  .dot-sky { background: #0284c7; }
+  .dot-amber { background: #d97706; }
+  .dot-rose { background: #e11d48; }
+  .dot-purple { background: #9333ea; }
+
+  /* ПРАВАЯ ВЫДВИЖНАЯ ПАНЕЛЬ (DRAWER) — ЧАСТЬ ОБЩЕЙ СРЕДЫ РАБОЧЕГО СТОЛА */
+  .workbench-drawer {
+    position: fixed;
+    top: 42px;
+    right: 0;
+    bottom: 32px;
+    width: 500px;
+    max-width: 100vw;
+    background: #171412;
+    background-image: 
+      radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+      radial-gradient(circle at 0% 100%, rgba(180, 83, 9, 0.05) 0%, transparent 50%),
+      linear-gradient(180deg, rgba(28, 24, 21, 0.98) 0%, rgba(20, 17, 15, 0.98) 100%);
+    backdrop-filter: blur(24px);
+    border-left: 1px solid rgba(245, 158, 11, 0.22);
+    box-shadow: -24px 0 60px rgba(0, 0, 0, 0.75), inset 1px 0 0 rgba(255, 255, 255, 0.05);
+    z-index: 60;
+    transform: translateX(110%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+    color: #ede8df;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .workbench-drawer:not(.is-open) {
+    box-shadow: none !important;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* АТМОСФЕРА ПАНЕЛЕЙ ПО ТИПАМ ПРОЕКТОВ (ЛАБОРАТОРНЫЕ ПОВЕРХНОСТИ) */
+
+  /* 1. БОТЫ (код / терминал / сообщения / автоматизация) */
+  #modal-myasnaya-troitsa,
+  #modal-aichatbot,
+  #modal-bots {
+    background: #0f1613;
+    background-image: 
+      radial-gradient(circle at 90% 10%, rgba(34, 197, 94, 0.09) 0%, transparent 55%),
+      radial-gradient(circle at 10% 90%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
+      linear-gradient(rgba(52, 211, 153, 0.015) 1px, transparent 1px),
+      linear-gradient(180deg, #15201b 0%, #0d1411 100%);
+    background-size: auto, auto, 100% 4px, auto;
+    border-left: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  /* 2. САЙТЫ / ЛЕНДИНГИ (интерфейс / браузер / рабочая среда) */
+  #modal-sites,
+  #modal-english-teacher,
+  #modal-twohearts,
+  #modal-siteviza,
+  #modal-atelier,
+  #modal-landasset5,
+  #modal-tracker01 {
+    background: #181512;
+    background-image: 
+      radial-gradient(circle at 90% 10%, rgba(234, 88, 12, 0.09) 0%, transparent 55%),
+      radial-gradient(circle at 10% 90%, rgba(245, 158, 11, 0.04) 0%, transparent 50%),
+      linear-gradient(rgba(245, 158, 11, 0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245, 158, 11, 0.015) 1px, transparent 1px),
+      linear-gradient(180deg, #201a16 0%, #14110f 100%);
+    background-size: auto, auto, 24px 24px, 24px 24px, auto;
+    border-left: 1px solid rgba(234, 88, 12, 0.28);
+  }
+
+  /* 3. ВИДЕО (плёнка / монтаж / кадры / рабочий процесс) */
+  #modal-video {
+    background: #16120e;
+    background-image: 
+      radial-gradient(circle at 90% 12%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
+      radial-gradient(circle at 10% 88%, rgba(220, 38, 38, 0.06) 0%, transparent 50%),
+      linear-gradient(180deg, #1e1712 0%, #110d0a 100%);
+    border-left: 1px solid rgba(245, 158, 11, 0.35);
+  }
+
+  /* 4. СЕТЬ (карта / координаты / связи / инфраструктура) */
+  #modal-network {
+    background: #0f1624;
+    background-image: 
+      radial-gradient(circle at 90% 10%, rgba(59, 130, 246, 0.12) 0%, transparent 55%),
+      radial-gradient(circle at 15% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+      linear-gradient(rgba(59, 130, 246, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.02) 1px, transparent 1px),
+      linear-gradient(180deg, #131c2e 0%, #0a0f19 100%);
+    background-size: auto, auto, 28px 28px, 28px 28px, auto;
+    border-left: 1px solid rgba(59, 130, 246, 0.35);
+  }
+
+  /* 5. ЧЕРНОВИК (бумага / эскиз / карандаш / идеи) */
+  #modal-draft {
+    background: #1a1613;
+    background-image: 
+      radial-gradient(circle at 88% 12%, rgba(217, 119, 6, 0.1) 0%, transparent 55%),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(180deg, #221c17 0%, #15120f 100%);
+    background-size: auto, 20px 20px, 20px 20px, auto;
+    border-left: 1px solid rgba(217, 119, 6, 0.3);
+  }
+
+  /* 6. ОБО МНЕ (лабораторный журнал / личный архив / заметки автора) */
+  #modal-about {
+    background: #1b1612;
+    background-image: 
+      radial-gradient(circle at 90% 10%, rgba(245, 158, 11, 0.14) 0%, transparent 60%),
+      radial-gradient(circle at 10% 90%, rgba(180, 83, 9, 0.06) 0%, transparent 50%),
+      linear-gradient(180deg, #241c16 0%, #15110d 100%);
+    border-left: 1px solid rgba(245, 158, 11, 0.35);
+  }
+
+  /* 7. РЕЛОКАНТ СЕРБИЯ (полевой дневник / исследование / реальный опыт) */
+  #modal-serbia-wip {
+    background: #1a1612;
+    background-image: 
+      radial-gradient(circle at 90% 12%, rgba(245, 158, 11, 0.12) 0%, transparent 55%),
+      radial-gradient(circle at 12% 88%, rgba(217, 119, 6, 0.06) 0%, transparent 50%),
+      linear-gradient(180deg, #231d17 0%, #16120e 100%);
+    border-left: 1px solid rgba(245, 158, 11, 0.35);
+  }
+
+  /* 8. НЕ ПОШЛО (архив закрытых гипотез / разбор ошибок / выводы) */
+  #modal-failures {
+    background: #1a1212;
+    background-image: 
+      radial-gradient(circle at 90% 12%, rgba(239, 68, 68, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 12% 88%, rgba(185, 28, 28, 0.05) 0%, transparent 50%),
+      linear-gradient(180deg, #221515 0%, #140d0d 100%);
+    border-left: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  /* 9. СИСТЕМА // CORE (чертёж / схема связей / архитектура) */
+  #modal-core {
+    background: #181410;
+    background-image: 
+      radial-gradient(circle at 90% 10%, rgba(249, 115, 22, 0.12) 0%, transparent 55%),
+      linear-gradient(rgba(249, 115, 22, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249, 115, 22, 0.02) 1px, transparent 1px),
+      linear-gradient(180deg, #201a14 0%, #130f0c 100%);
+    background-size: auto, 24px 24px, 24px 24px, auto;
+    border-left: 1px solid rgba(249, 115, 22, 0.35);
+  }
+
+  /* 10. ВХОДЯЩИЙ (прямая телефонная линия) */
+  #modal-incoming {
+    background: #1b1212;
+    background-image: 
+      radial-gradient(circle at 90% 12%, rgba(239, 68, 68, 0.12) 0%, transparent 55%),
+      linear-gradient(180deg, #241515 0%, #150d0d 100%);
+    border-left: 1px solid rgba(239, 68, 68, 0.35);
+  }
+
+  /* 11. МАНИФЕСТ (дерево и керамо-костер) — Компактное меню кружки */
+  #modal-manifesto {
+    top: 50px;
+    bottom: 40px;
+    max-height: calc(100vh - 90px);
+    background: #191512;
+    background-image: 
+      radial-gradient(circle at 90% 10%, rgba(245, 158, 11, 0.1) 0%, transparent 55%),
+      linear-gradient(180deg, #211b16 0%, #14110e 100%);
+    border-left: 1px solid rgba(245, 158, 11, 0.3);
+    border-top: 1px solid rgba(245, 158, 11, 0.15);
+    border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+    border-radius: 12px 0 0 12px;
+    box-shadow: -16px 0 45px rgba(0, 0, 0, 0.8);
+  }
+
+  #modal-manifesto:not(.is-expanded) {
+    width: 370px;
+  }
+
+  #modal-manifesto .drawer-content {
+    padding: 10px 14px;
+    gap: 7px;
+    overflow-y: auto;
+  }
+
+  #modal-manifesto .drawer-header {
+    padding-bottom: 6px;
+  }
+
+  #modal-manifesto .case-hero-strip {
+    padding: 8px 12px;
+    margin-bottom: 2px;
+    border-radius: 6px;
+  }
+
+  #modal-manifesto .status-live {
+    font-size: 9.5px;
+    margin-bottom: 2px;
+  }
+
+  #modal-manifesto .case-title {
+    font-size: 15px;
+    margin: 1px 0;
+  }
+
+  #modal-manifesto .case-lead {
+    font-size: 11px;
+    line-height: 1.3;
+    margin: 0;
+    opacity: 0.85;
+  }
+
+  #modal-manifesto .rules-stack {
+    gap: 5px;
+  }
+
+  #modal-manifesto .rule-card {
+    padding: 6px 10px;
+    gap: 8px;
+    border-radius: 5px;
+  }
+
+  #modal-manifesto .rule-num {
+    font-size: 13px;
+    min-width: 18px;
+  }
+
+  #modal-manifesto .rule-content strong {
+    font-size: 11.5px;
+    line-height: 1.2;
+    margin-bottom: 1px;
+  }
+
+  #modal-manifesto .rule-content p {
+    font-size: 10.5px;
+    line-height: 1.25;
+    margin: 0;
+  }
+
+  .workbench-drawer.is-open {
+    transform: translateX(0);
+  }
+
+  .workbench-drawer.is-expanded {
+    width: 92vw;
+    max-width: 1280px;
+  }
+
+  .drawer-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.14);
+  }
+
+  .drawer-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .drawer-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .case-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #f59e0b;
+  }
+
+  .drawer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .expand-drawer-btn, .close-drawer-btn {
+    padding: 5px 11px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: #ede8df;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .expand-drawer-btn:hover, .close-drawer-btn:hover {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #ffffff;
+  }
+
+  .case-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .status-live {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #34d399;
+    letter-spacing: 0.05em;
+  }
+
+  .case-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #ffffff;
+    margin-top: 6px;
+  }
+
+  .case-lead {
+    font-size: 15.5px;
+    font-weight: 500;
+    line-height: 1.55;
+    color: #d6d3d1;
+    margin-top: 8px;
+  }
+
+  .case-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .case-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .btn-primary {
+    background: #ea580c;
+    color: #ffffff;
+  }
+  .btn-primary:hover {
+    background: #f97316;
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #e7e5e4;
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  }
+  .btn-catalog-back {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #fde68a;
+    cursor: pointer;
+  }
+  .btn-catalog-back:hover {
+    background: rgba(245, 158, 11, 0.24);
+    border-color: rgba(245, 158, 11, 0.55);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  /* КАТАЛОГ САЙТОВ И ЛЕНДИНГОВ В ПРАВОЙ ПАНЕЛИ */
+  .sites-catalog-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .workbench-drawer.is-expanded .sites-catalog-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .catalog-project-card {
+    background: rgba(26, 21, 17, 0.85);
+    background-image: linear-gradient(135deg, rgba(38, 30, 24, 0.85) 0%, rgba(22, 17, 14, 0.95) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-left: 3.5px solid #ea580c;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .catalog-project-card:hover {
+    background: rgba(36, 28, 22, 0.95);
+    border-color: rgba(245, 158, 11, 0.45);
+    border-left-width: 5px;
+    transform: translateX(3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  }
+  .catalog-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .catalog-project-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+  }
+  .catalog-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2.5px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .badge-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.35); }
+  .badge-pink { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.35); }
+  .badge-cyan { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.35); }
+  .badge-amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); }
+  .badge-emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+  .badge-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.35); }
+  .bot-card-meat { border-left-color: #10b981 !important; }
+  .bot-card-detective { border-left-color: #a855f7 !important; }
+
+  .catalog-project-desc {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #d6d3d1;
+    margin: 0;
+  }
+  .catalog-project-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .catalog-open-btn {
+    padding: 7px 13px;
+    border-radius: 5px;
+    background: #ea580c;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.18s ease;
+  }
+  .catalog-open-btn:hover {
+    background: #f97316;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);
+  }
+  .catalog-link-btn {
+    padding: 6px 12px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #e7e5e4;
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.18s ease;
+  }
+  .catalog-link-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* РЕАЛЬНЫЕ ПЕРВЫЕ ЭКРАНЫ В КАРТОЧКАХ КАТАЛОГА */
+  .catalog-card-screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #0f0d0b;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+  }
+
+  .catalog-screen-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+  }
+
+  .catalog-project-card:hover .catalog-screen-img {
+    transform: scale(1.035);
+  }
+
+  .catalog-screen-overlay {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 2;
+  }
+
+  .screen-url-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #fef08a;
+    background: rgba(15, 12, 10, 0.88);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
+  }
+
+  /* БЛОКИ ОПИСАНИЯ И ОСОБЕННОСТЕЙ В КАТАЛОГЕ БОТОВ */
+  .catalog-card-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 7px 10px;
+    background: rgba(15, 12, 10, 0.55);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    border-radius: 6px;
+  }
+  .catalog-block-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #f59e0b;
+    letter-spacing: 0.05em;
+  }
+  .catalog-block-text {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #d6d3d1;
+    margin: 0;
+  }
+  .catalog-features-list {
+    margin: 0;
+    padding-left: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .catalog-features-list li {
+    font-size: 11px;
+    line-height: 1.35;
+    color: #e7e5e4;
+  }
+
+  /* БАННЕР РЕАЛЬНОГО ПЕРВОГО ЭКРАНА В ДОСЬЕ ПРОЕКТА */
+  .dossier-screen-preview {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0d0a08;
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .dossier-screen-img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .workbench-drawer.is-expanded .dossier-screen-img {
+    max-height: 440px;
+  }
+
+  .dossier-screen-preview:hover .dossier-screen-img {
+    transform: scale(1.015);
+  }
+
+  .dossier-screen-caption {
+    padding: 7px 12px;
+    background: rgba(20, 16, 13, 0.95);
+    border-top: 1px solid rgba(245, 158, 11, 0.18);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #fde68a;
+    text-transform: uppercase;
+  }
+
+  .dossier-screen-caption .caption-dot {
+    color: #22c55e;
+    font-size: 8px;
+    animation: pulse 2s infinite;
+  }
+
+  /* ДВУХКОЛОНОЧНАЯ СЕТКА */
+  .case-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .workbench-drawer.is-expanded .case-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .case-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-heading {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #f97316;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  .section-text {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #e7e5e4;
+  }
+
+  .facts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .facts-list li {
+    position: relative;
+    padding-left: 18px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #e7e5e4;
+  }
+  .facts-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #ea580c;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  .tech-spec-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: rgba(12, 10, 8, 0.55);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .spec-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(245, 158, 11, 0.1);
+  }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-row span { color: #c2bcb2; }
+  .spec-row strong { color: #ffffff; text-align: right; }
+
+  .result-status-box {
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #a7f3d0;
+  }
+
+  .quote-box {
+    margin: 0;
+    padding: 14px 16px;
+    border-left: 3px solid #f97316;
+    background: rgba(249, 115, 22, 0.08);
+    border-radius: 0 8px 8px 0;
+    font-family: 'Caveat', cursive;
+    font-size: 20px;
+    line-height: 1.35;
+    color: #fed7aa;
+  }
+
+  .failures-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .failure-item {
+    padding: 14px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+  .failure-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fca5a5;
+  }
+  .failure-desc {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #ded9d1;
+    margin-top: 6px;
+  }
+
+  .rules-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .rule-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 8px;
+    background: rgba(25, 21, 17, 0.6);
+    border: 1px solid rgba(245, 158, 11, 0.14);
+  }
+  .rule-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #f97316;
+    line-height: 1;
+  }
+  .rule-content strong {
+    display: block;
+    font-size: 15px;
+    color: #ffffff;
+    margin-bottom: 4px;
+  }
+  .rule-content p {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #d1cbc1;
+    margin: 0;
+  }
+
+  /* АРТЕФАКТЫ РАЗДЕЛА «ОБО МНЕ» (ЛАБОРАТОРНЫЙ СТИЛЬ) */
+  .lab-dossier-card {
+    padding: 16px 18px;
+    border-radius: 8px;
+    background: rgba(28, 23, 18, 0.65);
+    border: 1px solid rgba(245, 158, 11, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .dossier-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #a8a29e;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+  .dossier-tag {
+    color: #f97316;
+    font-weight: 700;
+  }
+  .dossier-status {
+    color: #34d399;
+    font-weight: 600;
+  }
+  .dossier-block {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .author-greeting {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  .dossier-subheading {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #f59e0b;
+    letter-spacing: 0.08em;
+  }
+  .dossier-text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #e7e5e4;
+    margin: 0;
+  }
+  .dossier-divider {
+    height: 1px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.07);
+    margin: 2px 0;
+  }
+
+  .lab-artifact-card {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .lab-artifact-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(249, 115, 22, 0.3);
+  }
+
+  .lab-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #a8a29e;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+    padding-bottom: 6px;
+    margin-bottom: 2px;
+  }
+  .lab-card-id {
+    color: #f97316;
+    font-weight: 700;
+  }
+  .lab-card-status {
+    color: #34d399;
+    font-weight: 600;
+  }
+
+  .greeting-highlight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .greeting-accent {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .lab-card-terms {
+    position: relative;
+    border-left: 3px solid #f59e0b;
+    background: rgba(245, 158, 11, 0.05);
+  }
+
+  /* ВИЗУАЛЬНЫЙ АРТЕФАКТ СВИТКА */
+  .lab-scroll-artifact {
+    position: relative;
+    padding: 16px 18px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(28, 25, 23, 0.85) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 0 25px rgba(245, 158, 11, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .scroll-artifact-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .wax-seal-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .seal-core {
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 35% 35%, #ef4444 0%, #991b1b 100%);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.55), inset 0 0 2px rgba(255, 255, 255, 0.5);
+    display: inline-block;
+  }
+  .seal-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #fca5a5;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .scroll-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: #f59e0b;
+    opacity: 0.85;
+  }
+
+  .scroll-handwritten-text {
+    margin: 0;
+    padding: 4px 0;
+    font-family: 'Caveat', 'Literata', 'Georgia', cursive, serif;
+    font-size: 21px;
+    line-height: 1.35;
+    color: #fef08a;
+    text-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+    font-weight: 600;
+  }
+
+  .scroll-artifact-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(245, 158, 11, 0.2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: #a8a29e;
+    letter-spacing: 0.06em;
+  }
+  .artifact-signature {
+    color: #fed7aa;
+  }
+
+  /* БЭКДРОП */
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    z-index: 55;
+  }
+  .drawer-backdrop.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>
+
+<script>
+  function initSpatialWorkbench() {
+    // 1. Часы
+    const clockEl = document.getElementById('live-clock');
+    function updateClock() {
+      if (clockEl) {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        clockEl.textContent = `${h}:${m}:${s} CET`;
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. Открытие, разворачивание и закрытие досье
+    const hotspots = document.querySelectorAll('.hotspot');
+    const drawers = document.querySelectorAll('.workbench-drawer');
+    const backdrop = document.getElementById('drawer-backdrop');
+    const closeButtons = document.querySelectorAll('.close-drawer-btn');
+    const expandButtons = document.querySelectorAll('.expand-drawer-btn');
+
+    function openDrawer(targetId: string) {
+      closeAllDrawers();
+      const target = document.getElementById(targetId);
+      if (target && backdrop) {
+        target.classList.remove('is-expanded');
+        target.classList.add('is-open');
+        backdrop.classList.add('is-active');
+      }
+      document.querySelectorAll('.cabinet-nav-item').forEach((item) => {
+        if (item.getAttribute('data-target') === targetId) {
+          item.classList.add('is-active');
+        } else {
+          item.classList.remove('is-active');
+        }
+      });
+    }
+
+    function toggleExpand(drawer: HTMLElement) {
+      const isExpanded = drawer.classList.contains('is-expanded');
+      const label = drawer.querySelector('.expand-label');
+      if (isExpanded) {
+        drawer.classList.remove('is-expanded');
+        if (label) label.textContent = 'НА ВЕСЬ СТОЛ';
+      } else {
+        drawer.classList.add('is-expanded');
+        if (label) label.textContent = 'СВЕРНУТЬ В ПАНЕЛЬ';
+      }
+    }
+
+    function closeAllDrawers() {
+      drawers.forEach((d) => {
+        d.classList.remove('is-open');
+        d.classList.remove('is-expanded');
+        const label = d.querySelector('.expand-label');
+        if (label) label.textContent = 'НА ВЕСЬ СТОЛ';
+      });
+      if (backdrop) backdrop.classList.remove('is-active');
+      document.querySelectorAll('.cabinet-nav-item').forEach((item) => {
+        item.classList.remove('is-active');
+      });
+    }
+
+    hotspots.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = btn.getAttribute('data-target');
+        if (targetId) {
+          openDrawer(targetId);
+        }
+      });
+      if (btn.tagName !== 'BUTTON') {
+        btn.addEventListener('keydown', (e) => {
+          const keyEv = e as KeyboardEvent;
+          if (keyEv.key === 'Enter' || keyEv.key === ' ') {
+            if (e.target === btn) {
+              e.preventDefault();
+              e.stopPropagation();
+              const targetId = btn.getAttribute('data-target');
+              if (targetId) openDrawer(targetId);
+            }
+          }
+        });
+      }
+    });
+
+    document.querySelectorAll('[data-open-drawer]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = btn.getAttribute('data-open-drawer');
+        if (targetId) {
+          openDrawer(targetId);
+        }
+      });
+    });
+
+    closeButtons.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeAllDrawers();
+      });
+    });
+
+    document.querySelectorAll('a.topbar-brand, a.workbench-table-logo-link').forEach((brandLink) => {
+      brandLink.addEventListener('click', (e) => {
+        const anyOpen = document.querySelector('.workbench-drawer.is-open');
+        if (anyOpen) {
+          e.preventDefault();
+          closeAllDrawers();
+          if (window.location.search) {
+            history.pushState(null, '', '/');
+          }
+        }
+      });
+    });
+
+    expandButtons.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const drawer = btn.closest('.workbench-drawer') as HTMLElement;
+        if (drawer) {
+          toggleExpand(drawer);
+        }
+      });
+    });
+
+    backdrop?.addEventListener('click', closeAllDrawers);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAllDrawers();
+      }
+    });
+
+    // 3. Тумблер темы (День / Ночь)
+    const toggleBtn = document.getElementById('desk-theme-toggle');
+    const themeIcon = document.getElementById('desk-theme-icon');
+    const themeLabel = document.getElementById('desk-theme-label');
+    const html = document.documentElement;
+
+    function applyDeskTheme(theme: string) {
+      html.setAttribute('data-theme', theme);
+      if (themeIcon && themeLabel) {
+        if (theme === 'night') {
+          themeIcon.textContent = '☽';
+          themeLabel.textContent = 'НОЧЬ';
+        } else {
+          themeIcon.textContent = '☼';
+          themeLabel.textContent = 'ДЕНЬ';
+        }
+      }
+    }
+
+    const currentHour = new Date().getHours();
+    const defaultTheme = (currentHour >= 20 || currentHour < 7) ? 'night' : 'day';
+    const saved = localStorage.getItem('gonka-theme') || defaultTheme;
+    applyDeskTheme(saved);
+
+    toggleBtn?.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      const next = current === 'night' ? 'day' : 'night';
+      localStorage.setItem('gonka-theme', next);
+      applyDeskTheme(next);
+    });
+
+    // 4. Проверка URL-параметров
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeParam = urlParams.get('theme');
+    if (themeParam) {
+      applyDeskTheme(themeParam);
+    }
+    const openParam = urlParams.get('open');
+    if (openParam) {
+      openDrawer(openParam);
+      if (urlParams.get('expanded') === 'true') {
+        const target = document.getElementById(openParam);
+        if (target) toggleExpand(target);
+      }
+    }
+    const hoverParam = urlParams.get('hover');
+    if (hoverParam) {
+      document.querySelector(`.hotspot[data-target="${hoverParam}"]`)?.classList.add('is-hovered');
+    }
+  }
+
+  initSpatialWorkbench();
+</script>

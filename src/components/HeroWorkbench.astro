@@ -1,0 +1,323 @@
+---
+// src/components/HeroWorkbench.astro
+---
+
+<section id="workbench" class="relative overflow-hidden py-12 lg:py-20 transition-colors duration-700" 
+         style="background: var(--desk-base);">
+
+  <!-- Направляющий луч света (Диагональное освещение верстака) -->
+  <div class="pointer-events-none absolute inset-0 z-0 opacity-70 transition-opacity duration-700"
+       style="background: var(--light-beam);"></div>
+
+  <!-- Архитектурная микро-сетка на фоне стола -->
+  <div class="pointer-events-none absolute inset-0 z-0 opacity-40"
+       style="background-image: radial-gradient(var(--desk-grid-dot) 1px, transparent 1px); background-size: 24px 24px;"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Заголовок-манифест мастерской -->
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b pb-6"
+         style="border-color: var(--desk-border);">
+      <div>
+        <div class="flex items-center gap-2 font-['JetBrains_Mono'] text-xs uppercase tracking-widest text-orange-600 mb-2">
+          <span>[ ВЕРСТАК № 1 ]</span>
+          <span>•</span>
+          <span>ТЕКУЩАЯ СБОРКА</span>
+          <span>•</span>
+          <span class="inline-flex items-center gap-1 font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+            ПОД СВЕТОМ
+          </span>
+        </div>
+        <h1 class="font-['Space_Grotesk'] text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight"
+            style="color: var(--desk-text);">
+          Цифровая лаборатория, где идеи становятся продуктами.
+        </h1>
+      </div>
+
+      <div class="max-w-md font-['JetBrains_Mono'] text-xs leading-relaxed" style="color: var(--desk-muted);">
+        <p class="mb-2">
+          <strong style="color: var(--desk-text);">Меньше теории — больше работающих вещей.</strong> 
+          Личный сборочный цех: сайты, Telegram-боты, AI-инструменты, автоматизации и цифровые сервисы.
+        </p>
+        <div class="flex items-center gap-4 text-[11px] opacity-75">
+          <span>СКОРОСТЬ: ⚡ VIBE CODING</span>
+          <span>•</span>
+          <span>СТАТУС: ДЕЙСТВУЕТ</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ОСНОВНОЙ СВЕТОВОЙ СТОЛ (Интерактивная композиция как в logo.png) -->
+    <div class="relative rounded-2xl border p-4 sm:p-8 lg:p-10 shadow-2xl transition-all duration-700"
+         style="background: var(--desk-card); border-color: var(--desk-border); box-shadow: var(--desk-shadow);">
+
+      <!-- Рама стола и технические координаты -->
+      <div class="absolute top-3 left-4 font-['JetBrains_Mono'] text-[10px] tracking-widest uppercase opacity-50 flex gap-4"
+           style="color: var(--desk-muted);">
+        <span>STATION: 45°15'N 19°51'E</span>
+        <span>GRID: A-01</span>
+      </div>
+      <div class="absolute top-3 right-4 font-['JetBrains_Mono'] text-[10px] tracking-widest uppercase opacity-50"
+           style="color: var(--desk-muted);">
+        <span>GONKA LIGHTBOX v2.6</span>
+      </div>
+
+      <!-- Сетка объектов на столе -->
+      <div class="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- ЛЕВЫЙ АРТЕФАКТ: ЧЕРНОВИК (Калька / Эскиз) -->
+        <div class="hidden xl:block xl:col-span-3">
+          <div class="group relative rounded-xl border p-5 backdrop-blur-sm transition-transform hover:-translate-y-1 hover:rotate-1"
+               style="background: var(--draft-bg); border-color: var(--draft-border);">
+            
+            <div class="flex items-center justify-between font-['JetBrains_Mono'] text-[10px] mb-3 opacity-70"
+                 style="color: var(--desk-muted);">
+              <span class="font-bold text-orange-600">ЧЕРНОВИК</span>
+              <span>08.09</span>
+            </div>
+
+            <!-- Архитектурный набросок -->
+            <div class="relative h-44 rounded border border-dashed flex items-center justify-center p-2 overflow-hidden"
+                 style="border-color: var(--desk-border);">
+              <svg class="w-full h-full opacity-40 stroke-current" style="color: var(--desk-text);" viewBox="0 0 100 100">
+                <rect x="10" y="10" width="80" height="80" fill="none" stroke-width="0.8" />
+                <line x1="10" y1="10" x2="90" y2="90" stroke-width="0.5" />
+                <line x1="90" y1="10" x2="10" y2="90" stroke-width="0.5" />
+                <circle cx="50" cy="50" r="30" fill="none" stroke-width="0.8" />
+                <rect x="25" y="25" width="50" height="50" fill="none" stroke-width="0.5" stroke-dasharray="2 2" />
+              </svg>
+              <span class="absolute bottom-2 left-2 font-['JetBrains_Mono'] text-[9px] opacity-60" style="color: var(--desk-muted);">
+                РАСКАДРОВКА ИДЕИ
+              </span>
+            </div>
+
+            <p class="mt-3 font-['Caveat'] text-lg leading-tight" style="color: var(--desk-text);">
+              «Любой сложный проект начинается с простой геометрической оси».
+            </p>
+          </div>
+        </div>
+
+        <!-- ЦЕНТРАЛЬНЫЙ АКТИВНЫЙ ПЛАНШЕТ: ВЕБ • ПОД СВЕТОМ (Главный лист) -->
+        <div class="lg:col-span-8 xl:col-span-6">
+          <div class="relative rounded-xl border p-6 sm:p-8 transition-shadow hover:shadow-xl"
+               style="background: var(--sheet-bg); border-color: var(--sheet-border);">
+
+            <!-- Сигнальная оранжевая черта слева (как в logo.png) -->
+            <div class="absolute left-0 top-6 bottom-6 w-1.5 rounded-r bg-gradient-to-b from-orange-500 to-amber-500"></div>
+
+            <!-- Шапка листа -->
+            <div class="flex items-center justify-between font-['JetBrains_Mono'] text-xs pb-4 border-b"
+                 style="border-color: var(--desk-border); color: var(--desk-muted);">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-orange-600">ВЕБ</span>
+                <span>• ПОД СВЕТОМ</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span>00:41:16</span>
+              </div>
+            </div>
+
+            <!-- Содержимое листа -->
+            <div class="mt-6 space-y-6">
+              <div>
+                <span class="font-['JetBrains_Mono'] text-xs font-semibold text-orange-600 tracking-wider">/ 01</span>
+                <h2 class="font-['Space_Grotesk'] text-2xl sm:text-3xl font-bold tracking-tight mt-1"
+                    style="color: var(--desk-text);">
+                  Собираю разрозненное в систему.
+                </h2>
+                <p class="mt-2 text-base sm:text-lg leading-relaxed" style="color: var(--desk-muted);">
+                  Веб, контент, автоматизация. Простые решения для сложных задач.
+                  <strong>Свет показывает главное.</strong>
+                </p>
+              </div>
+
+              <!-- Архитектурный блок с мини-иллюстрацией из logo.png -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg border"
+                   style="background: var(--desk-card); border-color: var(--desk-border);">
+                
+                <!-- Атмосферный кадр с побережьем в тумане -->
+                <div class="relative rounded overflow-hidden aspect-[4/3] bg-zinc-900 border"
+                     style="border-color: var(--desk-border);">
+                  <div class="absolute inset-0 bg-cover bg-center opacity-85 transition-transform hover:scale-105 duration-500"
+                       style="background-image: url('/workbench.png'); background-position: 30% 45%; filter: contrast(1.1);"></div>
+                  <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm text-[9px] font-['JetBrains_Mono'] text-white">
+                    ФОКУС: ГОРИЗОНТ
+                  </div>
+                </div>
+
+                <!-- Архитектурный фрейм-схема -->
+                <div class="flex flex-col justify-between font-['JetBrains_Mono'] text-xs"
+                     style="color: var(--desk-muted);">
+                  <div class="space-y-1.5">
+                    <div class="text-[10px] uppercase font-bold text-orange-600">СТРУКТУРА:</div>
+                    <div class="flex items-center gap-1.5 text-xs">
+                      <span>&gt; процесс</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-xs">
+                      <span>&gt; результат</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-xs font-semibold" style="color: var(--desk-text);">
+                      <span>&gt; работающий код</span>
+                    </div>
+                  </div>
+
+                  <div class="pt-3 border-t text-[11px]" style="border-color: var(--desk-border);">
+                    <span>АКТИВНЫЙ РЕЖИМ:</span>
+                    <div class="font-bold text-emerald-600 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      DEPLOY LIVE
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Кнопки действий -->
+              <div class="flex flex-wrap items-center gap-3 pt-2">
+                <a href="#projects" 
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-['JetBrains_Mono'] text-xs font-semibold text-white shadow transition-all hover:brightness-110 active:scale-95"
+                   style="background: #ea580c;">
+                  <span>РЕЕСТР АРТЕФАКТОВ</span>
+                  <span>↓</span>
+                </a>
+
+                <a href="#pipeline"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-['JetBrains_Mono'] text-xs font-medium border transition-colors hover:border-orange-500"
+                   style="background: var(--desk-card); border-color: var(--desk-border); color: var(--desk-text);">
+                  <span>КОНВЕЙЕР: 7 СТАДИЙ</span>
+                  <span>→</span>
+                </a>
+
+                <a href="https://t.me/GNKGONKAAI" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-['JetBrains_Mono'] text-xs font-medium transition-colors"
+                   style="color: #2AABEE;">
+                  <span>КАНАЛ В TELEGRAM</span>
+                  <span>↗</span>
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ПРАВЫЙ СТОЛБЕЦ: ПРИКОЛОТЫЙ ЛИСТ + БОТ + РУКОПИСНАЯ ПОМЕТКА -->
+        <div class="lg:col-span-4 xl:col-span-3 space-y-6">
+
+          <!-- Приколотый скотчем листок с принципами (как в logo.png) -->
+          <div class="relative rounded-lg p-5 shadow-md border transform rotate-1 transition-transform hover:rotate-0"
+               style="background: var(--note-bg); border-color: var(--note-border);">
+            
+            <!-- Кусочек скотча сверху листа -->
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-amber-200/50 backdrop-blur-sm border border-amber-300/40 rotate-1 shadow-xs"></div>
+
+            <div class="font-['Space_Grotesk'] text-base font-semibold space-y-1.5" style="color: var(--desk-text);">
+              <div class="pb-1 border-b border-black/10">Больше смысла</div>
+              <div class="pb-1 border-b border-black/10">Меньше шума</div>
+              <div class="pb-1 border-b border-black/10">Честные проекты</div>
+              <div class="pb-1 border-b border-black/10">Живые заметки</div>
+              <div>Развитие в процессе</div>
+            </div>
+
+            <div class="mt-4 pt-2 border-t border-black/10 flex justify-between font-['JetBrains_Mono'] text-[10px] opacity-60"
+                 style="color: var(--desk-muted);">
+              <span>ПРИНЦИП ГОНКИ</span>
+              <span>2026</span>
+            </div>
+          </div>
+
+          <!-- Крафтовая полоса: БОТ • ЖИВЁТ -->
+          <div class="rounded-lg p-4 border font-['JetBrains_Mono'] text-xs transition-all hover:border-orange-400"
+               style="background: var(--craft-bg); border-color: var(--craft-border);">
+            
+            <div class="flex items-center justify-between text-[11px] mb-2 opacity-80" style="color: var(--desk-muted);">
+              <span class="font-bold text-orange-700">БОТ</span>
+              <span class="text-emerald-700 font-semibold">ЖИВЁТ</span>
+            </div>
+
+            <p class="text-[11px] leading-snug mb-3" style="color: var(--desk-text);">
+              Автономный Telegram-бот с механикой майнинга и распределения заданий.
+            </p>
+
+            <a href="https://t.me/GonkaAI_Mining_Bot?start=4507c724-549a-4972-9862-5ae3051dc96" 
+               target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-orange-700 hover:underline">
+              <span>Запустить бота @GonkaAI_Mining_Bot</span>
+              <span>↗</span>
+            </a>
+          </div>
+
+          <!-- Рукописная помета «НЕ ПОШЛО» (Честный след руки) -->
+          <div class="relative pl-6 py-2">
+            <!-- Стрелка и текст в рукописном стиле -->
+            <div class="font-['Caveat'] text-2xl font-bold tracking-wide" style="color: var(--desk-text);">
+              не пошло
+            </div>
+            <div class="font-['JetBrains_Mono'] text-[11px] opacity-70 flex flex-col gap-0.5 mt-1" style="color: var(--desk-muted);">
+              <span>→ сложный SaaS (ошибки архитектуры)</span>
+              <span>→ крипто-памп трекер</span>
+              <span>→ пересобран в бота</span>
+            </div>
+            <div class="mt-2 text-[10px] font-['JetBrains_Mono'] opacity-60" style="color: var(--desk-muted);">
+              *ошибки сохранены в архиве лаборатории
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- НИЖНЯЯ 35-ММ КИНОПЛЁНКА: ПЛЁНКА • 08k -->
+      <div class="mt-10 pt-6 border-t" style="border-color: var(--desk-border);">
+        <div class="flex items-center justify-between font-['JetBrains_Mono'] text-[11px] mb-3"
+             style="color: var(--desk-muted);">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-orange-600">ПЛЁНКА • 08k</span>
+            <span class="opacity-60">• КАДРЫ ПРОЦЕССА И ДЕМО</span>
+          </div>
+          <a href="#filmstrip" class="hover:text-orange-500 transition-colors">Смотреть монтажный стол ↓</a>
+        </div>
+
+        <!-- Горизонтальная перфорированная лента -->
+        <div class="relative rounded-lg p-2 overflow-x-auto bg-zinc-950 border border-zinc-800 shadow-inner">
+          <div class="flex items-center gap-3 min-w-[700px]">
+            <!-- Перфорация сверху и снизу имитируется в CSS -->
+            <div class="flex-1 flex gap-3">
+              <div class="relative w-36 h-20 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden group">
+                <div class="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-100 transition-opacity"
+                     style="background-image: url('/workbench.png'); background-position: 10% 85%;"></div>
+                <span class="relative z-10 font-['JetBrains_Mono'] text-[9px] text-white/90 bg-black/60 px-1 rounded">01: FRAME</span>
+              </div>
+
+              <div class="relative w-36 h-20 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden group">
+                <div class="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-100 transition-opacity"
+                     style="background-image: url('/workbench.png'); background-position: 25% 85%;"></div>
+                <span class="relative z-10 font-['JetBrains_Mono'] text-[9px] text-white/90 bg-black/60 px-1 rounded">02: CODE</span>
+              </div>
+
+              <div class="relative w-36 h-20 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden group">
+                <div class="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-100 transition-opacity"
+                     style="background-image: url('/workbench.png'); background-position: 40% 85%;"></div>
+                <span class="relative z-10 font-['JetBrains_Mono'] text-[9px] text-white/90 bg-black/60 px-1 rounded">03: DEPLOY</span>
+              </div>
+
+              <div class="relative w-36 h-20 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden group">
+                <div class="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-100 transition-opacity"
+                     style="background-image: url('/workbench.png'); background-position: 60% 85%;"></div>
+                <span class="relative z-10 font-['JetBrains_Mono'] text-[9px] text-white/90 bg-black/60 px-1 rounded">04: RESULT</span>
+              </div>
+
+              <div class="flex-1 flex flex-col justify-center px-4 font-['JetBrains_Mono'] text-[11px] text-zinc-400">
+                <div class="text-orange-400 font-bold">МОНТАЖНЫЙ РЯД 2026</div>
+                <div class="text-[10px] opacity-70">Сквозной переход от эскиза к работающему деплою.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>

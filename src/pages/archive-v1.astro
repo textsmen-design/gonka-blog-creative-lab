@@ -1,0 +1,41 @@
+---
+const title = "gonka.blog — Крипта на максималках";
+---
+
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .logo-font { font-family: 'Space Grotesk', sans-serif; }
+    .hero-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.05em; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen">
+
+  <nav class="fixed top-0 w-full bg-black/90 backdrop-blur-2xl border-b border-white/10 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
+      <a href="#" class="flex items-center gap-4">
+        <img src="/logo.png" alt="gonka.blog" class="h-12 w-auto">
+        <span class="logo-font text-4xl font-bold tracking-[-0.03em]">gonka.blog</span>
+      </a>
+      <a href="https://t.me/lonelysvobodny" target="_blank" class="bg-white hover:bg-cyan-400 hover:text-black text-black px-6 py-3 rounded-2xl font-semibold flex items-center gap-2">
+        <i class="fa-brands fa-telegram text-xl"></i> Telegram
+      </a>
+    </div>
+  </nav>
+
+  <section class="min-h-screen flex items-center justify-center px-6 pt-20 text-center">
+    <div>
+      <h1 class="text-7xl font-bold tracking-tighter mb-6">ГОНКА ТОЛЬКО<br>НАЧИНАЕТСЯ</h1>
+      <p class="text-2xl text-zinc-400">Честный крипто-блог в стиле максимальной скорости</p>
+    </div>
+  </section>
+
+</body>
+</html>

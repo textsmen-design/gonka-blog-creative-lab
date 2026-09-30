@@ -1,0 +1,77 @@
+---
+// src/pages/index.astro
+import SpatialWorkbench from '../components/SpatialWorkbench.astro';
+
+const title = "GONKA.BLOG — Личная цифровая лаборатория";
+const description = "Среда, где идеи превращаются в работающие цифровые продукты: сайты, боты, AI-сервисы, автоматизации и SaaS.";
+---
+
+<!DOCTYPE html>
+<html lang="ru" data-theme="day">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+
+  <!-- Tailwind CDN для мгновенной сборки стилей -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Space Grotesk, JetBrains Mono, Inter, Caveat, Unbounded, Literata -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,500;0,7..72,600;1,7..72,500;1,7..72,600&family=Space+Grotesk:wght@500;600;700&family=Unbounded:wght@600;700;800&subset=cyrillic&display=swap" rel="stylesheet">
+
+  <style is:global>
+    :root {
+      /* Дневной световой стол (Warm Drafting Table) */
+      --desk-base: #1c1b19;
+      --desk-card: #fdfbf7;
+      --desk-border: #e6dfd3;
+      --desk-text: #1a1917;
+      --desk-muted: #5e5950;
+      --desk-accent: #ea580c;
+      --desk-amber: #f59e0b;
+      --nav-bg: rgba(28, 27, 25, 0.95);
+      --light-beam: radial-gradient(circle at 35% 45%, rgba(255, 235, 190, 0.45) 0%, transparent 65%);
+    }
+
+    [data-theme="night"] {
+      /* Ночной световой стол (Darkroom Lightbox) */
+      --desk-base: #0f0e0d;
+      --desk-card: #1c1b1a;
+      --desk-border: #2e2d2a;
+      --desk-text: #f3efe6;
+      --desk-muted: #9e978b;
+      --desk-accent: #f97316;
+      --desk-amber: #fbbf24;
+      --nav-bg: rgba(15, 14, 13, 0.95);
+      --light-beam: radial-gradient(circle at 35% 45%, rgba(249, 115, 22, 0.2) 0%, transparent 65%);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--desk-base);
+      color: var(--desk-text);
+      transition: background-color 0.8s ease, color 0.8s ease;
+    }
+
+    ::selection {
+      background-color: #ea580c;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full overflow-x-hidden antialiased select-none">
+
+  <!-- Интерактивный пространственный верстак GONKA.BLOG -->
+  <SpatialWorkbench />
+
+</body>
+</html>
