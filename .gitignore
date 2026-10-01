@@ -33,3 +33,10 @@ pnpm-debug.log*
 gonka-blog/
 promt.txt
 Снимок экрана*
+
+# local admin (Stage 2) — секреты и рабочие файлы админки
+tools/admin/.token
+tools/admin/audit.log
+src/data/.backups/
+src/data/.admin.lock
+src/data/.tmp/

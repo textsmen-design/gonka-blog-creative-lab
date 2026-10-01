@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "links.json — ссылки GONKA.BLOG (allowlist)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "telegram",
+    "email",
+    "youtube",
+    "instagram",
+    "english",
+    "twohearts",
+    "siteviza",
+    "atelier",
+    "landasset5",
+    "tracker01",
+    "reloca",
+    "myasnayaTroitsa",
+    "botDetective"
+  ],
+  "properties": {
+    "telegram": { "$ref": "#/$defs/link" },
+    "email": { "$ref": "#/$defs/link" },
+    "youtube": { "$ref": "#/$defs/link", "description": "заглушка #youtube — не менять" },
+    "instagram": { "$ref": "#/$defs/link", "description": "заглушка #instagram — не менять" },
+    "english": { "$ref": "#/$defs/link" },
+    "twohearts": { "$ref": "#/$defs/link" },
+    "siteviza": { "$ref": "#/$defs/link" },
+    "atelier": { "$ref": "#/$defs/link" },
+    "landasset5": { "$ref": "#/$defs/link" },
+    "tracker01": { "$ref": "#/$defs/link" },
+    "reloca": { "$ref": "#/$defs/link" },
+    "myasnayaTroitsa": { "$ref": "#/$defs/link" },
+    "botDetective": { "$ref": "#/$defs/link" }
+  },
+  "$defs": {
+    "link": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(https://[A-Za-z0-9.-]+(:[0-9]+)?(/[^\\s]*)?|mailto:[^\\s@]+@[^\\s@]+\\.[A-Za-z]{2,}|#[A-Za-z0-9_-]+|/[^\\s]*)$"
+    }
+  }
+}

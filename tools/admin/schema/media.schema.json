@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "media.json — превью проектов GONKA.BLOG",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["previews"],
+  "properties": {
+    "previews": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "englishTeacher",
+        "twohearts",
+        "siteviza",
+        "atelier",
+        "landasset5",
+        "tracker01",
+        "myasnayaTroitsa",
+        "botDetective"
+      ],
+      "properties": {
+        "englishTeacher": { "$ref": "#/$defs/path" },
+        "twohearts": { "$ref": "#/$defs/path" },
+        "siteviza": { "$ref": "#/$defs/path" },
+        "atelier": { "$ref": "#/$defs/path" },
+        "landasset5": { "$ref": "#/$defs/path" },
+        "tracker01": { "$ref": "#/$defs/path" },
+        "myasnayaTroitsa": { "$ref": "#/$defs/path" },
+        "botDetective": { "$ref": "#/$defs/path" }
+      }
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^/previews/[a-z0-9.-]+\\.(jpg|png|webp|svg)$"
+    }
+  }
+}

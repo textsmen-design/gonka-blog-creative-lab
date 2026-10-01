@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>GONKA.BLOG — админка контента</title>
+  <link rel="stylesheet" href="/ui/style.css" />
+</head>
+<body>
+  <div id="gate" class="gate" hidden>
+    <form id="gate-form" class="gate-card" autocomplete="off">
+      <h1>GONKA.BLOG · админка</h1>
+      <p class="muted">Введите токен доступа.</p>
+      <p class="muted small">Токен: <code>tools/admin/.token</code> (первый запуск создаёт файл)</p>
+      <input id="gate-token" type="password" placeholder="токен" required />
+      <button type="submit">Войти</button>
+      <p id="gate-error" class="error" hidden></p>
+    </form>
+  </div>
+
+  <div id="app" hidden>
+    <header class="top">
+      <div class="brand">GONKA.BLOG <span class="muted">/ контент</span></div>
+      <nav id="tabs" class="tabs"></nav>
+      <div class="top-right">
+        <span id="conn" class="pill">…</span>
+        <button id="btn-logout" class="ghost" type="button">Выйти</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="toolbar">
+        <button id="btn-save" type="button" disabled>Сохранить</button>
+        <button id="btn-reload" class="ghost" type="button">Перезагрузить</button>
+        <button id="btn-raw" class="ghost" type="button">Режим JSON</button>
+        <span id="dirty" class="pill"></span>
+        <span class="muted small">Сборка сайта выполняется вручную: <code>npm run build</code></span>
+      </div>
+
+      <div id="notices" class="notices"></div>
+
+      <section id="diffbox" class="diffbox" hidden>
+        <h2>Изменения</h2>
+        <div id="diff-list"></div>
+        <div class="diff-actions">
+          <button id="btn-confirm" type="button">Подтвердить сохранение</button>
+          <button id="btn-cancel" class="ghost" type="button">Отмена</button>
+        </div>
+      </section>
+
+      <section id="editor" class="editor"></section>
+
+      <section id="history" class="history" hidden>
+        <h2>История резервных копий</h2>
+        <div id="history-list"></div>
+      </section>
+    </main>
+
+    <footer class="status" id="status">—</footer>
+  </div>
+
+  <script src="/ui/app.js"></script>
+</body>
+</html>

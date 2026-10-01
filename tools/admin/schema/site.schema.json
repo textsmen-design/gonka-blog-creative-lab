@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "site.json — оболочка сайта GONKA.BLOG",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["meta", "topbar", "footer", "desk", "nav", "scrolls", "chips"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "description"],
+      "properties": {
+        "title": { "$ref": "#/$defs/str" },
+        "description": { "$ref": "#/$defs/str" }
+      }
+    },
+    "topbar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "vibe", "brandSub"],
+      "properties": {
+        "status": { "$ref": "#/$defs/str" },
+        "vibe": { "$ref": "#/$defs/str" },
+        "brandSub": { "$ref": "#/$defs/str" }
+      },
+      "description": "coords (45°15'N 19°51'E) — хардкод в шаблоне, поля нет"
+    },
+    "footer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hint"],
+      "properties": { "hint": { "$ref": "#/$defs/str" } }
+    },
+    "desk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modal-core",
+        "modal-draft",
+        "modal-failures",
+        "modal-incoming",
+        "modal-manifesto",
+        "modal-network",
+        "modal-serbia-wip",
+        "modal-video"
+      ],
+      "properties": {
+        "modal-core": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-draft": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-failures": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-incoming": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-manifesto": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-network": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-serbia-wip": { "$ref": "#/$defs/deskTagOnly" },
+        "modal-video": { "$ref": "#/$defs/deskWithStatement" }
+      }
+    },
+    "nav": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/navItem" }
+    },
+    "scrolls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sites", "bots", "author"],
+      "properties": {
+        "sites": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["closedTag", "tag", "badge", "sub"],
+          "properties": {
+            "closedTag": { "$ref": "#/$defs/str" },
+            "tag": { "$ref": "#/$defs/str" },
+            "badge": { "$ref": "#/$defs/str" },
+            "sub": { "$ref": "#/$defs/str" }
+          }
+        },
+        "bots": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["closedTag"],
+          "properties": { "closedTag": { "$ref": "#/$defs/str" } }
+        },
+        "author": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["closedTag"],
+          "properties": { "closedTag": { "$ref": "#/$defs/str" } }
+        }
+      }
+    },
+    "chips": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/str" }
+    }
+  },
+  "$defs": {
+    "str": { "type": "string", "minLength": 1 },
+    "deskWithStatement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "statement"],
+      "properties": {
+        "tag": { "$ref": "#/$defs/str" },
+        "statement": { "$ref": "#/$defs/str" }
+      }
+    },
+    "deskTagOnly": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag"],
+      "properties": { "tag": { "$ref": "#/$defs/str" } },
+      "description": "statement «Полевое исследование и личный R&D.» — хардкод в шаблоне"
+    },
+    "navItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": { "label": { "$ref": "#/$defs/str" } }
+    }
+  }
+}
