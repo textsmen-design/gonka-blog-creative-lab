@@ -1,5 +1,15 @@
 ---
 // src/components/SpatialWorkbench.astro
+import site from '../data/site.json';
+import links from '../data/links.json';
+import media from '../data/media.json';
+import sections from '../data/sections.json';
+
+const S = sections;
+const L = links;
+const M = media.previews;
+const W0 = "\n";
+const W1 = " ";
 ---
 
 <div id="spatial-canvas-container" class="spatial-root select-none">
@@ -14,7 +24,7 @@
           <span class="pulse-ring"></span>
           <span class="pulse-dot"></span>
         </span>
-        <span class="status-text">СТОЛ В РАБОТЕ</span>
+        <span class="status-text">{site.topbar.status}</span>
       </div>
 
       <div class="meta-coords">
@@ -22,14 +32,14 @@
         <span>•</span>
         <span>45°15'N 19°51'E</span>
         <span>•</span>
-        <span>VIBE CODING</span>
+        <span>{site.topbar.vibe}</span>
       </div>
     </div>
 
     <!-- Центр: бренд GONKA.BLOG -->
     <a href="/" class="topbar-brand" title="GONKA.BLOG">
       <span class="brand-title">GONKA<span class="brand-orange">.BLOG</span></span>
-      <span class="brand-sub">// digital lab</span>
+      <span class="brand-sub">{site.topbar.brandSub}</span>
     </a>
 
     <!-- Правая группа: Тумблер освещения + Соцсети/Связь -->
@@ -40,14 +50,14 @@
       </button>
 
       <div class="topbar-links-group" aria-label="Контакты и социальные сети">
-        <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="topbar-social-btn topbar-btn-tg" title="Связаться в Telegram (@lonelysvobodny)">
+        <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="topbar-social-btn topbar-btn-tg" title="Связаться в Telegram (@lonelysvobodny)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
           </svg>
           <span>Telegram</span>
         </a>
 
-        <a href="mailto:textsmen@gmail.com" class="topbar-social-btn topbar-btn-email" title="Написать на Email (textsmen@gmail.com)">
+        <a href={L.email} class="topbar-social-btn topbar-btn-email" title="Написать на Email (textsmen@gmail.com)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="20" height="16" x="2" y="4" rx="2"/>
             <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
@@ -55,14 +65,14 @@
           <span>Email</span>
         </a>
 
-        <a href="#youtube" class="topbar-social-btn topbar-btn-yt" title="YouTube канал (в разработке)">
+        <a href={L.youtube} class="topbar-social-btn topbar-btn-yt" title="YouTube канал (в разработке)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
           </svg>
           <span>YouTube</span>
         </a>
 
-        <a href="#instagram" class="topbar-social-btn topbar-btn-ig" title="Instagram профиль (в разработке)">
+        <a href={L.instagram} class="topbar-social-btn topbar-btn-ig" title="Instagram профиль (в разработке)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
@@ -110,7 +120,7 @@
 
       <!-- ССЫЛКИ В ПРАВОМ ВЕРХНЕМ УГЛУ СТОЛА (TELEGRAM, EMAIL, YOUTUBE, INSTAGRAM) -->
       <a 
-        href="https://t.me/lonelysvobodny" 
+        href={L.telegram} 
         target="_blank" 
         rel="noopener noreferrer" 
         class="workbench-corner-link corner-link-telegram" 
@@ -122,7 +132,7 @@
       </a>
 
       <a 
-        href="mailto:textsmen@gmail.com" 
+        href={L.email} 
         class="workbench-corner-link corner-link-email" 
         title="Email (textsmen@gmail.com)"
         aria-label="Написать на почту: textsmen@gmail.com"
@@ -132,7 +142,7 @@
       </a>
 
       <a 
-        href="#youtube" 
+        href={L.youtube} 
         class="workbench-corner-link corner-link-youtube" 
         title="YouTube канал (в разработке)"
         aria-label="YouTube канал GONKA.BLOG (в разработке)"
@@ -145,7 +155,7 @@
       </a>
 
       <a 
-        href="#instagram" 
+        href={L.instagram} 
         class="workbench-corner-link corner-link-instagram" 
         title="Instagram профиль (в разработке)"
         aria-label="Instagram профиль GONKA.BLOG (в разработке)"
@@ -166,8 +176,8 @@
         <div class="hotspot-aura"></div>
         <div class="phone-pulse-ring"></div>
         <div class="editorial-float-label label-switchboard-card label-below-left">
-          <span class="editorial-tag">ПРЯМАЯ ЛИНИЯ</span>
-          <span class="editorial-statement">«Есть задача? Снимем трубку.»</span>
+          <span class="editorial-tag">{site.desk['modal-incoming'].tag}</span>
+          <span class="editorial-statement">{site.desk['modal-incoming'].statement}</span>
         </div>
       </button>
 
@@ -175,8 +185,8 @@
       <button type="button" class="hotspot hotspot-notebook" data-target="modal-draft" aria-label="Черновик лаборатории">
         <div class="hotspot-aura"></div>
         <div class="editorial-float-label label-draft-parchment label-above-left">
-          <span class="parchment-tag">ЧЕРНОВИК // ЭСКИЗ</span>
-          <span class="parchment-statement">«Сначала был один лист и карандаш.»</span>
+          <span class="parchment-tag">{site.desk['modal-draft'].tag}</span>
+          <span class="parchment-statement">{site.desk['modal-draft'].statement}</span>
         </div>
       </button>
 
@@ -184,8 +194,8 @@
       <button type="button" class="hotspot hotspot-failures" data-target="modal-failures" aria-label="Архив закрытых гипотез: НЕ ПОШЛО">
         <div class="hotspot-aura"></div>
         <div class="editorial-float-label label-failures-card label-above-left">
-          <span class="editorial-tag tag-crimson-seal">АРХИВ ОШИБОК</span>
-          <span class="editorial-statement">«Эту версию чуть не выбросил. Зато понял главное.»</span>
+          <span class="editorial-tag tag-crimson-seal">{site.desk['modal-failures'].tag}</span>
+          <span class="editorial-statement">{site.desk['modal-failures'].statement}</span>
         </div>
       </button>
 
@@ -202,7 +212,7 @@
         <div class="sites-closed-wrapper">
           <img src="/svitok-closed.png" alt="Свиток Сайты / Лендинги (закрытый)" class="sites-closed-img" />
           <div class="sites-closed-tag">
-            <span>САЙТЫ / ЛЕНДИНГИ</span>
+            <span>{site.scrolls.sites.closedTag}</span>
           </div>
           <div class="sites-pulse-seal"></div>
         </div>
@@ -217,8 +227,8 @@
           <div class="scroll-parchment-sheet">
             <div class="sites-parchment-content">
               <div class="sites-parchment-header">
-                <span class="sites-parchment-tag">САЙТЫ / ЛЕНДИНГИ</span>
-                <span class="sites-parchment-badge">6 РАБОТ</span>
+                <span class="sites-parchment-tag">{site.scrolls.sites.tag}</span>
+                <span class="sites-parchment-badge">{site.scrolls.sites.badge}</span>
               </div>
 
               <!-- Мини-меню проектов: клик сразу открывает персональное досье -->
@@ -230,8 +240,8 @@
                   title="English Teacher — открыть досье"
                   aria-label="English Teacher: открыть персональное досье проекта"
                 >
-                  <img src="/previews/preview-english-teacher.jpg" alt="English Teacher — первый экран" />
-                  <span class="chip-label">ENG</span>
+                  <img src={M.englishTeacher} alt="English Teacher — первый экран" />
+                  <span class="chip-label">{site.chips[0]}</span>
                 </button>
                 <button 
                   type="button" 
@@ -240,8 +250,8 @@
                   title="TwoHearts — открыть досье"
                   aria-label="TwoHearts: открыть персональное досье проекта"
                 >
-                  <img src="/previews/preview-twohearts.jpg" alt="TwoHearts — первый экран" />
-                  <span class="chip-label">2H</span>
+                  <img src={M.twohearts} alt="TwoHearts — первый экран" />
+                  <span class="chip-label">{site.chips[1]}</span>
                 </button>
                 <button 
                   type="button" 
@@ -250,8 +260,8 @@
                   title="Siteviza — открыть досье"
                   aria-label="Siteviza: открыть персональное досье проекта"
                 >
-                  <img src="/previews/preview-siteviza.jpg" alt="Siteviza — первый экран" />
-                  <span class="chip-label">VZN</span>
+                  <img src={M.siteviza} alt="Siteviza — первый экран" />
+                  <span class="chip-label">{site.chips[2]}</span>
                 </button>
                 <button 
                   type="button" 
@@ -260,8 +270,8 @@
                   title="Atelier — открыть досье"
                   aria-label="Atelier: открыть персональное досье проекта"
                 >
-                  <img src="/previews/preview-atelier.jpg" alt="Atelier — первый экран" />
-                  <span class="chip-label">ATL</span>
+                  <img src={M.atelier} alt="Atelier — первый экран" />
+                  <span class="chip-label">{site.chips[3]}</span>
                 </button>
                 <button 
                   type="button" 
@@ -270,8 +280,8 @@
                   title="LandAsset5 — открыть досье"
                   aria-label="LandAsset5: открыть персональное досье проекта"
                 >
-                  <img src="/previews/preview-landasset5.jpg" alt="LandAsset5 — первый экран" />
-                  <span class="chip-label">LND</span>
+                  <img src={M.landasset5} alt="LandAsset5 — первый экран" />
+                  <span class="chip-label">{site.chips[4]}</span>
                 </button>
                 <button 
                   type="button" 
@@ -280,13 +290,12 @@
                   title="Tracker_01 — открыть досье"
                   aria-label="Tracker_01: открыть персональное досье проекта"
                 >
-                  <img src="/previews/preview-tracker01.jpg" alt="Tracker_01 — первый экран" />
-                  <span class="chip-label">TRK</span>
+                  <img src={M.tracker01} alt="Tracker_01 — первый экран" />
+                  <span class="chip-label">{site.chips[5]}</span>
                 </button>
               </div>
 
-              <div class="sites-parchment-sub">
-                Каталог действующих проектов <span class="sites-arrow">➔</span>
+              <div class="sites-parchment-sub">{W0}{site.scrolls.sites.sub}{W1}<span class="sites-arrow">➔</span>
               </div>
             </div>
             <div class="sites-wax-seal"></div>
@@ -303,8 +312,8 @@
       <button type="button" class="hotspot hotspot-core" data-target="modal-core" aria-label="GONKA.BLOG Система и Ядро">
         <div class="hotspot-aura"></div>
         <div class="editorial-float-label label-schematic-vellum label-above-center">
-          <span class="editorial-tag">СИСТЕМА</span>
-          <span class="editorial-statement">«Личная лаборатория. Всё собрано на одном столе.»</span>
+          <span class="editorial-tag">{site.desk['modal-core'].tag}</span>
+          <span class="editorial-statement">{site.desk['modal-core'].statement}</span>
         </div>
       </button>
 
@@ -321,7 +330,7 @@
         <div class="bots-closed-wrapper">
           <img src="/svitok-closed.png" alt="Свиток Боты (закрытый)" class="bots-closed-img" />
           <div class="bots-closed-tag">
-            <span>БОТЫ // TELEGRAM</span>
+            <span>{site.scrolls.bots.closedTag}</span>
           </div>
           <div class="bots-pulse-seal"></div>
         </div>
@@ -358,8 +367,8 @@
       <button type="button" class="hotspot hotspot-video" data-target="modal-video" aria-label="Видео и монтаж">
         <div class="hotspot-aura"></div>
         <div class="editorial-float-label label-celluloid-strip label-above-filmstrip">
-          <span class="editorial-tag">КИНОПЛЁНКА</span>
-          <span class="editorial-statement">«От черновика до кадра.»</span>
+          <span class="editorial-tag">{site.desk['modal-video'].tag}</span>
+          <span class="editorial-statement">{site.desk['modal-video'].statement}</span>
         </div>
       </button>
 
@@ -367,8 +376,8 @@
       <button type="button" class="hotspot hotspot-network" data-target="modal-network" aria-label="Инструменты: связи, технологии, инструменты">
         <div class="hotspot-aura"></div>
         <div class="editorial-float-label label-starchart-card label-above-center">
-          <span class="editorial-tag tag-blue">ИНСТРУМЕНТЫ</span>
-          <span class="editorial-statement">«Связи, стек и инструменты.»</span>
+          <span class="editorial-tag tag-blue">{site.desk['modal-network'].tag}</span>
+          <span class="editorial-statement">{site.desk['modal-network'].statement}</span>
         </div>
       </button>
 
@@ -376,7 +385,7 @@
       <button type="button" class="hotspot hotspot-serbia-wip" data-target="modal-serbia-wip" aria-label="Релокант Сербия: В работе">
         <div class="hotspot-aura"></div>
         <div class="editorial-float-label label-field-dispatch label-above-right">
-          <span class="editorial-tag">РЕЛОКАНТ СЕРБИЯ</span>
+          <span class="editorial-tag">{site.desk['modal-serbia-wip'].tag}</span>
           <span class="editorial-statement">«Полевое исследование и личный R&D.»</span>
         </div>
       </button>
@@ -392,7 +401,7 @@
         <div class="scroll-closed-wrapper">
           <img src="/svitok-closed.png" alt="Свиток Автор (закрытый)" class="scroll-closed-img" />
           <div class="scroll-closed-tag">
-            <span>АВТОР</span>
+            <span>{site.scrolls.author.closedTag}</span>
           </div>
           <div class="scroll-pulse-seal"></div>
         </div>
@@ -407,8 +416,8 @@
       <button type="button" class="hotspot hotspot-mug" data-target="modal-manifesto" aria-label="Манифест действия: IDEAS BUILD TEST REPEAT">
         <div class="hotspot-aura"></div>
         <div class="editorial-float-label label-coaster-tile label-above-right">
-          <span class="editorial-tag">IDEAS BUILD TEST REPEAT</span>
-          <span class="editorial-statement">«Меньше теории — больше работающих вещей.»</span>
+          <span class="editorial-tag">{site.desk['modal-manifesto'].tag}</span>
+          <span class="editorial-statement">{site.desk['modal-manifesto'].statement}</span>
         </div>
       </button>
 
@@ -418,42 +427,42 @@
 
         <!-- 1. ЧЕРНОВИК -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-draft" aria-label="Черновик: открыть лабораторные записи и эскизы">
-          <span class="cabinet-nav-label">ЧЕРНОВИК</span>
+          <span class="cabinet-nav-label">{site.nav[0].label}</span>
         </button>
 
         <!-- 2. ЛЕНДИНГИ -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-sites" aria-label="Лендинги: открыть каталог действующих веб-проектов">
-          <span class="cabinet-nav-label">ЛЕНДИНГИ</span>
+          <span class="cabinet-nav-label">{site.nav[1].label}</span>
         </button>
 
         <!-- 3. СИСТЕМА -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-core" aria-label="Система: открыть архитектуру и ядро GONKA.BLOG">
-          <span class="cabinet-nav-label">СИСТЕМА</span>
+          <span class="cabinet-nav-label">{site.nav[2].label}</span>
         </button>
 
         <!-- 4. МЯСНАЯ ТРОИЦА -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-myasnaya-troitsa" aria-label="Мясная Троица: открыть досье Telegram-бота">
-          <span class="cabinet-nav-label">МЯСНАЯ ТРОИЦА</span>
+          <span class="cabinet-nav-label">{site.nav[3].label}</span>
         </button>
 
         <!-- 5. НЕ ПОШЛО -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-failures" aria-label="Не пошло: открыть архив закрытых гипотез">
-          <span class="cabinet-nav-label">НЕ ПОШЛО</span>
+          <span class="cabinet-nav-label">{site.nav[4].label}</span>
         </button>
 
         <!-- 6. ВИДЕО -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-video" aria-label="Видео: открыть монтаж и кадры рабочего процесса">
-          <span class="cabinet-nav-label">ВИДЕО</span>
+          <span class="cabinet-nav-label">{site.nav[5].label}</span>
         </button>
 
         <!-- 7. ИНСТРУМЕНТЫ -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-network" aria-label="Инструменты: открыть стек технологий и связи">
-          <span class="cabinet-nav-label">ИНСТРУМЕНТЫ</span>
+          <span class="cabinet-nav-label">{site.nav[6].label}</span>
         </button>
 
         <!-- 8. БОТЫ -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-bots" aria-label="Боты: открыть каталог Telegram-ботов лаборатории">
-          <span class="cabinet-nav-label">БОТЫ</span>
+          <span class="cabinet-nav-label">{site.nav[7].label}</span>
         </button>
       </nav>
 
@@ -465,27 +474,27 @@
     <div class="bottombar-left-zone">
       <span class="hint-bold">GONKA.BLOG</span>
       <span class="hint-divider">•</span>
-      <span class="hint-sub">Свет показывает главное. Кликайте на названия и предметы верстака.</span>
+      <span class="hint-sub">{site.footer.hint}</span>
     </div>
 
     <!-- Единые точки связи -->
     <div class="bottombar-actions">
-      <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="contact-wire-btn" title="Написать в Telegram (@lonelysvobodny)">
+      <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="contact-wire-btn" title="Написать в Telegram (@lonelysvobodny)">
         <span class="wire-dot dot-sky"></span>
         <span>TELEGRAM</span>
       </a>
 
-      <a href="mailto:textsmen@gmail.com" class="contact-wire-btn" title="Отправить email (textsmen@gmail.com)">
+      <a href={L.email} class="contact-wire-btn" title="Отправить email (textsmen@gmail.com)">
         <span class="wire-dot dot-amber"></span>
         <span>EMAIL</span>
       </a>
 
-      <a href="#youtube" class="contact-wire-btn" title="YouTube канал (в разработке)">
+      <a href={L.youtube} class="contact-wire-btn" title="YouTube канал (в разработке)">
         <span class="wire-dot dot-rose"></span>
         <span>YOUTUBE</span>
       </a>
 
-      <a href="#instagram" class="contact-wire-btn" title="Instagram профиль (в разработке)">
+      <a href={L.instagram} class="contact-wire-btn" title="Instagram профиль (в разработке)">
         <span class="wire-dot dot-purple"></span>
         <span>INSTAGRAM</span>
       </a>
@@ -500,8 +509,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-orange">[ СИСТЕМА // GONKA.BLOG ]</span>
-          <span class="case-badge">РАБОЧИЙ СТОЛ</span>
+          <span class="drawer-tag text-orange">{S['modal-core'].header.tag}</span>
+          <span class="case-badge">{S['modal-core'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -516,53 +525,47 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● ДЕЙСТВУЮЩАЯ СИСТЕМА</div>
-          <h2 class="case-title">GONKA.BLOG</h2>
-          <p class="case-lead">Личная цифровая лаборатория и рабочий стол действующих проектов.</p>
+          <div class="status-live">{S['modal-core'].hero.status}</div>
+          <h2 class="case-title">{S['modal-core'].hero.title}</h2>
+          <p class="case-lead">{S['modal-core'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              НАПИСАТЬ В TELEGRAM ↗
-            </a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-core'].actions[0]}{W0}</a>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
-              <p class="section-text">
-                GONKA.BLOG собирает в одном месте проекты, эксперименты и инструменты мастерской. Готовые продукты можно открыть и проверить. Незаконченные остаются частью рабочего процесса.
-              </p>
+              <h3 class="section-heading">{S['modal-core'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-core'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// КАК УСТРОЕН СТОЛ</h3>
+              <h3 class="section-heading">{S['modal-core'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Каждый объект на столе связан с отдельным проектом или экспериментом.</li>
-                <li>По клику открывается его рабочая запись.</li>
-                <li>В записи — задача, реализация, технологии, результат и ссылка.</li>
-                <li>Проекты можно возвращать на стол и продолжать исследовать следующий.</li>
+                <li>{S['modal-core'].blocks[1].items[0]}</li>
+                <li>{S['modal-core'].blocks[1].items[1]}</li>
+                <li>{S['modal-core'].blocks[1].items[2]}</li>
+                <li>{S['modal-core'].blocks[1].items[3]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО ЗДЕСЬ ПОКАЗАНО</h3>
+              <h3 class="section-heading">{S['modal-core'].blocks[2].heading}</h3>
               <div class="lab-dossier-card">
-                <p class="dossier-text">
-                  Готовые сайты, Telegram-боты, веб-сервисы, эксперименты и проекты в разработке.
-                </p>
+                <p class="dossier-text">{W0}{S['modal-core'].blocks[2].dossier[0]}{W0}</p>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// СИСТЕМНЫЕ ПАРАМЕТРЫ</h3>
+              <h3 class="section-heading">{S['modal-core'].blocks[3].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Формат:</span><strong>Личная цифровая лаборатория</strong></div>
-                <div class="spec-row"><span>Среда:</span><strong>Интерактивный верстак</strong></div>
-                <div class="spec-row"><span>Доступ:</span><strong>Действующие live-проекты</strong></div>
-                <div class="spec-row"><span>Статус:</span><strong>Постоянное обновление</strong></div>
+                <div class="spec-row"><span>{S['modal-core'].blocks[3].specs[0][0]}</span><strong>{S['modal-core'].blocks[3].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-core'].blocks[3].specs[1][0]}</span><strong>{S['modal-core'].blocks[3].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-core'].blocks[3].specs[2][0]}</span><strong>{S['modal-core'].blocks[3].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-core'].blocks[3].specs[3][0]}</span><strong>{S['modal-core'].blocks[3].specs[3][1]}</strong></div>
               </div>
             </div>
           </div>
@@ -578,8 +581,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-emerald">[ АРХИВ // МЯСНАЯ ТРОИЦА ]</span>
-          <span class="case-badge">TELEGRAM-БОТ</span>
+          <span class="drawer-tag text-emerald">{S['modal-myasnaya-troitsa'].header.tag}</span>
+          <span class="case-badge">{S['modal-myasnaya-troitsa'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -594,58 +597,48 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: БОТ РАБОТАЕТ В TELEGRAM</div>
-          <h2 class="case-title">Мясная Троица</h2>
-          <p class="case-lead">Telegram-бот для мониторинга цен на мясо по городам и подбора рецептов.</p>
+          <div class="status-live">{S['modal-myasnaya-troitsa'].hero.status}</div>
+          <h2 class="case-title">{S['modal-myasnaya-troitsa'].hero.title}</h2>
+          <p class="case-lead">{S['modal-myasnaya-troitsa'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://t.me/myasnaya_troitsa_bot" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ЗАПУСТИТЬ В TELEGRAM (@myasnaya_troitsa_bot) ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">
-              ← К КАТАЛОГУ БОТОВ
-            </button>
+            <a href={L.myasnayaTroitsa} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-myasnaya-troitsa'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-myasnaya-troitsa'].actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">{W0}{S['modal-myasnaya-troitsa'].actions[2]}{W0}</button>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
-              <p class="section-text">
-                Telegram-бот экосистемы «Мясная Троица». Помогает ориентироваться в ценах на основные виды мяса (курица, свинина, говядина) в разных городах и регионах, сравнивать стоимость и получать практические рекомендации шефа.
-              </p>
+              <h3 class="section-heading">{S['modal-myasnaya-troitsa'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-myasnaya-troitsa'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <h3 class="section-heading">{S['modal-myasnaya-troitsa'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Выбор города и просмотр актуального среза цен на мясо.</li>
-                <li>Механика сравнения стоимости базовой мясной корзины между городами.</li>
-                <li>Советы от шеф-повара и подбор рецептов под конкретный отруб.</li>
-                <li>Фирменная механика общения от лица трёх персонажей бренда.</li>
+                <li>{S['modal-myasnaya-troitsa'].blocks[1].items[0]}</li>
+                <li>{S['modal-myasnaya-troitsa'].blocks[1].items[1]}</li>
+                <li>{S['modal-myasnaya-troitsa'].blocks[1].items[2]}</li>
+                <li>{S['modal-myasnaya-troitsa'].blocks[1].items[3]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <h3 class="section-heading">{S['modal-myasnaya-troitsa'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Язык:</span><strong>Python 3</strong></div>
-                <div class="spec-row"><span>Фреймворк:</span><strong>Telegram Bot API / Asyncio</strong></div>
-                <div class="spec-row"><span>База данных:</span><strong>SQLite / Local Storage</strong></div>
-                <div class="spec-row"><span>Сервер:</span><strong>Ubuntu Linux VPS</strong></div>
+                <div class="spec-row"><span>{S['modal-myasnaya-troitsa'].blocks[2].specs[0][0]}</span><strong>{S['modal-myasnaya-troitsa'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-myasnaya-troitsa'].blocks[2].specs[1][0]}</span><strong>{S['modal-myasnaya-troitsa'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-myasnaya-troitsa'].blocks[2].specs[2][0]}</span><strong>{S['modal-myasnaya-troitsa'].blocks[2].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-myasnaya-troitsa'].blocks[2].specs[3][0]}</span><strong>{S['modal-myasnaya-troitsa'].blocks[2].specs[3][1]}</strong></div>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
-              <div class="result-status-box">
-                Бот развёрнут на сервере и доступен по адресу @myasnaya_troitsa_bot.
-              </div>
+              <h3 class="section-heading">{S['modal-myasnaya-troitsa'].blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{S['modal-myasnaya-troitsa'].blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -660,8 +653,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-emerald">[ КАТАЛОГ // TELEGRAM-БОТЫ ]</span>
-          <span class="case-badge">2 ДЕЙСТВУЮЩИХ БОТА</span>
+          <span class="drawer-tag text-emerald">{S['modal-bots'].header.tag}</span>
+          <span class="case-badge">{S['modal-bots'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -676,87 +669,79 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● ДЕЙСТВУЮЩИЕ БОТЫ МАСТЕРСКОЙ</div>
-          <h2 class="case-title">Telegram-боты</h2>
-          <p class="case-lead">Действующие боты и интерактивные сценарии в Telegram. Выберите проект, чтобы изучить подробное досье или запустить бота в Telegram.</p>
+          <div class="status-live">{S['modal-bots'].hero.status}</div>
+          <h2 class="case-title">{S['modal-bots'].hero.title}</h2>
+          <p class="case-lead">{S['modal-bots'].hero.lead}</p>
         </div>
 
         <div class="sites-catalog-grid bots-catalog-grid">
           <!-- 1. Мясная Троица -->
           <div class="catalog-project-card bot-card-meat">
             <div class="catalog-card-screen">
-              <img src="/previews/preview-myasnaya-troitsa.png" alt="Мясная Троица — Telegram-бот" class="catalog-screen-img" loading="lazy" />
+              <img src={M.myasnayaTroitsa} alt="Мясная Троица — Telegram-бот" class="catalog-screen-img" loading="lazy" />
               <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">@myasnaya_troitsa_bot</span>
+                <span class="screen-url-badge">{S['modal-bots'].cards[0].screenBadge}</span>
               </div>
             </div>
             <div class="catalog-card-header">
-              <span class="catalog-project-name">Мясная Троица</span>
-              <span class="catalog-badge badge-emerald">TELEGRAM-БОТ</span>
+              <span class="catalog-project-name">{S['modal-bots'].cards[0].name}</span>
+              <span class="catalog-badge badge-emerald">{S['modal-bots'].cards[0].badge}</span>
             </div>
-            <p class="catalog-project-desc">Telegram-бот для мониторинга цен на мясо по городам и подбора рецептов шефа.</p>
+            <p class="catalog-project-desc">{S['modal-bots'].cards[0].desc}</p>
             
             <div class="catalog-card-block">
-              <span class="catalog-block-title">// ЧТО ДЕЛАЕТ БОТ:</span>
-              <p class="catalog-block-text">Помогает ориентироваться в ценах на основные виды мяса (курица, свинина, говядина) в разных городах и регионах, сравнивать стоимость и получать практические рекомендации шефа.</p>
+              <span class="catalog-block-title">{S['modal-bots'].cards[0].sections[0].title}</span>
+              <p class="catalog-block-text">{S['modal-bots'].cards[0].sections[0].text}</p>
             </div>
 
             <div class="catalog-card-block">
-              <span class="catalog-block-title">// ОСНОВНЫЕ ОСОБЕННОСТИ:</span>
+              <span class="catalog-block-title">{S['modal-bots'].cards[0].sections[1].title}</span>
               <ul class="catalog-features-list">
-                <li>Выбор города и просмотр актуального среза цен на мясо</li>
-                <li>Сравнение стоимости базовой мясной корзины между городами</li>
-                <li>Советы от шеф-повара и подбор рецептов под конкретный отруб</li>
-                <li>Фирменная механика общения от лица трёх персонажей бренда</li>
+                <li>{S['modal-bots'].cards[0].sections[1].items[0]}</li>
+                <li>{S['modal-bots'].cards[0].sections[1].items[1]}</li>
+                <li>{S['modal-bots'].cards[0].sections[1].items[2]}</li>
+                <li>{S['modal-bots'].cards[0].sections[1].items[3]}</li>
               </ul>
             </div>
 
             <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-myasnaya-troitsa">
-                ОТКРЫТЬ ДОСЬЕ ➔
-              </button>
-              <a href="https://t.me/myasnaya_troitsa_bot" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Запустить бота @myasnaya_troitsa_bot в Telegram">
-                В TELEGRAM ↗
-              </a>
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-myasnaya-troitsa">{W0}{S['modal-bots'].cards[0].actions[0]}{W0}</button>
+              <a href={L.myasnayaTroitsa} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Запустить бота @myasnaya_troitsa_bot в Telegram">{W0}{S['modal-bots'].cards[0].actions[1]}{W0}</a>
             </div>
           </div>
 
           <!-- 2. Бот Детектив -->
           <div class="catalog-project-card bot-card-detective">
             <div class="catalog-card-screen">
-              <img src="/previews/preview-bot-detective.png" alt="Бот Детектив — интерактивные детективные истории" class="catalog-screen-img" loading="lazy" />
+              <img src={M.botDetective} alt="Бот Детектив — интерактивные детективные истории" class="catalog-screen-img" loading="lazy" />
               <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">@AI_CH_BOT_univers_bot</span>
+                <span class="screen-url-badge">{S['modal-bots'].cards[1].screenBadge}</span>
               </div>
             </div>
             <div class="catalog-card-header">
-              <span class="catalog-project-name">Бот Детектив</span>
-              <span class="catalog-badge badge-purple">КВЕСТ-БОТ</span>
+              <span class="catalog-project-name">{S['modal-bots'].cards[1].name}</span>
+              <span class="catalog-badge badge-purple">{S['modal-bots'].cards[1].badge}</span>
             </div>
-            <p class="catalog-project-desc">Игровой Telegram-бот с интерактивными текстовыми квестами-расследованиями.</p>
+            <p class="catalog-project-desc">{S['modal-bots'].cards[1].desc}</p>
 
             <div class="catalog-card-block">
-              <span class="catalog-block-title">// ЧТО ДЕЛАЕТ БОТ:</span>
-              <p class="catalog-block-text">Игрок выступает в роли сыщика: выбирает дело, изучает улики, допрашивает свидетелей, сверяет алиби и решает, кому предъявить обвинение.</p>
+              <span class="catalog-block-title">{S['modal-bots'].cards[1].sections[0].title}</span>
+              <p class="catalog-block-text">{S['modal-bots'].cards[1].sections[0].text}</p>
             </div>
 
             <div class="catalog-card-block">
-              <span class="catalog-block-title">// ОСНОВНЫЕ ОСОБЕННОСТИ:</span>
+              <span class="catalog-block-title">{S['modal-bots'].cards[1].sections[1].title}</span>
               <ul class="catalog-features-list">
-                <li>Система нелинейных детективных дел разной сложности</li>
-                <li>Команды расследования: /cases, /evidence, /interrog, /alibi, /hint, /accuse</li>
-                <li>Доставка улик с медиа-файлами (фото, аудио, видео) и текстовым fallback</li>
-                <li>Сохранение игрового прогресса, профиль игрока и система достижений</li>
+                <li>{S['modal-bots'].cards[1].sections[1].items[0]}</li>
+                <li>{S['modal-bots'].cards[1].sections[1].items[1]}</li>
+                <li>{S['modal-bots'].cards[1].sections[1].items[2]}</li>
+                <li>{S['modal-bots'].cards[1].sections[1].items[3]}</li>
               </ul>
             </div>
 
             <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-aichatbot">
-                ОТКРЫТЬ ДОСЬЕ ➔
-              </button>
-              <a href="https://t.me/AI_CH_BOT_univers_bot" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Запустить бота @AI_CH_BOT_univers_bot в Telegram">
-                В TELEGRAM ↗
-              </a>
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-aichatbot">{W0}{S['modal-bots'].cards[1].actions[0]}{W0}</button>
+              <a href={L.botDetective} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Запустить бота @AI_CH_BOT_univers_bot в Telegram">{W0}{S['modal-bots'].cards[1].actions[1]}{W0}</a>
             </div>
           </div>
 
@@ -772,8 +757,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-orange">[ КАТАЛОГ // САЙТЫ И ЛЕНДИНГИ ]</span>
-          <span class="case-badge">6 ДЕЙСТВУЮЩИХ ПРОЕКТОВ</span>
+          <span class="drawer-tag text-orange">{S['modal-sites'].header.tag}</span>
+          <span class="case-badge">{S['modal-sites'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -788,147 +773,123 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● ДЕЙСТВУЮЩИЙ КАТАЛОГ МАСТЕРСКОЙ</div>
-          <h2 class="case-title">Сайты и лендинги</h2>
-          <p class="case-lead">Каталог готовых и опубликованных веб-проектов лаборатории. Выберите проект, чтобы изучить рабочую запись или перейти к сайту.</p>
+          <div class="status-live">{S['modal-sites'].hero.status}</div>
+          <h2 class="case-title">{S['modal-sites'].hero.title}</h2>
+          <p class="case-lead">{S['modal-sites'].hero.lead}</p>
         </div>
 
         <div class="sites-catalog-grid">
           <!-- 1. English Teacher -->
           <div class="catalog-project-card">
             <div class="catalog-card-screen">
-              <img src="/previews/preview-english-teacher.jpg" alt="English Teacher — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <img src={M.englishTeacher} alt="English Teacher — реальный первый экран" class="catalog-screen-img" loading="lazy" />
               <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">english.gonka.blog</span>
+                <span class="screen-url-badge">{S['modal-sites'].cards[0].screenBadge}</span>
               </div>
             </div>
             <div class="catalog-card-header">
-              <span class="catalog-project-name">English Teacher</span>
-              <span class="catalog-badge badge-blue">ЛЕНДИНГ</span>
+              <span class="catalog-project-name">{S['modal-sites'].cards[0].name}</span>
+              <span class="catalog-badge badge-blue">{S['modal-sites'].cards[0].badge}</span>
             </div>
-            <p class="catalog-project-desc">Презентационный лендинг частного преподавателя английского языка с формой записи на вводный урок.</p>
+            <p class="catalog-project-desc">{S['modal-sites'].cards[0].desc}</p>
             <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-english-teacher">
-                ОТКРЫТЬ ДОСЬЕ ➔
-              </button>
-              <a href="https://english.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт english.gonka.blog">
-                НА САЙТ ↗
-              </a>
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-english-teacher">{W0}{S['modal-sites'].cards[0].actions[0]}{W0}</button>
+              <a href={L.english} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт english.gonka.blog">{W0}{S['modal-sites'].cards[0].actions[1]}{W0}</a>
             </div>
           </div>
 
           <!-- 2. TwoHearts -->
           <div class="catalog-project-card">
             <div class="catalog-card-screen">
-              <img src="/previews/preview-twohearts.jpg" alt="TwoHearts — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <img src={M.twohearts} alt="TwoHearts — реальный первый экран" class="catalog-screen-img" loading="lazy" />
               <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">twohearts.gonka.blog</span>
+                <span class="screen-url-badge">{S['modal-sites'].cards[1].screenBadge}</span>
               </div>
             </div>
             <div class="catalog-card-header">
-              <span class="catalog-project-name">TwoHearts</span>
-              <span class="catalog-badge badge-pink">ДЕЙТИНГ-ЛЕНДИНГ</span>
+              <span class="catalog-project-name">{S['modal-sites'].cards[1].name}</span>
+              <span class="catalog-badge badge-pink">{S['modal-sites'].cards[1].badge}</span>
             </div>
-            <p class="catalog-project-desc">Лендинг серии камерных офлайн-вечеров знакомств на Патриарших прудах в Москве.</p>
+            <p class="catalog-project-desc">{S['modal-sites'].cards[1].desc}</p>
             <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-twohearts">
-                ОТКРЫТЬ ДОСЬЕ ➔
-              </button>
-              <a href="https://twohearts.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт twohearts.gonka.blog">
-                НА САЙТ ↗
-              </a>
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-twohearts">{W0}{S['modal-sites'].cards[1].actions[0]}{W0}</button>
+              <a href={L.twohearts} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт twohearts.gonka.blog">{W0}{S['modal-sites'].cards[1].actions[1]}{W0}</a>
             </div>
           </div>
 
           <!-- 3. Siteviza -->
           <div class="catalog-project-card">
             <div class="catalog-card-screen">
-              <img src="/previews/preview-siteviza.jpg" alt="Siteviza — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <img src={M.siteviza} alt="Siteviza — реальный первый экран" class="catalog-screen-img" loading="lazy" />
               <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">siteviza.gonka.blog</span>
+                <span class="screen-url-badge">{S['modal-sites'].cards[2].screenBadge}</span>
               </div>
             </div>
             <div class="catalog-card-header">
-              <span class="catalog-project-name">Siteviza</span>
-              <span class="catalog-badge badge-cyan">САЙТ-ВИЗИТКА</span>
+              <span class="catalog-project-name">{S['modal-sites'].cards[2].name}</span>
+              <span class="catalog-badge badge-cyan">{S['modal-sites'].cards[2].badge}</span>
             </div>
-            <p class="catalog-project-desc">Персональный сайт-визитка публичного трейдера и автора YouTube-канала с формой подписки на рассылку.</p>
+            <p class="catalog-project-desc">{S['modal-sites'].cards[2].desc}</p>
             <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-siteviza">
-                ОТКРЫТЬ ДОСЬЕ ➔
-              </button>
-              <a href="https://siteviza.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт siteviza.gonka.blog">
-                НА САЙТ ↗
-              </a>
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-siteviza">{W0}{S['modal-sites'].cards[2].actions[0]}{W0}</button>
+              <a href={L.siteviza} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт siteviza.gonka.blog">{W0}{S['modal-sites'].cards[2].actions[1]}{W0}</a>
             </div>
           </div>
 
           <!-- 4. Atelier -->
           <div class="catalog-project-card">
             <div class="catalog-card-screen">
-              <img src="/previews/preview-atelier.jpg" alt="Atelier — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <img src={M.atelier} alt="Atelier — реальный первый экран" class="catalog-screen-img" loading="lazy" />
               <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">atelier.gonka.blog</span>
+                <span class="screen-url-badge">{S['modal-sites'].cards[3].screenBadge}</span>
               </div>
             </div>
             <div class="catalog-card-header">
-              <span class="catalog-project-name">Atelier</span>
-              <span class="catalog-badge badge-amber">СТУДИЯ ПОШИВА</span>
+              <span class="catalog-project-name">{S['modal-sites'].cards[3].name}</span>
+              <span class="catalog-badge badge-amber">{S['modal-sites'].cards[3].badge}</span>
             </div>
-            <p class="catalog-project-desc">Лендинг московской студии индивидуального пошива мужской и женской одежды премиального класса.</p>
+            <p class="catalog-project-desc">{S['modal-sites'].cards[3].desc}</p>
             <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-atelier">
-                ОТКРЫТЬ ДОСЬЕ ➔
-              </button>
-              <a href="https://atelier.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт atelier.gonka.blog">
-                НА САЙТ ↗
-              </a>
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-atelier">{W0}{S['modal-sites'].cards[3].actions[0]}{W0}</button>
+              <a href={L.atelier} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт atelier.gonka.blog">{W0}{S['modal-sites'].cards[3].actions[1]}{W0}</a>
             </div>
           </div>
 
           <!-- 5. LandAsset5 -->
           <div class="catalog-project-card">
             <div class="catalog-card-screen">
-              <img src="/previews/preview-landasset5.jpg" alt="LandAsset5 — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <img src={M.landasset5} alt="LandAsset5 — реальный первый экран" class="catalog-screen-img" loading="lazy" />
               <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">landasset5.gonka.blog</span>
+                <span class="screen-url-badge">{S['modal-sites'].cards[4].screenBadge}</span>
               </div>
             </div>
             <div class="catalog-card-header">
-              <span class="catalog-project-name">LandAsset5</span>
-              <span class="catalog-badge badge-emerald">ИНВЕСТ-АКТИВ</span>
+              <span class="catalog-project-name">{S['modal-sites'].cards[4].name}</span>
+              <span class="catalog-badge badge-emerald">{S['modal-sites'].cards[4].badge}</span>
             </div>
-            <p class="catalog-project-desc">Инвестиционный лендинг крупного земельного актива 26,118 га: 3 участка, 49 лет аренды, форма связи с собственником.</p>
+            <p class="catalog-project-desc">{S['modal-sites'].cards[4].desc}</p>
             <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-landasset5">
-                ОТКРЫТЬ ДОСЬЕ ➔
-              </button>
-              <a href="https://landasset5.gonka.blog" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт landasset5.gonka.blog">
-                НА САЙТ ↗
-              </a>
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-landasset5">{W0}{S['modal-sites'].cards[4].actions[0]}{W0}</button>
+              <a href={L.landasset5} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт landasset5.gonka.blog">{W0}{S['modal-sites'].cards[4].actions[1]}{W0}</a>
             </div>
           </div>
 
           <!-- 6. Tracker_01 -->
           <div class="catalog-project-card">
             <div class="catalog-card-screen">
-              <img src="/previews/preview-tracker01.jpg" alt="Tracker_01 — реальный первый экран" class="catalog-screen-img" loading="lazy" />
+              <img src={M.tracker01} alt="Tracker_01 — реальный первый экран" class="catalog-screen-img" loading="lazy" />
               <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">tracker-01.gonka.blog</span>
+                <span class="screen-url-badge">{S['modal-sites'].cards[5].screenBadge}</span>
               </div>
             </div>
             <div class="catalog-card-header">
-              <span class="catalog-project-name"><span class="tracker-led-mini"></span>Tracker_01</span>
-              <span class="catalog-badge badge-amber">РАБОЧИЙ ПРОДУКТ</span>
+              <span class="catalog-project-name"><span class="tracker-led-mini"></span>{S['modal-sites'].cards[5].name}</span>
+              <span class="catalog-badge badge-amber">{S['modal-sites'].cards[5].badge}</span>
             </div>
             <p class="catalog-project-desc">Полнофункциональный веб-трекер задач для сервисных команд: Канбан Drag & Drop, PHP 8.3, 14/14 тестов пройдены.</p>
             <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-tracker01">
-                ОТКРЫТЬ ДОСЬЕ ➔
-              </button>
-              <a href="https://tracker-01.gonka.blog/" target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Открыть демо трекера">
-                НА САЙТ ↗
-              </a>
+              <button type="button" class="catalog-open-btn" data-open-drawer="modal-tracker01">{W0}{S['modal-sites'].cards[5].actions[0]}{W0}</button>
+              <a href={L.tracker01} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Открыть демо трекера">{W0}{S['modal-sites'].cards[5].actions[1]}{W0}</a>
             </div>
           </div>
         </div>
@@ -944,8 +905,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-blue">[ АРХИВ // ENGLISH TEACHER ]</span>
-          <span class="case-badge">ЛЕНДИНГ</span>
+          <span class="drawer-tag text-blue">{S['modal-english-teacher'].header.tag}</span>
+          <span class="case-badge">{S['modal-english-teacher'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -960,65 +921,54 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: ЛЕНДИНГ ГОТОВ</div>
-          <h2 class="case-title">English Teacher</h2>
-          <p class="case-lead">Презентационный лендинг преподавателя английского языка с формой записи.</p>
+          <div class="status-live">{S['modal-english-teacher'].hero.status}</div>
+          <h2 class="case-title">{S['modal-english-teacher'].hero.title}</h2>
+          <p class="case-lead">{S['modal-english-teacher'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://english.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ОТКРЫТЬ ЛЕНДИНГ ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
-              ← К КАТАЛОГУ САЙТОВ
-            </button>
+            <a href={L.english} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-english-teacher'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-english-teacher'].actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-english-teacher'].actions[2]}{W0}</button>
           </div>
         </div>
 
         <!-- Реальный первый экран проекта -->
         <div class="dossier-screen-preview">
-          <img src="/previews/preview-english-teacher.jpg" alt="English Teacher — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <img src={M.englishTeacher} alt="English Teacher — реальный первый экран" class="dossier-screen-img" loading="lazy" />
           <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // english.gonka.blog
-          </div>
+            <span class="caption-dot">●</span>{W1}{S['modal-english-teacher'].screen.caption}{W0}</div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
-              <p class="section-text">
-                Одностраничный сайт для частного преподавателя английского языка. Сайт представляет методику, форматы индивидуальных занятий и помогает будущему ученику записаться на вводный урок.
-              </p>
+              <h3 class="section-heading">{S['modal-english-teacher'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-english-teacher'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <h3 class="section-heading">{S['modal-english-teacher'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Спроектирована чёткая структура: позиционирование, форматы уроков, подход.</li>
-                <li>Спокойный академический дизайн с фокусом на читаемость и доверие.</li>
-                <li>Интерактивная форма записи на консультацию.</li>
-                <li>Адаптивная вёрстка для удобного просмотра со смартфона.</li>
+                <li>{S['modal-english-teacher'].blocks[1].items[0]}</li>
+                <li>{S['modal-english-teacher'].blocks[1].items[1]}</li>
+                <li>{S['modal-english-teacher'].blocks[1].items[2]}</li>
+                <li>{S['modal-english-teacher'].blocks[1].items[3]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <h3 class="section-heading">{S['modal-english-teacher'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
-                <div class="spec-row"><span>Форма заявки:</span><strong>Google Apps Script</strong></div>
-                <div class="spec-row"><span>База лидов:</span><strong>Google Таблицы</strong></div>
+                <div class="spec-row"><span>{S['modal-english-teacher'].blocks[2].specs[0][0]}</span><strong>{S['modal-english-teacher'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-english-teacher'].blocks[2].specs[1][0]}</span><strong>{S['modal-english-teacher'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-english-teacher'].blocks[2].specs[2][0]}</span><strong>{S['modal-english-teacher'].blocks[2].specs[2][1]}</strong></div>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
-              <div class="result-status-box">
-                Лендинг свёрстан, форма подключена, проект готов к приёму заявок.
-              </div>
+              <h3 class="section-heading">{S['modal-english-teacher'].blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{S['modal-english-teacher'].blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -1033,8 +983,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-pink">[ АРХИВ // TWOHEARTS ]</span>
-          <span class="case-badge">ЛЕНДИНГ</span>
+          <span class="drawer-tag text-pink">{S['modal-twohearts'].header.tag}</span>
+          <span class="case-badge">{S['modal-twohearts'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1049,65 +999,54 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: ЛЕНДИНГ ГОТОВ</div>
-          <h2 class="case-title">TwoHearts</h2>
-          <p class="case-lead">Лендинг серии камерных офлайн-вечеров знакомств на Патриарших прудах.</p>
+          <div class="status-live">{S['modal-twohearts'].hero.status}</div>
+          <h2 class="case-title">{S['modal-twohearts'].hero.title}</h2>
+          <p class="case-lead">{S['modal-twohearts'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://twohearts.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ОТКРЫТЬ ЛЕНДИНГ ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
-              ← К КАТАЛОГУ САЙТОВ
-            </button>
+            <a href={L.twohearts} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-twohearts'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-twohearts'].actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-twohearts'].actions[2]}{W0}</button>
           </div>
         </div>
 
         <!-- Реальный первый экран проекта -->
         <div class="dossier-screen-preview">
-          <img src="/previews/preview-twohearts.jpg" alt="TwoHearts — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <img src={M.twohearts} alt="TwoHearts — реальный первый экран" class="dossier-screen-img" loading="lazy" />
           <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // twohearts.gonka.blog
-          </div>
+            <span class="caption-dot">●</span>{W1}{S['modal-twohearts'].screen.caption}{W0}</div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
-              <p class="section-text">
-                Сайт для камерных офлайн-вечеров знакомств в Москве (Патриаршие пруды). Задача лендинга — передать тёплую атмосферу живого общения и предложить комфортную альтернативу приложениям для дейтинга.
-              </p>
+              <h3 class="section-heading">{S['modal-twohearts'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-twohearts'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <h3 class="section-heading">{S['modal-twohearts'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Создана кинематографичная эстетика вечерней Москвы и тёплого ресторанного света.</li>
-                <li>Описаны концепция встреч, правила участия и расписание ближайших дат.</li>
-                <li>Реализована форма бронирования участия на вечер.</li>
-                <li>Полная мобильная адаптация под экраны смартфонов.</li>
+                <li>{S['modal-twohearts'].blocks[1].items[0]}</li>
+                <li>{S['modal-twohearts'].blocks[1].items[1]}</li>
+                <li>{S['modal-twohearts'].blocks[1].items[2]}</li>
+                <li>{S['modal-twohearts'].blocks[1].items[3]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <h3 class="section-heading">{S['modal-twohearts'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
-                <div class="spec-row"><span>Стиль:</span><strong>Editorial Typography + Night Moscow</strong></div>
-                <div class="spec-row"><span>Адаптивность:</span><strong>Mobile First</strong></div>
+                <div class="spec-row"><span>{S['modal-twohearts'].blocks[2].specs[0][0]}</span><strong>{S['modal-twohearts'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-twohearts'].blocks[2].specs[1][0]}</span><strong>{S['modal-twohearts'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-twohearts'].blocks[2].specs[2][0]}</span><strong>{S['modal-twohearts'].blocks[2].specs[2][1]}</strong></div>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
-              <div class="result-status-box">
-                Лендинг свёрстан, опубликован и готов к приёму участников.
-              </div>
+              <h3 class="section-heading">{S['modal-twohearts'].blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{S['modal-twohearts'].blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -1122,8 +1061,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-cyan">[ АРХИВ // SITEVIZA ]</span>
-          <span class="case-badge">САЙТ-ВИЗИТКА</span>
+          <span class="drawer-tag text-cyan">{S['modal-siteviza'].header.tag}</span>
+          <span class="case-badge">{S['modal-siteviza'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1138,65 +1077,54 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: САЙТ ГОТОВ</div>
-          <h2 class="case-title">Siteviza</h2>
-          <p class="case-lead">Персональный сайт-визитка публичного трейдера и автора YouTube-канала.</p>
+          <div class="status-live">{S['modal-siteviza'].hero.status}</div>
+          <h2 class="case-title">{S['modal-siteviza'].hero.title}</h2>
+          <p class="case-lead">{S['modal-siteviza'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://siteviza.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ОТКРЫТЬ САЙТ ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
-              ← К КАТАЛОГУ САЙТОВ
-            </button>
+            <a href={L.siteviza} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-siteviza'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-siteviza'].actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-siteviza'].actions[2]}{W0}</button>
           </div>
         </div>
 
         <!-- Реальный первый экран проекта -->
         <div class="dossier-screen-preview">
-          <img src="/previews/preview-siteviza.jpg" alt="Siteviza — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <img src={M.siteviza} alt="Siteviza — реальный первый экран" class="dossier-screen-img" loading="lazy" />
           <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // siteviza.gonka.blog
-          </div>
+            <span class="caption-dot">●</span>{W1}{S['modal-siteviza'].screen.caption}{W0}</div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
-              <p class="section-text">
-                Одностраничный сайт для публичного трейдера и автора видеоконтента о финансовых рынках. Задача — представить стиль торговли автора, показать ключевые результаты и привлечь аудиторию к подписке.
-              </p>
+              <h3 class="section-heading">{S['modal-siteviza'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-siteviza'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <h3 class="section-heading">{S['modal-siteviza'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Спроектирован строгий тёмный дизайн в стилистике финансовых медиа.</li>
-                <li>Оформлены блоки о торговой стратегии, результатах и YouTube-выпусках.</li>
-                <li>Встроена форма сбора email-подписчиков на аналитическую рассылку.</li>
-                <li>Быстрая навигация по якорным разделам страницы.</li>
+                <li>{S['modal-siteviza'].blocks[1].items[0]}</li>
+                <li>{S['modal-siteviza'].blocks[1].items[1]}</li>
+                <li>{S['modal-siteviza'].blocks[1].items[2]}</li>
+                <li>{S['modal-siteviza'].blocks[1].items[3]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <h3 class="section-heading">{S['modal-siteviza'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
-                <div class="spec-row"><span>Формат:</span><strong>One-Page Landing</strong></div>
-                <div class="spec-row"><span>Подписка:</span><strong>Email Lead Capture Form</strong></div>
+                <div class="spec-row"><span>{S['modal-siteviza'].blocks[2].specs[0][0]}</span><strong>{S['modal-siteviza'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-siteviza'].blocks[2].specs[1][0]}</span><strong>{S['modal-siteviza'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-siteviza'].blocks[2].specs[2][0]}</span><strong>{S['modal-siteviza'].blocks[2].specs[2][1]}</strong></div>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
-              <div class="result-status-box">
-                Сайт собран, протестирован и подготовлен к публикации.
-              </div>
+              <h3 class="section-heading">{S['modal-siteviza'].blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{S['modal-siteviza'].blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -1211,8 +1139,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-amber">[ АРХИВ // ATELIER ]</span>
-          <span class="case-badge">ЛЕНДИНГ</span>
+          <span class="drawer-tag text-amber">{S['modal-atelier'].header.tag}</span>
+          <span class="case-badge">{S['modal-atelier'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1227,65 +1155,54 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: ЛЕНДИНГ ГОТОВ</div>
-          <h2 class="case-title">Atelier</h2>
-          <p class="case-lead">Лендинг московской студии индивидуального пошива мужской и женской одежды.</p>
+          <div class="status-live">{S['modal-atelier'].hero.status}</div>
+          <h2 class="case-title">{S['modal-atelier'].hero.title}</h2>
+          <p class="case-lead">{S['modal-atelier'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://atelier.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ОТКРЫТЬ ЛЕНДИНГ ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
-              ← К КАТАЛОГУ САЙТОВ
-            </button>
+            <a href={L.atelier} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-atelier'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-atelier'].actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-atelier'].actions[2]}{W0}</button>
           </div>
         </div>
 
         <!-- Реальный первый экран проекта -->
         <div class="dossier-screen-preview">
-          <img src="/previews/preview-atelier.jpg" alt="Atelier — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <img src={M.atelier} alt="Atelier — реальный первый экран" class="dossier-screen-img" loading="lazy" />
           <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // atelier.gonka.blog
-          </div>
+            <span class="caption-dot">●</span>{W1}{S['modal-atelier'].screen.caption}{W0}</div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
-              <p class="section-text">
-                Сайт-презентация премиального ателье в Москве. Решает задачу демонстрации услуг пошива: деловые костюмы, вечерние наряды, качественные ткани и индивидуальный крой под клиента.
-              </p>
+              <h3 class="section-heading">{S['modal-atelier'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-atelier'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <h3 class="section-heading">{S['modal-atelier'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Премиальный минималистичный дизайн с упором на эстетику тканей и кроя.</li>
-                <li>Наглядная пошаговая схема работы: от снятия мерок до готового изделия.</li>
-                <li>Демонстрационное портфолио выполненных работ по категориям.</li>
-                <li>Форма быстрой записи на примерку и консультацию мастера.</li>
+                <li>{S['modal-atelier'].blocks[1].items[0]}</li>
+                <li>{S['modal-atelier'].blocks[1].items[1]}</li>
+                <li>{S['modal-atelier'].blocks[1].items[2]}</li>
+                <li>{S['modal-atelier'].blocks[1].items[3]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <h3 class="section-heading">{S['modal-atelier'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
-                <div class="spec-row"><span>Типографика:</span><strong>Премиальный акцидентный стиль</strong></div>
-                <div class="spec-row"><span>Адаптивность:</span><strong>Mobile First</strong></div>
+                <div class="spec-row"><span>{S['modal-atelier'].blocks[2].specs[0][0]}</span><strong>{S['modal-atelier'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-atelier'].blocks[2].specs[1][0]}</span><strong>{S['modal-atelier'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-atelier'].blocks[2].specs[2][0]}</span><strong>{S['modal-atelier'].blocks[2].specs[2][1]}</strong></div>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
-              <div class="result-status-box">
-                Адаптивный лендинг готов и опубликован.
-              </div>
+              <h3 class="section-heading">{S['modal-atelier'].blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{S['modal-atelier'].blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -1300,8 +1217,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-emerald">[ АРХИВ // LANDASSET5 ]</span>
-          <span class="case-badge">ИНВЕСТ-АКТИВ</span>
+          <span class="drawer-tag text-emerald">{S['modal-landasset5'].header.tag}</span>
+          <span class="case-badge">{S['modal-landasset5'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1316,69 +1233,58 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: ИНВЕСТИЦИОННЫЙ ЛЕНДИНГ ГОТОВ</div>
-          <h2 class="case-title">LandAsset5</h2>
-          <p class="case-lead">Инвестиционный лендинг крупного земельного актива 26,118 га под развитие.</p>
+          <div class="status-live">{S['modal-landasset5'].hero.status}</div>
+          <h2 class="case-title">{S['modal-landasset5'].hero.title}</h2>
+          <p class="case-lead">{S['modal-landasset5'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://landasset5.gonka.blog" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ОТКРЫТЬ ЛЕНДИНГ ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
-              ← К КАТАЛОГУ САЙТОВ
-            </button>
+            <a href={L.landasset5} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-landasset5'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-landasset5'].actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-landasset5'].actions[2]}{W0}</button>
           </div>
         </div>
 
         <!-- Реальный первый экран проекта -->
         <div class="dossier-screen-preview">
-          <img src="/previews/preview-landasset5.jpg" alt="LandAsset5 — реальный первый экран" class="dossier-screen-img" loading="lazy" />
+          <img src={M.landasset5} alt="LandAsset5 — реальный первый экран" class="dossier-screen-img" loading="lazy" />
           <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ПЕРВЫЙ ЭКРАН // landasset5.gonka.blog
-          </div>
+            <span class="caption-dot">●</span>{W1}{S['modal-landasset5'].screen.caption}{W0}</div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
-              <p class="section-text">
-                Инвестиционная страница конкретного земельного актива. Без абстрактных лозунгов: на странице собраны все ключевые характеристики, необходимые инвестору для оценки объекта.
-              </p>
+              <h3 class="section-heading">{S['modal-landasset5'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-landasset5'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ФАКТЫ ОБ АКТИВЕ</h3>
+              <h3 class="section-heading">{S['modal-landasset5'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Площадь актива: 26,118 га.</li>
-                <li>Структура: 3 смежных земельных участка.</li>
-                <li>Юридический статус: право долгосрочной аренды на 49 лет.</li>
-                <li>Интерактивная карта расположения и рельефа.</li>
-                <li>Кадастровые номера и документация для юридической проверки.</li>
-                <li>Концепция перспективного развития территории.</li>
-                <li>Прямая форма связи с собственником.</li>
+                <li>{S['modal-landasset5'].blocks[1].items[0]}</li>
+                <li>{S['modal-landasset5'].blocks[1].items[1]}</li>
+                <li>{S['modal-landasset5'].blocks[1].items[2]}</li>
+                <li>{S['modal-landasset5'].blocks[1].items[3]}</li>
+                <li>{S['modal-landasset5'].blocks[1].items[4]}</li>
+                <li>{S['modal-landasset5'].blocks[1].items[5]}</li>
+                <li>{S['modal-landasset5'].blocks[1].items[6]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <h3 class="section-heading">{S['modal-landasset5'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Вёрстка:</span><strong>HTML5, CSS3, JavaScript</strong></div>
-                <div class="spec-row"><span>Бэкенд заявок:</span><strong>Google Apps Script</strong></div>
-                <div class="spec-row"><span>База данных:</span><strong>Google Таблицы</strong></div>
-                <div class="spec-row"><span>Уведомления:</span><strong>Email textsmen@gmail.com</strong></div>
+                <div class="spec-row"><span>{S['modal-landasset5'].blocks[2].specs[0][0]}</span><strong>{S['modal-landasset5'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-landasset5'].blocks[2].specs[1][0]}</span><strong>{S['modal-landasset5'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-landasset5'].blocks[2].specs[2][0]}</span><strong>{S['modal-landasset5'].blocks[2].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-landasset5'].blocks[2].specs[3][0]}</span><strong>{S['modal-landasset5'].blocks[2].specs[3][1]}</strong></div>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
-              <div class="result-status-box">
-                Лендинг свёрстан, бэкенд настроен, отправка заявок протестирована.
-              </div>
+              <h3 class="section-heading">{S['modal-landasset5'].blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{S['modal-landasset5'].blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -1393,8 +1299,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-amber">[ АРХИВ // TRACKER_01 ]</span>
-          <span class="case-badge">РАБОЧИЙ ПРОДУКТ</span>
+          <span class="drawer-tag text-amber">{S['modal-tracker01'].header.tag}</span>
+          <span class="case-badge">{S['modal-tracker01'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1409,67 +1315,56 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: РАБОЧИЙ ПРОДУКТ • ТЕСТЫ 14/14 PASS</div>
-          <h2 class="case-title">Tracker_01</h2>
-          <p class="case-lead">Полнофункциональный веб-трекер задач для малых сервисных команд (айдентика Stopa).</p>
+          <div class="status-live">{S['modal-tracker01'].hero.status}</div>
+          <h2 class="case-title">{S['modal-tracker01'].hero.title}</h2>
+          <p class="case-lead">{S['modal-tracker01'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://tracker-01.gonka.blog/" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ОТКРЫТЬ ДЕМО ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">
-              ← К КАТАЛОГУ САЙТОВ
-            </button>
+            <a href={L.tracker01} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-tracker01'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-tracker01'].actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-tracker01'].actions[2]}{W0}</button>
           </div>
         </div>
 
         <!-- Реальный первый экран Канбан-доски -->
         <div class="dossier-screen-preview">
-          <img src="/previews/preview-tracker01.jpg" alt="Tracker_01 — реальный экран Канбан-доски" class="dossier-screen-img" loading="lazy" />
+          <img src={M.tracker01} alt="Tracker_01 — реальный экран Канбан-доски" class="dossier-screen-img" loading="lazy" />
           <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span> РЕАЛЬНЫЙ ИНТЕРФЕЙС СЕРВИСА // tracker-01.gonka.blog
-          </div>
+            <span class="caption-dot">●</span>{W1}{S['modal-tracker01'].screen.caption}{W0}</div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// ДЛЯ КОГО И ЗАЧЕМ</h3>
-              <p class="section-text">
-                Сервис разработан для небольших сервисных служб (выгул и передержка животных, клининг, локальные команды). Помогает вести задачи без путаницы в мессенджерах и без дорогой подписки на корпоративные таск-трекеры.
-              </p>
+              <h3 class="section-heading">{S['modal-tracker01'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-tracker01'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО РЕАЛЬНО СДЕЛАНО</h3>
+              <h3 class="section-heading">{S['modal-tracker01'].blocks[1].heading}</h3>
               <ul class="facts-list">
                 <li>Интерактивный Канбан на 5 колонок с native HTML5 Drag & Drop.</li>
-                <li>Ролевая модель доступа: Администратор, Руководитель, Сотрудник.</li>
-                <li>Управление дедлайнами, приоритетами и подсветка просроченных задач.</li>
-                <li>Комментарии к карточкам с прикреплением ссылок и история изменений.</li>
-                <li>Безопасная сессионная авторизация и CSRF-защита форм.</li>
+                <li>{S['modal-tracker01'].blocks[1].items[0]}</li>
+                <li>{S['modal-tracker01'].blocks[1].items[1]}</li>
+                <li>{S['modal-tracker01'].blocks[1].items[2]}</li>
+                <li>{S['modal-tracker01'].blocks[1].items[3]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <h3 class="section-heading">{S['modal-tracker01'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Бэкенд:</span><strong>PHP 8.3 (чистая архитектура)</strong></div>
-                <div class="spec-row"><span>База данных:</span><strong>MySQL / MariaDB (10 таблиц)</strong></div>
-                <div class="spec-row"><span>Фронтенд:</span><strong>HTML5, CSS3, Vanilla JS</strong></div>
-                <div class="spec-row"><span>Сервер:</span><strong>Ubuntu Linux, Nginx</strong></div>
+                <div class="spec-row"><span>{S['modal-tracker01'].blocks[2].specs[0][0]}</span><strong>{S['modal-tracker01'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-tracker01'].blocks[2].specs[1][0]}</span><strong>{S['modal-tracker01'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-tracker01'].blocks[2].specs[2][0]}</span><strong>{S['modal-tracker01'].blocks[2].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-tracker01'].blocks[2].specs[3][0]}</span><strong>{S['modal-tracker01'].blocks[2].specs[3][1]}</strong></div>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
-              <div class="result-status-box">
-                Сервис полностью работает, 14 приёмочных тестов пройдены успешно.
-              </div>
+              <h3 class="section-heading">{S['modal-tracker01'].blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{S['modal-tracker01'].blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -1484,8 +1379,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-purple">[ АРХИВ // БОТ ДЕТЕКТИВ ]</span>
-          <span class="case-badge">TELEGRAM-БОТ</span>
+          <span class="drawer-tag text-purple">{S['modal-aichatbot'].header.tag}</span>
+          <span class="case-badge">{S['modal-aichatbot'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1500,59 +1395,49 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: БОТ РАБОТАЕТ В TELEGRAM</div>
-          <h2 class="case-title">Бот Детектив</h2>
-          <p class="case-lead">Игровой Telegram-бот с интерактивными текстовыми квестами-расследованиями.</p>
+          <div class="status-live">{S['modal-aichatbot'].hero.status}</div>
+          <h2 class="case-title">{S['modal-aichatbot'].hero.title}</h2>
+          <p class="case-lead">{S['modal-aichatbot'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://t.me/AI_CH_BOT_univers_bot" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ЗАПУСТИТЬ В TELEGRAM (@AI_CH_BOT_univers_bot) ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">
-              ← К КАТАЛОГУ БОТОВ
-            </button>
+            <a href={L.botDetective} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-aichatbot'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-aichatbot'].actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">{W0}{S['modal-aichatbot'].actions[2]}{W0}</button>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ПРОЕКТЕ</h3>
-              <p class="section-text">
-                Интерактивный бот в Telegram. Игрок выступает в роли сыщика: выбирает дело, изучает улики, допрашивает свидетелей, сверяет алиби и решает, кому предъявить обвинение.
-              </p>
+              <h3 class="section-heading">{S['modal-aichatbot'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-aichatbot'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО СДЕЛАНО</h3>
+              <h3 class="section-heading">{S['modal-aichatbot'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Система нелинейных детективных дел разной сложности.</li>
-                <li>Игровые команды: /cases, /evidence, /interrog, /alibi, /hint, /accuse.</li>
-                <li>Сохранение игрового прогресса, профиль игрока и система достижений.</li>
-                <li>Доставка улик с медиа-файлами (фото, аудио, видео) и текстовым fallback.</li>
-                <li>175 автоматических тестов для проверки надёжности движка.</li>
+                <li>{S['modal-aichatbot'].blocks[1].items[0]}</li>
+                <li>{S['modal-aichatbot'].blocks[1].items[1]}</li>
+                <li>{S['modal-aichatbot'].blocks[1].items[2]}</li>
+                <li>{S['modal-aichatbot'].blocks[1].items[3]}</li>
+                <li>{S['modal-aichatbot'].blocks[1].items[4]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕХНОЛОГИИ</h3>
+              <h3 class="section-heading">{S['modal-aichatbot'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Бэкенд:</span><strong>Node.js, TypeScript</strong></div>
-                <div class="spec-row"><span>Платформа:</span><strong>Telegram Bot API</strong></div>
-                <div class="spec-row"><span>Тесты:</span><strong>175 unit/integration tests</strong></div>
-                <div class="spec-row"><span>Сервер:</span><strong>Linux VPS</strong></div>
+                <div class="spec-row"><span>{S['modal-aichatbot'].blocks[2].specs[0][0]}</span><strong>{S['modal-aichatbot'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-aichatbot'].blocks[2].specs[1][0]}</span><strong>{S['modal-aichatbot'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-aichatbot'].blocks[2].specs[2][0]}</span><strong>{S['modal-aichatbot'].blocks[2].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-aichatbot'].blocks[2].specs[3][0]}</span><strong>{S['modal-aichatbot'].blocks[2].specs[3][1]}</strong></div>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// РЕЗУЛЬТАТ</h3>
-              <div class="result-status-box">
-                Бот опубликован и доступен в Telegram: @AI_CH_BOT_univers_bot.
-              </div>
+              <h3 class="section-heading">{S['modal-aichatbot'].blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{S['modal-aichatbot'].blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -1567,8 +1452,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-amber">[ ПОЛЕВОЕ ИССЛЕДОВАНИЕ ]</span>
-          <span class="case-badge">В РАБОТЕ</span>
+          <span class="drawer-tag text-amber">{S['modal-serbia-wip'].header.tag}</span>
+          <span class="case-badge">{S['modal-serbia-wip'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1583,54 +1468,44 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● ПОЛЕВОЕ ИССЛЕДОВАНИЕ // В РАБОТЕ</div>
-          <h2 class="case-title">Релокант Сербия</h2>
-          <p class="case-lead">Полевое исследование среды, сервисов и реальных бытовых задач.</p>
+          <div class="status-live">{S['modal-serbia-wip'].hero.status}</div>
+          <h2 class="case-title">{S['modal-serbia-wip'].hero.title}</h2>
+          <p class="case-lead">{S['modal-serbia-wip'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://reloca.gonka.blog/" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" title="Открыть проект reloca.gonka.blog">
-              ОТКРЫТЬ ПРОЕКТ (reloca.gonka.blog) ↗
-            </a>
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
-              ОБСУДИТЬ В TELEGRAM (@lonelysvobodny) ↗
-            </a>
+            <a href={L.reloca} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" title="Открыть проект reloca.gonka.blog">{W0}{S['modal-serbia-wip'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-serbia-wip'].actions[1]}{W0}</a>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО ИССЛЕДУЮ</h3>
-              <p class="section-text">
-                Собираю информацию о среде, сервисах, документах, жилье, бытовых задачах и цифровых инструментах.
-              </p>
+              <h3 class="section-heading">{S['modal-serbia-wip'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-serbia-wip'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// КАК ИДУ</h3>
-              <div class="tech-spec-box" style="font-size: 13px; color: #ede8df; line-height: 1.55;">
-                Наблюдение → сбор фактов → проверка → фиксация → гипотеза.
-              </div>
+              <h3 class="section-heading">{S['modal-serbia-wip'].blocks[1].heading}</h3>
+              <div class="tech-spec-box" style="font-size: 13px; color: #ede8df; line-height: 1.55;">{W0}{S['modal-serbia-wip'].blocks[1].boxText}{W0}</div>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ТЕКУЩИЙ ЭТАП</h3>
+              <h3 class="section-heading">{S['modal-serbia-wip'].blocks[2].heading}</h3>
               <div class="lab-dossier-card">
-                <p class="dossier-text">
-                  Исследование продолжается. Материалы появляются по мере проверки и использования на практике.
-                </p>
+                <p class="dossier-text">{W0}{S['modal-serbia-wip'].blocks[2].dossier[0]}{W0}</p>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ПОЛЕВЫЕ ДАННЫЕ</h3>
+              <h3 class="section-heading">{S['modal-serbia-wip'].blocks[3].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Проект:</span><strong><a href="https://reloca.gonka.blog/" target="_blank" rel="noopener noreferrer" style="color: #f59e0b; text-decoration: underline;">reloca.gonka.blog ↗</a></strong></div>
-                <div class="spec-row"><span>Статус:</span><strong class="text-amber-400">[ В РАБОТЕ // ИССЛЕДОВАНИЕ ]</strong></div>
+                <div class="spec-row"><span>{S['modal-serbia-wip'].blocks[3].specs[0][0]}</span><strong><a href={L.reloca} target="_blank" rel="noopener noreferrer" style="color: #f59e0b; text-decoration: underline;">{S['modal-serbia-wip'].blocks[3].specs[0][1]}</a></strong></div>
+                <div class="spec-row"><span>{S['modal-serbia-wip'].blocks[3].specs[1][0]}</span><strong class="text-amber-400">{S['modal-serbia-wip'].blocks[3].specs[1][1]}</strong></div>
                 <div class="spec-row"><span>Характер:</span><strong>Личный R&D-проект</strong></div>
-                <div class="spec-row"><span>Локация:</span><strong>Белград • Нови-Сад</strong></div>
-                <div class="spec-row"><span>Связь:</span><strong>@lonelysvobodny</strong></div>
+                <div class="spec-row"><span>{S['modal-serbia-wip'].blocks[3].specs[2][0]}</span><strong>{S['modal-serbia-wip'].blocks[3].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-serbia-wip'].blocks[3].specs[3][0]}</span><strong>{S['modal-serbia-wip'].blocks[3].specs[3][1]}</strong></div>
               </div>
             </div>
           </div>
@@ -1646,8 +1521,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-orange">[ ПРЯМАЯ ЛИНИЯ // КОНТАКТ ]</span>
-          <span class="case-badge">СВЯЗЬ</span>
+          <span class="drawer-tag text-orange">{S['modal-incoming'].header.tag}</span>
+          <span class="case-badge">{S['modal-incoming'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1662,39 +1537,35 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: НА СВЯЗИ</div>
-          <h2 class="case-title">Прямая связь</h2>
-          <p class="case-lead">Есть задача или идея цифрового продукта? Давайте обсудим напрямую.</p>
+          <div class="status-live">{S['modal-incoming'].hero.status}</div>
+          <h2 class="case-title">{S['modal-incoming'].hero.title}</h2>
+          <p class="case-lead">{S['modal-incoming'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              НАПИСАТЬ В TELEGRAM (@lonelysvobodny) ↗
-            </a>
-            <a href="mailto:textsmen@gmail.com" class="case-action-btn btn-secondary">
-              ОТПРАВИТЬ EMAIL ↗
-            </a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-incoming'].actions[0]}{W0}</a>
+            <a href={L.email} class="case-action-btn btn-secondary">{W0}{S['modal-incoming'].actions[1]}{W0}</a>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// С ЧЕМ МОЖНО ОБРАТИТЬСЯ</h3>
+              <h3 class="section-heading">{S['modal-incoming'].blocks[0].heading}</h3>
               <ul class="facts-list">
-                <li>Разработка Telegram-ботов для заказов, каталогов и сервисов.</li>
-                <li>Создание презентационных сайтов и адаптивных лендингов.</li>
-                <li>Внутренние рабочие инструменты, таск-трекеры и автоматизации.</li>
-                <li>Быстрая сборка работающих прототипов (MVP).</li>
+                <li>{S['modal-incoming'].blocks[0].items[0]}</li>
+                <li>{S['modal-incoming'].blocks[0].items[1]}</li>
+                <li>{S['modal-incoming'].blocks[0].items[2]}</li>
+                <li>{S['modal-incoming'].blocks[0].items[3]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// КОНТАКТЫ</h3>
+              <h3 class="section-heading">{S['modal-incoming'].blocks[1].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Telegram:</span><strong>@lonelysvobodny</strong></div>
-                <div class="spec-row"><span>Email:</span><strong>textsmen@gmail.com</strong></div>
-                <div class="spec-row"><span>Формат:</span><strong>Обсудили задачу ➔ собрали ➔ запустили</strong></div>
+                <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[0][0]}</span><strong>{S['modal-incoming'].blocks[1].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[1][0]}</span><strong>{S['modal-incoming'].blocks[1].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[2][0]}</span><strong>{S['modal-incoming'].blocks[1].specs[2][1]}</strong></div>
               </div>
             </div>
           </div>
@@ -1710,8 +1581,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-amber">[ ПРОЦЕСС // ЧЕРНОВИК ]</span>
-          <span class="case-badge">РОЖДЕНИЕ ПРОЕКТА</span>
+          <span class="drawer-tag text-amber">{S['modal-draft'].header.tag}</span>
+          <span class="case-badge">{S['modal-draft'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1726,51 +1597,45 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● ПРОВЕРКА ЦЕЛЕСООБРАЗНОСТИ</div>
-          <h2 class="case-title">Черновик</h2>
-          <p class="case-lead">Место, где идея превращается в первую рабочую версию.</p>
+          <div class="status-live">{S['modal-draft'].hero.status}</div>
+          <h2 class="case-title">{S['modal-draft'].hero.title}</h2>
+          <p class="case-lead">{S['modal-draft'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              ОБСУДИТЬ ИДЕЮ В TELEGRAM ↗
-            </a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-draft'].actions[0]}{W0}</a>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// КАК РОЖДАЕТСЯ ПРОЕКТ</h3>
-              <p class="section-text">
-                Сначала фиксирую задачу. Потом собираю структуру и сценарий. Затем делаю минимальный рабочий прототип. Если прототип проходит проверку — проект идёт дальше.
-              </p>
+              <h3 class="section-heading">{S['modal-draft'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-draft'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ЭТАПЫ СБОРКИ</h3>
+              <h3 class="section-heading">{S['modal-draft'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>1. Задача и сценарий.</li>
-                <li>2. Черновая структура.</li>
-                <li>3. Первый рабочий прототип.</li>
-                <li>4. Проверка на реальных данных.</li>
-                <li>5. Решение: развивать или закрыть.</li>
+                <li>{S['modal-draft'].blocks[1].items[0]}</li>
+                <li>{S['modal-draft'].blocks[1].items[1]}</li>
+                <li>{S['modal-draft'].blocks[1].items[2]}</li>
+                <li>{S['modal-draft'].blocks[1].items[3]}</li>
+                <li>{S['modal-draft'].blocks[1].items[4]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ГЛАВНАЯ МЫСЛЬ</h3>
-              <blockquote class="quote-box">
-                «Здесь проект ещё не готов. Здесь проверяется, стоит ли его вообще собирать.»
-              </blockquote>
+              <h3 class="section-heading">{S['modal-draft'].blocks[2].heading}</h3>
+              <blockquote class="quote-box">{W0}{S['modal-draft'].blocks[2].quote}{W0}</blockquote>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// ПАРАМЕТРЫ ЭТАПА</h3>
+              <h3 class="section-heading">{S['modal-draft'].blocks[3].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Фокус:</span><strong>Проверка жизнеспособности</strong></div>
-                <div class="spec-row"><span>Инструмент:</span><strong>Блокнот, схема, быстрый код</strong></div>
-                <div class="spec-row"><span>Критерий:</span><strong>Понятная польза сценария</strong></div>
+                <div class="spec-row"><span>{S['modal-draft'].blocks[3].specs[0][0]}</span><strong>{S['modal-draft'].blocks[3].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-draft'].blocks[3].specs[1][0]}</span><strong>{S['modal-draft'].blocks[3].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-draft'].blocks[3].specs[2][0]}</span><strong>{S['modal-draft'].blocks[3].specs[2][1]}</strong></div>
               </div>
             </div>
           </div>
@@ -1786,8 +1651,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-red">[ АРХИВ ОШИБОК // НЕ ПОШЛО ]</span>
-          <span class="case-badge">ПОСТМОРТЕМ</span>
+          <span class="drawer-tag text-red">{S['modal-failures'].header.tag}</span>
+          <span class="case-badge">{S['modal-failures'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1802,38 +1667,30 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live text-red">● ЗАКРЫТЫЕ ЭКСПЕРИМЕНТЫ</div>
-          <h2 class="case-title">Не пошло</h2>
-          <p class="case-lead">Честный постмортем закрытых гипотез мастерской.</p>
+          <div class="status-live text-red">{S['modal-failures'].hero.status}</div>
+          <h2 class="case-title">{S['modal-failures'].hero.title}</h2>
+          <p class="case-lead">{S['modal-failures'].hero.lead}</p>
         </div>
 
         <div class="case-section">
-          <h3 class="section-heading">// ЧЕМУ НАУЧИЛИ ОШИБКИ</h3>
-          <p class="section-text">
-            В живой лаборатории не каждый эксперимент превращается в продукт. Если идея не даёт практического результата или спроса — правильнее закрыть её сразу, чем тянуть месяцами.
-          </p>
+          <h3 class="section-heading">{S['modal-failures'].blocks[0].heading}</h3>
+          <p class="section-text">{W0}{S['modal-failures'].blocks[0].text}{W0}</p>
         </div>
 
         <div class="failures-list">
           <div class="failure-item">
-            <div class="failure-title">➔ Тяжелый микросервисный SaaS без клиентов</div>
-            <p class="failure-desc">
-              Слишком сложная архитектура до проверки спроса. Урок: сначала простой MVP и тест на живых людях, затем усложнение.
-            </p>
+            <div class="failure-title">{S['modal-failures'].failures[0].title}</div>
+            <p class="failure-desc">{W0}{S['modal-failures'].failures[0].desc}{W0}</p>
           </div>
 
           <div class="failure-item">
-            <div class="failure-title">➔ DEX Liquidity Sniffer в криптовалютах</div>
-            <p class="failure-desc">
-              Эксперимент с ончейн-аналитикой криптобирж. Закрыт из-за отсутствия долгосрочной практической пользы.
-            </p>
+            <div class="failure-title">{S['modal-failures'].failures[1].title}</div>
+            <p class="failure-desc">{W0}{S['modal-failures'].failures[1].desc}{W0}</p>
           </div>
 
           <div class="failure-item">
-            <div class="failure-title">➔ Автоматический суммаризатор новостей</div>
-            <p class="failure-desc">
-              Парсер работал отлично, но людям не нужны общие выжимки — им нужны конкретные ответы под их прикладную задачу.
-            </p>
+            <div class="failure-title">{S['modal-failures'].failures[2].title}</div>
+            <p class="failure-desc">{W0}{S['modal-failures'].failures[2].desc}{W0}</p>
           </div>
         </div>
       </div>
@@ -1848,7 +1705,7 @@
       <div class="drawer-header">
         <div class="drawer-header-left">
           <span class="drawer-tag text-amber">[ АРХИВ // ВИДЕО & МОНТАЖ ]</span>
-          <span class="case-badge">ВИДЕОЦЕХ</span>
+          <span class="case-badge">{S['modal-video'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1863,32 +1720,28 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● СТАТУС: ВИДЕОЦЕХ</div>
-          <h2 class="case-title">Видео и процесс</h2>
-          <p class="case-lead">Фиксация процесса сборки продуктов, скринкасты и визуальные материалы.</p>
+          <div class="status-live">{S['modal-video'].hero.status}</div>
+          <h2 class="case-title">{S['modal-video'].hero.title}</h2>
+          <p class="case-lead">{S['modal-video'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-video'].actions[0]}{W0}</a>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// О ФОРМАТЕ</h3>
-              <p class="section-text">
-                Видео-материалы по разработке цифровых продуктов: запись живой сборки интерфейсов, демонстрация работы ботов и разбор архитектурных решений.
-              </p>
+              <h3 class="section-heading">{S['modal-video'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-video'].blocks[0].text}{W0}</p>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ИНСТРУМЕНТЫ</h3>
+              <h3 class="section-heading">{S['modal-video'].blocks[1].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Монтаж:</span><strong>DaVinci Resolve</strong></div>
-                <div class="spec-row"><span>Запись экрана:</span><strong>OBS Studio</strong></div>
+                <div class="spec-row"><span>{S['modal-video'].blocks[1].specs[0][0]}</span><strong>{S['modal-video'].blocks[1].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-video'].blocks[1].specs[1][0]}</span><strong>{S['modal-video'].blocks[1].specs[1][1]}</strong></div>
               </div>
             </div>
           </div>
@@ -1904,8 +1757,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-blue">[ ИНФРАСТРУКТУРА // СЕТЬ ]</span>
-          <span class="case-badge">ТЕХНИЧЕСКАЯ ОСНОВА</span>
+          <span class="drawer-tag text-blue">{S['modal-network'].header.tag}</span>
+          <span class="case-badge">{S['modal-network'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1920,43 +1773,39 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● ТЕХНИЧЕСКАЯ ОСНОВА</div>
-          <h2 class="case-title">Инструменты</h2>
-          <p class="case-lead">Техническая основа, на которой работают проекты мастерской.</p>
+          <div class="status-live">{S['modal-network'].hero.status}</div>
+          <h2 class="case-title">{S['modal-network'].hero.title}</h2>
+          <p class="case-lead">{S['modal-network'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              СВЯЗАТЬСЯ В TELEGRAM ↗
-            </a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-network'].actions[0]}{W0}</a>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">// ПРИНЦИП ВЫБОРА</h3>
-              <p class="section-text">
-                Инструмент выбирается под задачу проекта. Для простого сайта не нужна сложная инфраструктура. Для бота или сервиса важны стабильность, база данных и постоянная работа.
-              </p>
+              <h3 class="section-heading">{S['modal-network'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-network'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">// КАК ЭТО РАБОТАЕТ</h3>
+              <h3 class="section-heading">{S['modal-network'].blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>Сайт → веб-сервер → данные.</li>
-                <li>Бот → сервер → внешние API → база данных.</li>
-                <li>Каждый проект получает только ту инфраструктуру, которая ему действительно нужна.</li>
+                <li>{S['modal-network'].blocks[1].items[0]}</li>
+                <li>{S['modal-network'].blocks[1].items[1]}</li>
+                <li>{S['modal-network'].blocks[1].items[2]}</li>
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">// ЧТО ИСПОЛЬЗУЕТСЯ</h3>
+              <h3 class="section-heading">{S['modal-network'].blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Веб:</span><strong>Astro, HTML, CSS, JavaScript</strong></div>
-                <div class="spec-row"><span>Боты и сервисы:</span><strong>Python, Node.js, PHP</strong></div>
-                <div class="spec-row"><span>Данные:</span><strong>MySQL, SQLite, PostgreSQL</strong></div>
-                <div class="spec-row"><span>Инфраструктура:</span><strong>Linux VPS, Nginx, systemd</strong></div>
+                <div class="spec-row"><span>{S['modal-network'].blocks[2].specs[0][0]}</span><strong>{S['modal-network'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-network'].blocks[2].specs[1][0]}</span><strong>{S['modal-network'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-network'].blocks[2].specs[2][0]}</span><strong>{S['modal-network'].blocks[2].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-network'].blocks[2].specs[3][0]}</span><strong>{S['modal-network'].blocks[2].specs[3][1]}</strong></div>
               </div>
             </div>
           </div>
@@ -1972,8 +1821,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-orange">[ ПРАВИЛА // КАК Я РАБОТАЮ ]</span>
-          <span class="case-badge">РАБОЧИЙ ЦИКЛ</span>
+          <span class="drawer-tag text-orange">{S['modal-manifesto'].header.tag}</span>
+          <span class="case-badge">{S['modal-manifesto'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -1988,49 +1837,49 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● РАБОЧИЙ ЦИКЛ РАЗРАБОТКИ</div>
-          <h2 class="case-title">Как я работаю</h2>
-          <p class="case-lead">Рабочий цикл создания реального цифрового продукта.</p>
+          <div class="status-live">{S['modal-manifesto'].hero.status}</div>
+          <h2 class="case-title">{S['modal-manifesto'].hero.title}</h2>
+          <p class="case-lead">{S['modal-manifesto'].hero.lead}</p>
         </div>
 
         <div class="rules-stack">
           <div class="rule-card">
-            <span class="rule-num">01</span>
+            <span class="rule-num">{S['modal-manifesto'].rules[0].num}</span>
             <div class="rule-content">
-              <strong>РАЗОБРАТЬ ЗАДАЧУ</strong>
-              <p>Понять, что нужно сделать, для кого и какой результат нужен.</p>
+              <strong>{S['modal-manifesto'].rules[0].title}</strong>
+              <p>{S['modal-manifesto'].rules[0].text}</p>
             </div>
           </div>
 
           <div class="rule-card">
-            <span class="rule-num">02</span>
+            <span class="rule-num">{S['modal-manifesto'].rules[1].num}</span>
             <div class="rule-content">
-              <strong>СОБРАТЬ ПЕРВУЮ ВЕРСИЮ</strong>
-              <p>Сначала рабочий прототип, потом детализация.</p>
+              <strong>{S['modal-manifesto'].rules[1].title}</strong>
+              <p>{S['modal-manifesto'].rules[1].text}</p>
             </div>
           </div>
 
           <div class="rule-card">
-            <span class="rule-num">03</span>
+            <span class="rule-num">{S['modal-manifesto'].rules[2].num}</span>
             <div class="rule-content">
-              <strong>ПРОВЕРИТЬ</strong>
-              <p>Запустить, проверить сценарии, ссылки, данные и реальное поведение.</p>
+              <strong>{S['modal-manifesto'].rules[2].title}</strong>
+              <p>{S['modal-manifesto'].rules[2].text}</p>
             </div>
           </div>
 
           <div class="rule-card">
-            <span class="rule-num">04</span>
+            <span class="rule-num">{S['modal-manifesto'].rules[3].num}</span>
             <div class="rule-content">
-              <strong>ДОВЕСТИ ДО ЗАПУСКА</strong>
-              <p>Исправить найденное, подключить необходимые сервисы и вывести проект в работу.</p>
+              <strong>{S['modal-manifesto'].rules[3].title}</strong>
+              <p>{S['modal-manifesto'].rules[3].text}</p>
             </div>
           </div>
 
           <div class="rule-card">
-            <span class="rule-num">05</span>
+            <span class="rule-num">{S['modal-manifesto'].rules[4].num}</span>
             <div class="rule-content">
-              <strong>ЗАФИКСИРОВАТЬ РЕЗУЛЬТАТ</strong>
-              <p>Что получилось — оставить как рабочий продукт. Что не получилось — честно отметить и не выдавать за готовое.</p>
+              <strong>{S['modal-manifesto'].rules[4].title}</strong>
+              <p>{S['modal-manifesto'].rules[4].text}</p>
             </div>
           </div>
         </div>
@@ -2045,8 +1894,8 @@
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-amber">[ ЗАПИСЬ АВТОРА // ОБО МНЕ ]</span>
-          <span class="case-badge">АРТЕФАКТ</span>
+          <span class="drawer-tag text-amber">{S['modal-about'].header.tag}</span>
+          <span class="case-badge">{S['modal-about'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -2061,16 +1910,12 @@
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">● ЦИФРОВАЯ ЛАБОРАТОРИЯ // ЗАПИСЬ АВТОРА</div>
-          <h2 class="case-title">Олег // GONKA.BLOG</h2>
-          <p class="case-lead">Личная мастерская действующих цифровых продуктов.</p>
+          <div class="status-live">{S['modal-about'].hero.status}</div>
+          <h2 class="case-title">{S['modal-about'].hero.title}</h2>
+          <p class="case-lead">{S['modal-about'].hero.lead}</p>
           <div class="case-actions">
-            <a href="https://t.me/lonelysvobodny" target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
-              НАПИСАТЬ В TELEGRAM (@lonelysvobodny) ↗
-            </a>
-            <a href="mailto:textsmen@gmail.com" class="case-action-btn btn-secondary">
-              ОТПРАВИТЬ EMAIL ↗
-            </a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-about'].actions[0]}{W0}</a>
+            <a href={L.email} class="case-action-btn btn-secondary">{W0}{S['modal-about'].actions[1]}{W0}</a>
           </div>
         </div>
 
@@ -2079,36 +1924,30 @@
 
             <!-- АВТОРСКОЕ ДОСЬЕ -->
             <div class="case-section">
-              <h3 class="section-heading">// ЛАБОРАТОРНАЯ ЗАПИСЬ АВТОРА</h3>
+              <h3 class="section-heading">{S['modal-about'].blocks[0].heading}</h3>
               <div class="lab-dossier-card">
                 <div class="dossier-badge-row">
-                  <span class="dossier-tag">ЗАПИСЬ АВТОРА</span>
-                  <span class="dossier-status">● В СЕТИ</span>
+                  <span class="dossier-tag">{S['modal-about'].blocks[0].dossierTag}</span>
+                  <span class="dossier-status">{S['modal-about'].blocks[0].dossierStatus}</span>
                 </div>
 
                 <div class="dossier-block">
-                  <div class="author-greeting">Привет! Я Олег.</div>
-                  <p class="dossier-text">
-                    Создаю цифровые решения под задачи бизнеса: лендинги, Telegram-боты и веб-сервисы.
-                  </p>
-                </div>
-
-                <div class="dossier-divider"></div>
-
-                <div class="dossier-block">
-                  <span class="dossier-subheading">// ПОДХОД К ЗАДАЧЕ</span>
-                  <p class="dossier-text">
-                    Помогаю превратить задачу в понятный готовый продукт: продумываю структуру, реализую согласованный функционал и довожу проект до готового результата.
-                  </p>
+                  <div class="author-greeting">{S['modal-about'].blocks[0].greeting}</div>
+                  <p class="dossier-text">{W0}{S['modal-about'].blocks[0].dossier[0]}{W0}</p>
                 </div>
 
                 <div class="dossier-divider"></div>
 
                 <div class="dossier-block">
-                  <span class="dossier-subheading">// ПРИНЦИП РАБОТЫ</span>
-                  <p class="dossier-text">
-                    Работаю по согласованному объёму, соблюдаю сроки и внимательно отношусь к деталям.
-                  </p>
+                  <span class="dossier-subheading">{S['modal-about'].blocks[0].subheadings[0]}</span>
+                  <p class="dossier-text">{W0}{S['modal-about'].blocks[0].dossier[1]}{W0}</p>
+                </div>
+
+                <div class="dossier-divider"></div>
+
+                <div class="dossier-block">
+                  <span class="dossier-subheading">{S['modal-about'].blocks[0].subheadings[1]}</span>
+                  <p class="dossier-text">{W0}{S['modal-about'].blocks[0].dossier[2]}{W0}</p>
                 </div>
               </div>
             </div>
@@ -2119,23 +1958,21 @@
 
             <!-- ВИЗУАЛЬНЫЙ АРТЕФАКТ СВИТКА В СТИЛЕ ЦИФРОВОЙ ЛАБОРАТОРИИ -->
             <div class="case-section">
-              <h3 class="section-heading">// АРТЕФАКТ СО СТОЛА</h3>
+              <h3 class="section-heading">{S['modal-about'].blocks[1].heading}</h3>
               <div class="lab-scroll-artifact">
                 <div class="scroll-artifact-top">
                   <div class="wax-seal-icon">
                     <span class="seal-core"></span>
-                    <span class="seal-text">СВИТОК ВЕРСТАКА</span>
+                    <span class="seal-text">{S['modal-about'].blocks[1].seal}</span>
                   </div>
-                  <span class="scroll-tag">ПЕРГАМЕНТ</span>
+                  <span class="scroll-tag">{S['modal-about'].blocks[1].tag}</span>
                 </div>
                 
-                <blockquote class="scroll-handwritten-text">
-                  «Хорошие идеи приходят не по расписанию.»
-                </blockquote>
+                <blockquote class="scroll-handwritten-text">{W0}{S['modal-about'].blocks[1].quote}{W0}</blockquote>
                 
                 <div class="scroll-artifact-bottom">
                   <span class="artifact-geo">45°15'N 19°51'E</span>
-                  <span class="artifact-signature">GONKA.BLOG // DIGITAL LAB</span>
+                  <span class="artifact-signature">{S['modal-about'].blocks[1].signature}</span>
                 </div>
               </div>
             </div>
@@ -2144,11 +1981,11 @@
             <div class="case-section">
               <h3 class="section-heading">// ПАРАМЕТРЫ & СВЯЗЬ</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>Создатель:</span><strong>Олег</strong></div>
-                <div class="spec-row"><span>Профиль:</span><strong>Лендинги • Боты • Сервисы</strong></div>
-                <div class="spec-row"><span>Формат:</span><strong>Согласованный объём и сроки</strong></div>
-                <div class="spec-row"><span>Telegram:</span><strong>@lonelysvobodny</strong></div>
-                <div class="spec-row"><span>Email:</span><strong>textsmen@gmail.com</strong></div>
+                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[0][0]}</span><strong>{S['modal-about'].blocks[2].specs[0][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[1][0]}</span><strong>{S['modal-about'].blocks[2].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[2][0]}</span><strong>{S['modal-about'].blocks[2].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[3][0]}</span><strong>{S['modal-about'].blocks[2].specs[3][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[4][0]}</span><strong>{S['modal-about'].blocks[2].specs[4][1]}</strong></div>
               </div>
             </div>
 

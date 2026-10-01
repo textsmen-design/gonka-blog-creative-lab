@@ -2,8 +2,10 @@
 // src/pages/index.astro
 import SpatialWorkbench from '../components/SpatialWorkbench.astro';
 
-const title = "GONKA.BLOG — Личная цифровая лаборатория";
-const description = "Среда, где идеи превращаются в работающие цифровые продукты: сайты, боты, AI-сервисы, автоматизации и SaaS.";
+import site from '../data/site.json';
+
+const title = site.meta.title;
+const description = site.meta.description;
 ---
 
 <!DOCTYPE html>
