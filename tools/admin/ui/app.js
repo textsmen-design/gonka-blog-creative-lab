@@ -1,45 +1,3 @@
-
-async function checkSession() {
-  try {
-    const res = await fetch('/api/session');
-    if (res.ok) {
-      document.getElementById('login-gate').style.display = 'none';
-      return true;
-    }
-  } catch (e) {}
-  return false;
-}
-
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const pwd = document.getElementById('login-pass').value;
-  try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ password: pwd })
-    });
-    if (res.ok) {
-      document.getElementById('login-gate').style.display = 'none';
-      // Store token locally as a fallback just in case some scripts read it (though we use cookies)
-      localStorage.setItem('admin_token', pwd);
-      window.TOKEN = pwd;
-      refreshUI();
-    } else {
-      document.getElementById('login-error').innerText = 'ACCESS DENIED';
-    }
-  } catch(err) {
-    document.getElementById('login-error').innerText = 'NETWORK ERROR';
-  }
-});
-
-// Logout
-window.logoutAdmin = async function() {
-  await fetch('/api/logout', { method: 'POST' });
-  localStorage.removeItem('admin_token');
-  location.reload();
-};
-
 /* tools/admin/ui/app.js — UI админки GONKA.BLOG (vanilla JS).
  * Данные в DOM попадают только через textContent (без innerHTML). */
 (() => {
@@ -1110,7 +1068,7 @@ window.logoutAdmin = async function() {
     try {
       const res = await fetch('/api/upload?name=' + encodeURIComponent(file.name), {
         method: 'POST',
-        headers: { 'X-Admin-Token': state.token, 'Content-Type': file.type },
+        headers: { 'Content-Type': file.type },
         body: await file.arrayBuffer(),
       });
       const body = await res.json().catch(() => ({}));
@@ -1169,7 +1127,7 @@ window.logoutAdmin = async function() {
   }
 
   async function doExport() {
-    const res = await fetch('/api/export', { headers: { 'X-Admin-Token': state.token } });
+    const res = await fetch('/api/export', { headers: {} });
     if (res.status !== 200) { notice('err', 'Экспорт не выполнен', [{ message: 'ошибка ' + res.status }]); return; }
     const blob = await res.blob();
     const m = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') || '');
@@ -1475,16 +1433,35 @@ window.logoutAdmin = async function() {
     e.preventDefault();
     state.token = $('#gate-token').value.trim();
     if (!state.token) return;
-    sessionStorage.setItem('gonka-admin-token', state.token);
-    $('#gate-error').hidden = true;
-    const ok = await load().catch(() => false);
-    if (!ok && state.token && !state.versionError) showGate('Токен не принят (проверьте tools/admin/.token)');
+    
+    $('#gate-submit').disabled = true;
+    try {
+      const loginRes = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: state.token })
+      });
+      if (!loginRes.ok) throw new Error('invalid');
+      
+      // Cookie is now set, load data without sending token in header
+      const ok = await load().catch(() => false);
+      if (!ok && !state.versionError) showGate('Не удалось загрузить данные после входа');
+      else {
+        sessionStorage.setItem('gonka-admin-token', 'SESSION_ACTIVE');
+        $('#gate-error').hidden = true;
+      }
+    } catch(e) {
+      showGate('Неверный пароль или ошибка сети');
+    } finally {
+      $('#gate-submit').disabled = false;
+    }
   });
 
-  $('#btn-logout').addEventListener('click', () => {
+  $('#btn-logout').addEventListener('click', async () => {
+    await fetch('/api/logout', { method: 'POST' });
     sessionStorage.removeItem('gonka-admin-token');
     state.token = '';
-    showGate();
+    location.reload();
   });
 
   $('#btn-reload').addEventListener('click', async () => {
@@ -1508,9 +1485,20 @@ window.logoutAdmin = async function() {
 
   // ---------- start ----------
   (async () => {
-    if (!state.token) { showGate(); return; }
+    // If we have an active session, verify it via API
+    try {
+      const sessRes = await fetch('/api/session');
+      if (!sessRes.ok) {
+        showGate();
+        return;
+      }
+    } catch(e) {
+      showGate('Ошибка сети');
+      return;
+    }
+
     const ok = await load().catch(() => false);
-    if (!ok && state.token && !state.versionError) showGate('Сессия истекла или токен неверен');
+    if (!ok && !state.versionError) showGate('Не удалось загрузить данные');
     else showConnection(true, 'localhost:' + (location.port || '80'));
   })();
 })();
