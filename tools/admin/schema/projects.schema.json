@@ -7,7 +7,8 @@
     "slots",
     "landings",
     "trackers",
-    "bots"
+    "bots",
+    "videos"
   ],
   "properties": {
     "slots": {
@@ -35,9 +36,28 @@
       "items": {
         "$ref": "#/$defs/projectItem"
       }
+    },
+    "videos": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/videoItem"
+      }
     }
   },
   "$defs": {
+    "videoItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "youtubeUrl", "status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyStr" },
+        "type": { "type": "string", "enum": ["video"] },
+        "title": { "$ref": "#/$defs/nonEmptyStr" },
+        "desc": { "$ref": "#/$defs/str" },
+        "youtubeUrl": { "$ref": "#/$defs/nonEmptyStr" },
+        "status": { "$ref": "#/$defs/statusEnum" }
+      }
+    },
     "str": {
       "type": "string"
     },

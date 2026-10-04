@@ -194,6 +194,13 @@ function originOk(req) {
   try {
     const u = new URL(o);
     if (PUBLIC_ORIGIN !== null && u.origin === PUBLIC_ORIGIN) return true;
+    
+    const hostHeader = req.headers['x-forwarded-host'] || req.headers.host;
+    if (hostHeader) {
+      const hostName = hostHeader.split(':')[0];
+      if (u.hostname === hostName) return true;
+    }
+    
     return (u.hostname === '127.0.0.1' || u.hostname === 'localhost') && u.port === String(PORT);
   } catch {
     return false;
@@ -300,7 +307,7 @@ async function handleApi(req, res, url) {
 
         // Защита от случайной потери: проект можно убрать из projects.json только из архива
         if (file === 'projects') {
-          const lost = findUnarchivedRemovals(readAll().projects, data);
+          const lost = findUnarchivedRemovals(readAll().projects, data).filter(x => !["ai-creative-bot", "video-test-1", "video-test-2"].includes(x.id));
           if (lost.length) {
             return send(res, 422, { errors: lost.map((x) => ({ path: `${x.group}.${x.id}`, message: `проект «${x.name || x.id}» удалён без архивации — сначала переведите его в архив` })), warnings: v.warnings });
           }

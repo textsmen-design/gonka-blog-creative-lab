@@ -176,8 +176,8 @@ await itAsync('GET /api/data с правильным токеном возвра
   const res = await req('/api/data', {
     headers: { Authorization: `Bearer ${TEST_TOKEN}` }
   });
-  assert.equal(res.status, 200);
-  assert.equal(res.body.files.length, 5);
+  assert.equal(res.status, 200, JSON.stringify(res.body));
+  assert.equal(res.body.files.length, 6);
   assert.ok(res.body.data.projects);
   assert.ok(res.body.etags.projects);
 });
@@ -230,7 +230,7 @@ await itAsync('Получение исходного состояния projects
   const res = await req('/api/data', {
     headers: { Authorization: `Bearer ${TEST_TOKEN}` }
   });
-  assert.equal(res.status, 200);
+  assert.equal(res.status, 200, JSON.stringify(res.body));
   projectsData = res.body.data.projects;
   projectsEtag = res.body.etags.projects;
   assert.ok(projectsData);
@@ -280,7 +280,7 @@ await itAsync('Проверка: Слот 1 сохранен, остальные
   const res = await req('/api/data', {
     headers: { Authorization: `Bearer ${TEST_TOKEN}` }
   });
-  assert.equal(res.status, 200);
+  assert.equal(res.status, 200, JSON.stringify(res.body));
   const p = res.body.data.projects;
   assert.equal(p.slots[0].assigned, true);
   assert.equal(p.slots[0].project.name, 'Тестовый проект Лампы');
@@ -330,7 +330,7 @@ await itAsync('Добавление нового лендинга (7-й ленд
     }
   });
 
-  assert.equal(res.status, 200);
+  assert.equal(res.status, 200, JSON.stringify(res.body));
   assert.ok(res.body.ok);
   projectsEtag = res.body.etag;
 });
@@ -348,7 +348,60 @@ await itAsync('Освобождение Слота 1 и удаление тес�
       ifMatch: projectsEtag
     }
   });
-  assert.equal(res.status, 200);
+  assert.equal(res.status, 200, JSON.stringify(res.body));
+  assert.ok(res.body.ok);
+  projectsEtag = res.body.etag;
+});
+
+
+
+// --- БЛОК 4.5: УПРАВЛЕНИЕ ВИДЕОРОЛИКАМИ ---
+console.log('\n[4.5/5] Управление видеороликами (Киноплёнка):');
+
+await itAsync('Добавление двух видео и их сохранение', async () => {
+  const resFetch = await req('/api/data', { headers: { Authorization: `Bearer ${TEST_TOKEN}` } });
+  const modified = resFetch.body.data.projects;
+  
+  modified.videos.push(
+    { type: 'video', id: 'video-test-1', title: 'Video Draft', youtubeUrl: 'https://youtu.be/12345', status: 'draft' },
+    { type: 'video', id: 'video-test-2', title: 'Video Published', youtubeUrl: 'https://youtu.be/67890', status: 'published' }
+  );
+
+  const res = await req('/api/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_TOKEN}` },
+    body: { file: 'projects', data: modified, ifMatch: resFetch.body.etags.projects }
+  });
+
+  assert.equal(res.status, 200, JSON.stringify(res.body));
+  assert.ok(res.body.ok);
+  projectsEtag = res.body.etag;
+});
+
+await itAsync('Повторная загрузка и проверка фильтров статуса', async () => {
+  const resFetch = await req('/api/data', { headers: { Authorization: `Bearer ${TEST_TOKEN}` } });
+  const videos = resFetch.body.data.projects.videos;
+  assert.equal(videos.length, 4);
+  
+  // Test project-ops search filters programmatically
+  const ops = await import('./lib/project-ops.mjs');
+  const allActive = ops.searchProjects(resFetch.body.data.projects, { group: 'videos', status: 'active' });
+  const drafts = ops.searchProjects(resFetch.body.data.projects, { group: 'videos', status: 'draft' });
+  const published = ops.searchProjects(resFetch.body.data.projects, { group: 'videos', status: 'published' });
+  
+  assert.equal(allActive.length, 4);
+  assert.equal(drafts.length, 2);
+  assert.equal(published.length, 2);
+});
+
+
+await itAsync('Освобождение видео и откат к исходному состоянию', async () => {
+  const res = await req('/api/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_TOKEN}` },
+    body: { file: 'projects', data: projectsData, ifMatch: projectsEtag }
+  });
+  assert.equal(res.status, 200, JSON.stringify(res.body));
   assert.ok(res.body.ok);
   projectsEtag = res.body.etag;
 });

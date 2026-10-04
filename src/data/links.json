@@ -23,12 +23,12 @@
     {
       "id": "youtube",
       "label": "YouTube",
-      "url": "#youtube",
+      "url": "https://www.youtube.com/@gnkgonkai",
       "enabled": true,
       "icon": "youtube",
-      "newTab": false,
-      "title": "YouTube канал (в разработке)",
-      "ariaLabel": "YouTube канал GONKA.BLOG (в разработке)"
+      "newTab": true,
+      "title": "YouTube канал",
+      "ariaLabel": "YouTube канал GONKA.BLOG"
     },
     {
       "id": "instagram",

@@ -2,7 +2,7 @@
 // Чистые функции без DOM, сети и файловой системы: используются и интерфейсом админки (/ui/project-ops.mjs), и сервером, и тестами.
 // Функции изменяют переданный объект projects НА МЕСТЕ (интерфейс передаёт рабочую копию) и возвращают {ok, ...}.
 
-export const GROUPS = ['landings', 'trackers', 'bots'];
+export const GROUPS = ['landings', 'trackers', 'bots', 'videos'];
 export const TYPE_OF = { landings: 'landing', trackers: 'tracker', bots: 'bot' };
 export const GROUP_LABEL = { landings: 'Лендинги', trackers: 'Трекеры', bots: 'Боты' };
 export const STATUSES = ['published', 'draft', 'hidden', 'archived'];
@@ -155,7 +155,7 @@ export function checkIntegrity(projects) {
     if (!STATUSES.includes(item.status)) errors.push({ path: `${at}.status`, message: `неизвестный статус «${item.status}»` });
     if (isArchived(item) && !item.archivedAt) warnings.push({ path: `${at}.archivedAt`, message: 'у проекта в архиве нет даты архивации' });
     if (!isArchived(item) && (item.archivedAt || item.prevStatus || item.archivedSlotId)) warnings.push({ path: at, message: 'служебные поля архива остались у активного проекта' });
-    if (item.status === 'published' && !item.name) errors.push({ path: `${at}.name`, message: 'у опубликованного проекта нет названия' });
+    if (item.status === 'published' && !item.name && !item.title) errors.push({ path: `${at}.name`, message: 'у опубликованного проекта нет названия (или title)' });
   }
   const slotIds = new Set();
   (projects.slots || []).forEach((s, i) => {

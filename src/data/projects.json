@@ -619,5 +619,31 @@
         }
       ]
     }
+  ],
+  "videos": [
+    {
+      "type": "video",
+      "id": "Gonka-Lab",
+      "title": "Gonka-Lab",
+      "youtubeUrl": "https://youtu.be/3KJ3kTjZJrs",
+      "desc": "Цифровая лаборатория",
+      "status": "published"
+    },
+    {
+      "type": "video",
+      "id": "video-5353",
+      "title": "Ок",
+      "youtubeUrl": "https://youtu.be/-X-rzMSZrJ8?si=Q6oqSsbDR-EjEV91",
+      "desc": "",
+      "status": "published"
+    },
+    {
+      "type": "video",
+      "id": "story",
+      "title": "story",
+      "youtubeUrl": "https://youtu.be/nNMT8qRK2mQ",
+      "desc": "",
+      "status": "published"
+    }
   ]
 }

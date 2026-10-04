@@ -7,7 +7,7 @@
     { id: 'slots', label: 'Резервные плашки' },
     { id: 'landings', label: 'Лендинги' },
     { id: 'trackers', label: 'Трекеры' },
-    { id: 'bots', label: 'Боты' },
+    { id: 'bots', label: 'Боты' }, { id: 'videos', label: 'Киноплёнка' },
     { id: 'site', label: 'Сайт' },
     { id: 'links', label: 'Ссылки' },
     { id: 'media', label: 'Медиа' },
@@ -28,7 +28,7 @@
   };
 
   // вкладки, редактирующие один файл projects.json
-  const PROJECT_TAB_IDS = ['slots', 'landings', 'trackers', 'bots'];
+  const PROJECT_TAB_IDS = ['slots', 'landings', 'trackers', 'bots', 'videos'];
   const fileOfTab = (tab) => (PROJECT_TAB_IDS.includes(tab) ? 'projects' : tab);
 
   const $ = (sel) => document.querySelector(sel);
@@ -206,6 +206,7 @@
     const isLandings = state.tab === 'landings';
     const isTrackers = state.tab === 'trackers';
     const isBots = state.tab === 'bots';
+    const isVideos = state.tab === 'videos';
     const activeFile = fileOfTab(state.tab);
     const dirty = !isHistory && state.dirty.has(activeFile);
 
@@ -227,6 +228,9 @@
     } else if (isBots) {
       const count = state.work?.projects?.bots?.length || 0;
       $('#status').textContent = `Боты (${count} проектов) · projects.json · ${short(state.etags?.projects)}`;
+    } else if (isVideos) {
+      const count = state.work?.projects?.videos?.length || 0;
+      $('#status').textContent = `Киноплёнка (${count} видео) · projects.json · ${short(state.etags?.projects)}`;
     } else if (!isHistory) {
       $('#status').textContent = `файл: ${state.tab}.json · загружен ${short(state.etags?.[state.tab])}` +
         (state.dirty.size ? ` · не сохранено: ${[...state.dirty].join(', ')}` : '');
@@ -364,15 +368,26 @@
   }
 
   // ---------- 2. ПРОЕКТЫ: ЛЕНДИНГИ / ТРЕКЕРЫ / БОТЫ (архив, дубликаты, поиск, предпросмотр) ----------
-  const VIEW = { landings: '#landings-view', trackers: '#trackers-view', bots: '#bots-view' };
-  const NOUN = { landings: 'лендинг', trackers: 'трекер', bots: 'бота' };
-  const HEAD = { landings: 'Лендинги', trackers: 'Трекеры', bots: 'Telegram-боты' };
-  const ADD = { landings: '+ Добавить лендинг', trackers: '+ Добавить трекер', bots: '+ Добавить бота' };
-  const filters = { landings: { q: '', status: 'active' }, trackers: { q: '', status: 'active' }, bots: { q: '', status: 'active' } };
+  const VIEW = { landings: '#landings-view', trackers: '#trackers-view', bots: '#bots-view', videos: '#videos-view' };
+  const NOUN = { landings: 'лендинг', trackers: 'трекер', bots: 'бота', videos: 'видео' };
+  const HEAD = { landings: 'Лендинги', trackers: 'Трекеры', bots: 'Telegram-боты', videos: 'Видео' };
+  const ADD = { landings: '+ Добавить лендинг', trackers: '+ Добавить трекер', bots: '+ Добавить бота', videos: '+ Добавить видео' };
+  const filters = { landings: { q: '', status: 'active' }, trackers: { q: '', status: 'active' }, bots: { q: '', status: 'active' }, videos: { q: '', status: 'active' } };
+  
+  function extractYtId(url) {
+    try {
+      const u = new URL(url);
+      if (u.hostname.includes('youtu.be')) return u.pathname.slice(1).split('?')[0];
+      if (u.pathname.includes('/shorts/')) return u.pathname.split('/shorts/')[1].split('?')[0];
+      return u.searchParams.get('v') || '';
+    } catch { return ''; }
+  }
+  
   const fmtDate = (iso) => { try { return new Date(iso).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }); } catch { return iso || ''; } };
 
   function openEditor(group, index) {
     if (group === 'bots') openBotModal(index);
+    else if (group === 'videos') openVideoModal(index);
     else openProjectModal(group === 'landings' ? 'landing' : 'tracker', index);
   }
 
@@ -416,12 +431,12 @@
     found.forEach(({ index, item: p }) => {
       const archived = ops.isArchived(p);
       const row = el('div', { class: 'landing-row' + (archived ? ' is-archived' : '') });
-      const thumb = group === 'bots' ? p.screenPreview : p.screenPreview;
-      if (thumb) row.append(el('img', { class: 'landing-thumb', src: thumb, alt: p.name, onerror: (e) => { e.target.style.display = 'none'; } }));
-      const url = group === 'bots' ? p.botUrl : p.url;
+      const thumb = p.screenPreview;
+      if (thumb) row.append(el('img', { class: 'landing-thumb', src: thumb, alt: p.name || p.title, onerror: (e) => { e.target.style.display = 'none'; } }));
+      const url = group === 'bots' ? p.botUrl : group === 'videos' ? p.youtubeUrl : p.url;
       row.append(el('div', { class: 'landing-info' },
         el('div', { class: 'landing-title-row' },
-          el('span', { class: 'landing-name' }, p.name),
+          el('span', { class: 'landing-name' }, p.name || p.title || 'Безымянный'),
           el('span', { class: 'landing-badge' }, p.badge || p.catalogBadge || NOUN[group].toUpperCase()),
           el('span', { class: 'badge-pill ' + p.status }, ops.STATUS_LABEL[p.status] || p.status)),
         el('div', { class: 'landing-lead' }, p.lead || p.catalogDesc || p.desc || ''),
@@ -462,12 +477,12 @@
   function archiveAction(group, p) {
     const slot = (state.work.projects.slots || []).find((s) => s.assignedProjectId === p.id || (s.assigned && s.project?.id === p.id));
     const extra = slot ? `\n\nОн стоит в резервной плашке «${slot.slotName}» — плашка освободится (при восстановлении вернётся, если будет свободна).` : '';
-    if (!confirm(`Перевести «${p.name}» в архив?\n\nПроект исчезнет с сайта, но все данные сохранятся; восстановить можно во вкладке «Архив».${extra}`)) return;
+    if (!confirm(`Перевести «${p.name || p.title}» в архив?\n\nПроект исчезнет с сайта, но все данные сохранятся; восстановить можно во вкладке «Архив».${extra}`)) return;
     const r = ops.archiveProject(state.work.projects, group, p.id);
     if (!r.ok) { notice('err', 'Не удалось архивировать', [{ message: r.error }]); return; }
     markDirty('projects');
     render();
-    notice('ok', `«${p.name}» перенесён в архив`, [{ message: 'Нажмите «Сохранить черновик», чтобы изменения применились.' }]);
+    notice('ok', `«${p.name || p.title}» перенесён в архив`, [{ message: 'Нажмите «Сохранить черновик», чтобы изменения применились.' }]);
   }
 
   function restoreAction(group, p) {
@@ -479,7 +494,7 @@
     const lines = [{ message: `Статус: ${ops.STATUS_LABEL[r.status]}.` }];
     if (r.restoredSlot) lines.push({ message: `Возвращён в резервную плашку «${r.restoredSlot}».` });
     if (r.slotBusy) lines.push({ message: `Плашка «${r.slotBusy}» уже занята — проект остался в каталоге без плашки.` });
-    notice('ok', `«${p.name}» восстановлен`, lines);
+    notice('ok', `«${p.name || p.title}» восстановлен`, lines);
   }
 
   function duplicateAction(group, p) {
@@ -488,20 +503,20 @@
     markDirty('projects');
     filters[group].status = 'active'; filters[group].q = '';
     render();
-    notice('ok', `Создана копия «${p.name} (копия)»`, [{ message: `Новый id: ${r.id}. Копия — черновик, на сайт не попадает и не стоит в плашках.` }]);
+    notice('ok', `Создана копия «${p.name || p.title} (копия)»`, [{ message: `Новый id: ${r.id}. Копия — черновик, на сайт не попадает и не стоит в плашках.` }]);
   }
 
   function deleteForeverAction(group, p) {
     confirmDangerous({
-      title: `Удалить «${p.name}» навсегда?`,
+      title: `Удалить «${p.name || p.title}» навсегда?`,
       lines: ['Проект будет удалён из данных. Вернуть его можно только из резервной копии (вкладка «История»).', 'Чтобы подтвердить, введите название проекта точно так, как оно написано ниже.'],
-      word: p.name,
+      word: p.name || p.title,
       action: () => {
         const r = ops.deleteForever(state.work.projects, group, p.id);
         if (!r.ok) { notice('err', 'Не удалось удалить', [{ message: r.error }]); return; }
         markDirty('projects');
         render();
-        notice('warn', `«${p.name}» удалён навсегда`, [{ message: 'Нажмите «Сохранить черновик» — перед записью создастся резервная копия.' }]);
+        notice('warn', `«${p.name || p.title}» удалён навсегда`, [{ message: 'Нажмите «Сохранить черновик» — перед записью создастся резервная копия.' }]);
       },
     });
   }
@@ -534,8 +549,8 @@
     const url = group === 'bots' ? p.botUrl : p.url;
     host.append(el('p', { class: 'muted small' }, 'Схематичный предпросмотр данных проекта. Точный вид на сайте зависит от оформления сцены; предпросмотр на сайте — этап публикации.'));
     const card = el('div', { class: 'pv-card' },
-      p.screenPreview ? el('img', { class: 'pv-img', src: p.screenPreview, alt: p.screenAlt || p.name, onerror: (e) => { e.target.style.display = 'none'; } }) : null,
-      el('div', { class: 'pv-card-head' }, el('strong', {}, p.name || '(без названия)'), el('span', { class: 'landing-badge' }, p.badge || p.catalogBadge || ''), el('span', { class: 'badge-pill ' + (p.status || 'draft') }, ops.STATUS_LABEL[p.status] || p.status || '')),
+      p.screenPreview ? el('img', { class: 'pv-img', src: p.screenPreview, alt: p.screenAlt || p.name || p.title, onerror: (e) => { e.target.style.display = 'none'; } }) : null,
+      el('div', { class: 'pv-card-head' }, el('strong', {}, p.name || p.title || '(без названия)'), el('span', { class: 'landing-badge' }, p.badge || p.catalogBadge || ''), el('span', { class: 'badge-pill ' + (p.status || 'draft') }, ops.STATUS_LABEL[p.status] || p.status || '')),
       el('p', {}, p.catalogDesc || p.desc || p.lead || ''),
       url ? el('div', { class: 'muted small' }, `Ссылка: ${url}`) : el('div', { class: 'muted small' }, 'Ссылка не указана'));
     host.append(el('h3', {}, 'Карточка в каталоге'), card);
@@ -547,7 +562,7 @@
     const dos = el('div', { class: 'pv-card' },
       el('div', { class: 'muted small' }, [p.headerTag, p.headerBadge].filter(Boolean).join('  ·  ')),
       el('div', { class: 'muted small' }, p.heroStatus || ''),
-      el('h4', {}, p.name || ''), el('p', {}, p.lead || ''));
+      el('h4', {}, p.name || p.title || ''), el('p', {}, p.lead || ''));
     (p.blocks || []).forEach((b) => {
       dos.append(el('div', { class: 'pv-block' }, el('em', {}, b.heading || ''),
         b.text ? el('p', {}, b.text) : null,
@@ -588,6 +603,82 @@
   ];
   const getDot = (o, path) => path.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
   const setDot = (o, path, v) => { const ks = path.split('.'); const last = ks.pop(); const t = ks.reduce((a, k) => a[k], o); t[last] = v; };
+
+  
+  const VIDEO_FIELDS = [
+    { k: 'id', label: 'ID', req: true, type: 'text' },
+    { k: 'title', label: 'Название', req: true, type: 'text' },
+    { k: 'youtubeUrl', label: 'Ссылка YouTube', req: true, type: 'text', full: true },
+    { k: 'desc', label: 'Описание (необязательно)', type: 'textarea', full: true },
+    { k: 'status', label: 'Статус', type: 'select', options: [['published', 'Опубликован'], ['hidden', 'Скрыт'], ['draft', 'Черновик'], ['archived', 'В архиве']] }
+  ];
+
+  function emptyVideo() { return { type: 'video', id: 'video-' + Math.floor(Math.random()*10000), title: '', youtubeUrl: '', desc: '', status: 'draft' }; }
+
+  function openVideoModal(index) {
+    const isNew = index < 0;
+    const src = isNew ? emptyVideo() : clone(state.work.projects.videos[index]);
+    $('#video-index').value = String(index);
+    $('#video-modal-title').textContent = isNew ? 'Новое видео' : `Редактирование: ${src.title}`;
+    
+    const grid = $('#video-fields'); grid.textContent = '';
+    
+    // Add real-time preview logic
+    const updatePreview = () => {
+      const urlInput = grid.querySelector('[data-k="youtubeUrl"]');
+      const pv = $('#video-preview-iframe');
+      const fallback = $('#video-preview-fallback');
+      if (!urlInput || !pv || !fallback) return;
+      const id = extractYtId(urlInput.value);
+      if (id) { 
+        pv.src = `https://www.youtube-nocookie.com/embed/${id}`; 
+        pv.style.display = 'block'; 
+        fallback.innerHTML = `<div style="text-align:center; padding: 8px; font-family: monospace; font-size: 11px; color: #a3a3a3;">Ошибка или пустой экран? <a href="${urlInput.value.replace(/"/g, '&quot;')}" target="_blank" style="color: #f59e0b; text-decoration: none;">Смотреть оригинал на YouTube ↗</a></div>`;
+      } else { 
+        pv.src = ''; 
+        pv.style.display = 'none'; 
+        fallback.innerHTML = `<div style="color: #666; text-align: center; line-height: 240px; font-size: 12px; font-family: monospace;">Вставьте ссылку для предпросмотра</div>`;
+      }
+    };
+
+    for (const f of VIDEO_FIELDS) {
+      const v = getDot(src, f.k);
+      let input;
+      if (f.type === 'select') { input = el('select', { 'data-k': f.k }, ...f.options.map(([val, l]) => { const o = el('option', { value: val }, l); if (v === val) o.selected = true; return o; })); }
+      else if (f.type === 'textarea') {
+        input = el('textarea', { 'data-k': f.k, rows: '3' });
+        input.value = v || '';
+      } else { 
+        input = el('input', { 'data-k': f.k, type: 'text' }); 
+        input.value = v || ''; 
+        if (f.k === 'youtubeUrl') input.addEventListener('input', updatePreview);
+      }
+      grid.append(el('div', { class: 'field' + (f.full ? ' full' : '') }, el('label', {}, f.label + (f.req ? ' *' : '')), input));
+    }
+    
+    updatePreview();
+    $('#video-modal').hidden = false;
+  }
+
+  $('#video-modal-close')?.addEventListener('click', () => { $('#video-modal').hidden = true; });
+  $('#video-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const index = parseInt($('#video-index').value, 10);
+    const obj = index < 0 ? emptyVideo() : clone(state.work.projects.videos[index]);
+    for (const f of VIDEO_FIELDS) {
+      const el = $('#video-fields').querySelector(`[data-k="${f.k}"]`);
+      if (el) setDot(obj, f.k, el.value.trim());
+    }
+    if (index < 0) {
+      if (!state.work.projects.videos) state.work.projects.videos = [];
+      state.work.projects.videos.unshift(obj);
+    } else {
+      state.work.projects.videos[index] = obj;
+    }
+    $('#video-modal').hidden = true;
+    markDirty('projects');
+    render();
+  });
 
   function openBotModal(index) {
     const isNew = index < 0;
@@ -1409,7 +1500,7 @@
   // ---------- main render router ----------
   function render() {
     const isHistory = state.tab === 'history';
-    const PROJECT_TABS = ['landings', 'trackers', 'bots'];
+    const PROJECT_TABS = ['landings', 'trackers', 'bots', 'videos'];
     const isSlots = state.tab === 'slots';
     const isProjects = PROJECT_TABS.includes(state.tab);
     const isFile = !isHistory && !isSlots && !isProjects;
