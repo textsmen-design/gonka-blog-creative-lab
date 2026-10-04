@@ -1,3 +1,45 @@
+
+async function checkSession() {
+  try {
+    const res = await fetch('/api/session');
+    if (res.ok) {
+      document.getElementById('login-gate').style.display = 'none';
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pwd = document.getElementById('login-pass').value;
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ password: pwd })
+    });
+    if (res.ok) {
+      document.getElementById('login-gate').style.display = 'none';
+      // Store token locally as a fallback just in case some scripts read it (though we use cookies)
+      localStorage.setItem('admin_token', pwd);
+      window.TOKEN = pwd;
+      refreshUI();
+    } else {
+      document.getElementById('login-error').innerText = 'ACCESS DENIED';
+    }
+  } catch(err) {
+    document.getElementById('login-error').innerText = 'NETWORK ERROR';
+  }
+});
+
+// Logout
+window.logoutAdmin = async function() {
+  await fetch('/api/logout', { method: 'POST' });
+  localStorage.removeItem('admin_token');
+  location.reload();
+};
+
 /* tools/admin/ui/app.js — UI админки GONKA.BLOG (vanilla JS).
  * Данные в DOM попадают только через textContent (без innerHTML). */
 (() => {
