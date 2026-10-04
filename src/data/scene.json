@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "lamp",
+      "label": "Лампа",
+      "target": "modal-slot-lamp",
+      "tipKey": "",
+      "visible": true
+    },
+    {
+      "id": "pencilcup",
+      "label": "Стакан с карандашами",
+      "target": "modal-slot-pencilcup",
+      "tipKey": "",
+      "visible": true
+    },
+    {
+      "id": "camera",
+      "label": "Фотоаппарат: видео",
+      "target": "modal-video",
+      "tipKey": "modal-video",
+      "visible": true
+    },
+    {
+      "id": "compass",
+      "label": "Компас",
+      "target": "modal-slot-compass",
+      "tipKey": "",
+      "visible": true
+    },
+    {
+      "id": "magnifier",
+      "label": "Лупа",
+      "target": "modal-slot-magnifier",
+      "tipKey": "",
+      "visible": true
+    },
+    {
+      "id": "books",
+      "label": "Книги: система",
+      "target": "modal-core",
+      "tipKey": "modal-core",
+      "visible": true
+    },
+    {
+      "id": "photo-left",
+      "label": "Фотографии",
+      "target": "modal-slot-photos",
+      "tipKey": "",
+      "visible": true
+    },
+    {
+      "id": "photo-right",
+      "label": "Фотографии",
+      "target": "modal-slot-photos",
+      "tipKey": "",
+      "visible": true
+    },
+    {
+      "id": "mug",
+      "label": "Кружка: манифест",
+      "target": "modal-slot-mug",
+      "tipKey": "modal-manifesto",
+      "visible": true
+    },
+    {
+      "id": "bell",
+      "label": "Колокольчик: связаться",
+      "target": "modal-incoming",
+      "tipKey": "modal-incoming",
+      "visible": true
+    },
+    {
+      "id": "globe",
+      "label": "Глобус: инструменты",
+      "target": "modal-network",
+      "tipKey": "modal-network",
+      "visible": true
+    },
+    {
+      "id": "notebook",
+      "label": "Блокнот: черновик",
+      "target": "modal-draft",
+      "tipKey": "modal-draft",
+      "visible": true
+    },
+    {
+      "id": "book-right",
+      "label": "Книга: не пошло",
+      "target": "modal-failures",
+      "tipKey": "modal-failures",
+      "visible": true
+    },
+    {
+      "id": "sheet",
+      "label": "Лист: таск-трекеры",
+      "target": "modal-trackers",
+      "tipKey": "modal-trackers",
+      "visible": true
+    },
+    {
+      "id": "map",
+      "label": "Карта: SRBIJA",
+      "target": "modal-srbija",
+      "tipKey": "modal-srbija",
+      "visible": true
+    }
+  ]
+}

@@ -41,7 +41,8 @@
         "modal-incoming",
         "modal-manifesto",
         "modal-network",
-        "modal-serbia-wip",
+        "modal-srbija",
+        "modal-trackers",
         "modal-video"
       ],
       "properties": {
@@ -51,8 +52,18 @@
         "modal-incoming": { "$ref": "#/$defs/deskWithStatement" },
         "modal-manifesto": { "$ref": "#/$defs/deskWithStatement" },
         "modal-network": { "$ref": "#/$defs/deskWithStatement" },
-        "modal-serbia-wip": { "$ref": "#/$defs/deskTagOnly" },
-        "modal-video": { "$ref": "#/$defs/deskWithStatement" }
+        "modal-srbija": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-trackers": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-video": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-serbia-wip": {
+          "type": "object",
+          "properties": {
+            "tag": { "$ref": "#/$defs/str" },
+            "statement": { "$ref": "#/$defs/str" }
+          },
+          "required": ["tag"],
+          "description": "DEPRECATED: автоматически мигрируется в modal-trackers"
+        }
       }
     },
     "nav": {

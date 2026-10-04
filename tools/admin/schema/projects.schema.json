@@ -1,0 +1,298 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "projects.json — управление резервными плашками, лендингами и трекерами GONKA.BLOG",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slots",
+    "landings",
+    "trackers",
+    "bots"
+  ],
+  "properties": {
+    "slots": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "$ref": "#/$defs/slotItem"
+      }
+    },
+    "landings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/projectItem"
+      }
+    },
+    "trackers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/projectItem"
+      }
+    },
+    "bots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/projectItem"
+      }
+    }
+  },
+  "$defs": {
+    "str": {
+      "type": "string"
+    },
+    "nonEmptyStr": {
+      "type": "string",
+      "minLength": 1
+    },
+    "statusEnum": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "hidden",
+        "archived"
+      ]
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "heading"
+      ],
+      "properties": {
+        "heading": {
+          "$ref": "#/$defs/nonEmptyStr"
+        },
+        "text": {
+          "$ref": "#/$defs/str"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyStr"
+          }
+        },
+        "specs": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "$ref": "#/$defs/nonEmptyStr"
+            }
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/str"
+        }
+      }
+    },
+    "projectItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "status",
+        "lead"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyStr"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "landing",
+            "tracker",
+            "slot",
+            "bot"
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyStr"
+        },
+        "badge": {
+          "$ref": "#/$defs/str"
+        },
+        "catalogBadge": {
+          "$ref": "#/$defs/str"
+        },
+        "status": {
+          "$ref": "#/$defs/statusEnum"
+        },
+        "lead": {
+          "$ref": "#/$defs/str"
+        },
+        "catalogDesc": {
+          "$ref": "#/$defs/str"
+        },
+        "url": {
+          "$ref": "#/$defs/str"
+        },
+        "telegram": {
+          "$ref": "#/$defs/str"
+        },
+        "screenPreview": {
+          "$ref": "#/$defs/str"
+        },
+        "screenBadge": {
+          "$ref": "#/$defs/str"
+        },
+        "caption": {
+          "$ref": "#/$defs/str"
+        },
+        "chipLabel": {
+          "$ref": "#/$defs/str"
+        },
+        "headerTag": {
+          "$ref": "#/$defs/str"
+        },
+        "heroStatus": {
+          "$ref": "#/$defs/str"
+        },
+        "drawerId": {
+          "$ref": "#/$defs/str"
+        },
+        "badgeClass": {
+          "$ref": "#/$defs/str"
+        },
+        "desc": {
+          "$ref": "#/$defs/str"
+        },
+        "urlTitle": {
+          "$ref": "#/$defs/str"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/block"
+          }
+        },
+        "accent": {
+          "type": "string",
+          "enum": [
+            "emerald",
+            "purple",
+            "amber",
+            "blue"
+          ]
+        },
+        "cardClass": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,40}$"
+        },
+        "screenAlt": {
+          "$ref": "#/$defs/str"
+        },
+        "botUrl": {
+          "$ref": "#/$defs/str"
+        },
+        "launchTitle": {
+          "$ref": "#/$defs/str"
+        },
+        "headerBadge": {
+          "$ref": "#/$defs/str"
+        },
+        "catalogActions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        },
+        "catalogSections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "$ref": "#/$defs/str"
+              },
+              "text": {
+                "$ref": "#/$defs/str"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/str"
+                }
+              }
+            }
+          }
+        },
+        "archivedAt": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "prevStatus": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "published",
+            "hidden"
+          ]
+        },
+        "archivedSlotId": {
+          "type": "string",
+          "maxLength": 40
+        }
+      }
+    },
+    "slotItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slotId",
+        "slotName",
+        "assigned"
+      ],
+      "properties": {
+        "slotId": {
+          "type": "string",
+          "enum": [
+            "lamp",
+            "mug",
+            "compass",
+            "photos",
+            "magnifier",
+            "pencilcup"
+          ]
+        },
+        "slotName": {
+          "$ref": "#/$defs/nonEmptyStr"
+        },
+        "assigned": {
+          "type": "boolean"
+        },
+        "assignedProjectId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "project": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/projectItem"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

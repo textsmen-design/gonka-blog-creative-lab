@@ -3,7 +3,9 @@
   "title": "media.json — превью проектов GONKA.BLOG",
   "type": "object",
   "additionalProperties": false,
-  "required": ["previews"],
+  "required": [
+    "previews"
+  ],
   "properties": {
     "previews": {
       "type": "object",
@@ -15,18 +17,34 @@
         "atelier",
         "landasset5",
         "tracker01",
-        "myasnayaTroitsa",
-        "botDetective"
+        "authorPortrait",
+        "srbijaBelgrade"
       ],
       "properties": {
-        "englishTeacher": { "$ref": "#/$defs/path" },
-        "twohearts": { "$ref": "#/$defs/path" },
-        "siteviza": { "$ref": "#/$defs/path" },
-        "atelier": { "$ref": "#/$defs/path" },
-        "landasset5": { "$ref": "#/$defs/path" },
-        "tracker01": { "$ref": "#/$defs/path" },
-        "myasnayaTroitsa": { "$ref": "#/$defs/path" },
-        "botDetective": { "$ref": "#/$defs/path" }
+        "englishTeacher": {
+          "$ref": "#/$defs/path"
+        },
+        "twohearts": {
+          "$ref": "#/$defs/path"
+        },
+        "siteviza": {
+          "$ref": "#/$defs/path"
+        },
+        "atelier": {
+          "$ref": "#/$defs/path"
+        },
+        "landasset5": {
+          "$ref": "#/$defs/path"
+        },
+        "tracker01": {
+          "$ref": "#/$defs/path"
+        },
+        "authorPortrait": {
+          "$ref": "#/$defs/path"
+        },
+        "srbijaBelgrade": {
+          "$ref": "#/$defs/path"
+        }
       }
     }
   },
@@ -34,7 +52,7 @@
     "path": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^/previews/[a-z0-9.-]+\\.(jpg|png|webp|svg)$"
+      "pattern": "^/previews/[a-z0-9][a-z0-9.-]*\\.(jpg|png|webp)$"
     }
   }
 }

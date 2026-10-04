@@ -1,15 +1,51 @@
 {
-  "telegram": "https://t.me/lonelysvobodny",
-  "email": "mailto:textsmen@gmail.com",
-  "youtube": "#youtube",
-  "instagram": "#instagram",
+  "socials": [
+    {
+      "id": "telegram",
+      "label": "Telegram",
+      "url": "https://t.me/lonelysvobodny",
+      "enabled": true,
+      "icon": "telegram",
+      "newTab": true,
+      "title": "Telegram (@lonelysvobodny)",
+      "ariaLabel": "Связаться в Telegram: @lonelysvobodny"
+    },
+    {
+      "id": "email",
+      "label": "Email",
+      "url": "mailto:textsmen@gmail.com",
+      "enabled": true,
+      "icon": "email",
+      "newTab": false,
+      "title": "Email (textsmen@gmail.com)",
+      "ariaLabel": "Написать на почту: textsmen@gmail.com"
+    },
+    {
+      "id": "youtube",
+      "label": "YouTube",
+      "url": "#youtube",
+      "enabled": true,
+      "icon": "youtube",
+      "newTab": false,
+      "title": "YouTube канал (в разработке)",
+      "ariaLabel": "YouTube канал GONKA.BLOG (в разработке)"
+    },
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "url": "#instagram",
+      "enabled": true,
+      "icon": "instagram",
+      "newTab": false,
+      "title": "Instagram профиль (в разработке)",
+      "ariaLabel": "Instagram профиль GONKA.BLOG (в разработке)"
+    }
+  ],
   "english": "https://english.gonka.blog",
   "twohearts": "https://twohearts.gonka.blog",
   "siteviza": "https://siteviza.gonka.blog",
   "atelier": "https://atelier.gonka.blog",
   "landasset5": "https://landasset5.gonka.blog",
   "tracker01": "https://tracker-01.gonka.blog/",
-  "reloca": "https://reloca.gonka.blog/",
-  "myasnayaTroitsa": "https://t.me/myasnaya_troitsa_bot",
-  "botDetective": "https://t.me/AI_CH_BOT_univers_bot"
+  "reloca": "https://reloca.gonka.blog/"
 }

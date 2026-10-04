@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "scene.json — предметы сцены (подписи, раздел, видимость, порядок). Форма контуров и позиции хранятся в коде (src/scene/objects.mjs).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "items"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "enum": [
+        1
+      ]
+    },
+    "items": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "description": "Порядок массива = порядок наложения внутри типа и порядок обхода с клавиатуры. Состав предметов фиксирован.",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "target",
+        "tipKey",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "lamp",
+            "pencilcup",
+            "camera",
+            "compass",
+            "magnifier",
+            "books",
+            "photo-left",
+            "photo-right",
+            "mug",
+            "bell",
+            "globe",
+            "notebook",
+            "book-right",
+            "sheet",
+            "map"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Доступное название предмета (для скринридера и клавиатуры)"
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^modal-[a-z0-9-]+$",
+          "description": "id существующей панели; проверяется по данным"
+        },
+        "tipKey": {
+          "type": "string",
+          "pattern": "^(modal-[a-z0-9-]+)?$",
+          "description": "ключ site.desk для текста всплывающей карточки; пусто — без карточки"
+        },
+        "visible": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

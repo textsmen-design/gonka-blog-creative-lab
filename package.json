@@ -12,7 +12,8 @@
     "astro": "astro",
     "admin": "node tools/admin/server.mjs",
     "check:bindings": "node tools/admin/check-bindings.mjs",
-    "verify:dist": "node tools/admin/verify-dist.mjs"
+    "verify:dist": "node tools/admin/verify-dist.mjs",
+    "test": "node tools/admin/test-suite.mjs"
   },
   "dependencies": {
     "astro": "^6.2.1"

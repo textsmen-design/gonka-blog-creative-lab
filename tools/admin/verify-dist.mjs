@@ -39,6 +39,9 @@ for (const rel of files) {
       problems.push(`запрещённый сегмент пути: ${rel}`);
     }
   }
+  if (/\.(backup|original)(-|$)|\.before-|\.bak$/i.test(path.basename(rel))) {
+    problems.push(`резервная копия/мусор в сборке: ${rel}`);
+  }
   if (/admin/i.test(path.basename(rel))) problems.push(`имя файла содержит "admin": ${rel}`);
 }
 

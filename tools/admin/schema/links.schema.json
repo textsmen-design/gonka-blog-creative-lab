@@ -4,40 +4,106 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "telegram",
-    "email",
-    "youtube",
-    "instagram",
+    "socials",
     "english",
     "twohearts",
     "siteviza",
     "atelier",
     "landasset5",
     "tracker01",
-    "reloca",
-    "myasnayaTroitsa",
-    "botDetective"
+    "reloca"
   ],
   "properties": {
-    "telegram": { "$ref": "#/$defs/link" },
-    "email": { "$ref": "#/$defs/link" },
-    "youtube": { "$ref": "#/$defs/link", "description": "заглушка #youtube — не менять" },
-    "instagram": { "$ref": "#/$defs/link", "description": "заглушка #instagram — не менять" },
-    "english": { "$ref": "#/$defs/link" },
-    "twohearts": { "$ref": "#/$defs/link" },
-    "siteviza": { "$ref": "#/$defs/link" },
-    "atelier": { "$ref": "#/$defs/link" },
-    "landasset5": { "$ref": "#/$defs/link" },
-    "tracker01": { "$ref": "#/$defs/link" },
-    "reloca": { "$ref": "#/$defs/link" },
-    "myasnayaTroitsa": { "$ref": "#/$defs/link" },
-    "botDetective": { "$ref": "#/$defs/link" }
+    "socials": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 12,
+      "description": "Соцсети и контакты. id telegram и email обязательны (используются в кнопках разделов). Порядок массива = порядок значков.",
+      "items": {
+        "$ref": "#/$defs/social"
+      }
+    },
+    "english": {
+      "$ref": "#/$defs/link"
+    },
+    "twohearts": {
+      "$ref": "#/$defs/link"
+    },
+    "siteviza": {
+      "$ref": "#/$defs/link"
+    },
+    "atelier": {
+      "$ref": "#/$defs/link"
+    },
+    "landasset5": {
+      "$ref": "#/$defs/link"
+    },
+    "tracker01": {
+      "$ref": "#/$defs/link"
+    },
+    "reloca": {
+      "$ref": "#/$defs/link"
+    }
   },
   "$defs": {
     "link": {
       "type": "string",
       "minLength": 1,
       "pattern": "^(https://[A-Za-z0-9.-]+(:[0-9]+)?(/[^\\s]*)?|mailto:[^\\s@]+@[^\\s@]+\\.[A-Za-z]{2,}|#[A-Za-z0-9_-]+|/[^\\s]*)$"
+    },
+    "social": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "url",
+        "enabled",
+        "icon",
+        "newTab",
+        "title",
+        "ariaLabel"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,23}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "url": {
+          "$ref": "#/$defs/link"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "icon": {
+          "type": "string",
+          "enum": [
+            "telegram",
+            "email",
+            "youtube",
+            "instagram",
+            "link"
+          ]
+        },
+        "newTab": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "ariaLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
     }
   }
 }

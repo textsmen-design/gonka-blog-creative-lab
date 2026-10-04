@@ -4,10 +4,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { paths } from './store.mjs';
+import { checkIntegrity } from './lib/project-ops.mjs';
 
 const LINK_RE =
   /^(https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?(\/[^\s]*)?|mailto:[^\s@]+@[^\s@]+\.[A-Za-z]{2,}|#[A-Za-z0-9_-]+|\/[^\s]*)$/;
-const MEDIA_PATH_RE = /^\/previews\/[a-z0-9.-]+\.(jpg|png|webp|svg)$/;
+const MEDIA_PATH_RE = /^\/previews\/[a-z0-9][a-z0-9.-]*\.(jpg|png|webp)$/;
 const DANGEROUS_RE = /^\s*(javascript|data|vbscript|file):/i;
 
 const schemaCache = new Map();
@@ -188,11 +189,77 @@ export function businessRules(name, data) {
     }
   }
 
+  if (name === 'links' && Array.isArray(data.socials)) {
+    const seen = new Set();
+    data.socials.forEach((s, i) => {
+      const at = `socials[${i}]`;
+      if (!s || typeof s !== 'object') return; // тип покрыт схемой
+      if (seen.has(s.id)) errors.push({ path: `${at}.id`, message: `повторяющийся id «${s.id}»` });
+      seen.add(s.id);
+      if (typeof s.url === 'string') {
+        if (DANGEROUS_RE.test(s.url)) errors.push({ path: `${at}.url`, message: 'запрещённая схема ссылки (javascript/data/vbscript/file)' });
+        else if (!LINK_RE.test(s.url)) errors.push({ path: `${at}.url`, message: 'ссылка вне allowlist (https:// | mailto: | #якорь | /путь)' });
+        if (s.newTab === true && !/^https:\/\//.test(s.url)) errors.push({ path: `${at}.newTab`, message: 'в новой вкладке открываются только https-ссылки' });
+      }
+      warnTrim(`${at}.label`, s.label);
+    });
+    for (const must of ['telegram', 'email']) {
+      if (!seen.has(must)) errors.push({ path: 'socials', message: `нельзя удалять «${must}»: эта ссылка используется в кнопках разделов` });
+    }
+  }
+
+  if (name === 'projects' && data) {
+    // целостность: повторы id/панелей, ссылки слотов, архив (общий модуль с интерфейсом админки)
+    const integrity = checkIntegrity(data);
+    errors.push(...integrity.errors);
+    warnings.push(...integrity.warnings);
+    (data.bots || []).forEach((b, i) => {
+      const at = `bots[${i}]`;
+      if (!b || typeof b !== 'object') return;
+      if (b.status === 'published') {
+        if (!b.drawerId) errors.push({ path: `${at}.drawerId`, message: 'для опубликованного бота нужен drawerId' });
+        if (!b.botUrl || !/^https:\/\//.test(b.botUrl)) errors.push({ path: `${at}.botUrl`, message: 'ссылка на бота должна быть https://' });
+      }
+      // шаблон досье бота ожидает фиксированную структуру: иначе сборка сайта упадёт
+      const shape = [];
+      if (!Array.isArray(b.actions) || b.actions.length !== 3) shape.push(['actions', 'нужно ровно 3 подписи кнопок (запуск, связаться, к каталогу)']);
+      if (!Array.isArray(b.catalogActions) || b.catalogActions.length !== 2) shape.push(['catalogActions', 'нужно ровно 2 подписи (открыть досье, в Telegram)']);
+      if (!Array.isArray(b.catalogSections) || b.catalogSections.length < 1) shape.push(['catalogSections', 'нужен хотя бы один блок карточки каталога']);
+      const bl = b.blocks;
+      if (!Array.isArray(bl) || bl.length !== 4 || typeof bl[0]?.text !== 'string' || !Array.isArray(bl[1]?.items) || !Array.isArray(bl[2]?.specs) || typeof bl[3]?.result !== 'string') {
+        shape.push(['blocks', 'нужны 4 блока: [0] text, [1] items, [2] specs, [3] result']);
+      }
+      for (const field of ['screenBadge', 'catalogDesc', 'badge', 'accent', 'cardClass', 'headerTag', 'headerBadge', 'heroStatus', 'lead']) {
+        if (typeof b[field] !== 'string' || !b[field]) shape.push([field, 'обязательное поле бота']);
+      }
+      for (const [f, msg] of shape) errors.push({ path: `${at}.${f}`, message: msg });
+      for (const key of ['botUrl']) {
+        if (typeof b[key] === 'string' && b[key] && DANGEROUS_RE.test(b[key])) errors.push({ path: `${at}.${key}`, message: 'запрещённая схема ссылки' });
+      }
+      if (typeof b.screenPreview === 'string' && b.screenPreview) {
+        if (!MEDIA_PATH_RE.test(b.screenPreview)) errors.push({ path: `${at}.screenPreview`, message: 'путь вне allowlist /previews/<имя>.jpg|png|webp' });
+        else {
+          const abs = path.join(p.publicDir, b.screenPreview);
+          if (!fs.existsSync(abs)) errors.push({ path: `${at}.screenPreview`, message: 'файл не найден в public/' });
+          else if (fs.statSync(abs).size > 2 * 1024 * 1024) errors.push({ path: `${at}.screenPreview`, message: 'файл больше 2 МБ' });
+        }
+      }
+    });
+  }
+
+  if (name === 'scene' && data && Array.isArray(data.items)) {
+    const seen = new Set();
+    data.items.forEach((it, i) => {
+      if (it && seen.has(it.id)) errors.push({ path: `items[${i}].id`, message: `повторяющийся предмет «${it.id}»` });
+      if (it) seen.add(it.id);
+    });
+  }
+
   if (name === 'media' && data && typeof data.previews === 'object' && data.previews) {
     for (const [key, value] of Object.entries(data.previews)) {
       if (typeof value !== 'string') continue;
       if (!MEDIA_PATH_RE.test(value)) {
-        errors.push({ path: `previews.${key}`, message: 'путь вне allowlist /previews/<имя>.jpg|png|webp|svg' });
+        errors.push({ path: `previews.${key}`, message: 'путь вне allowlist /previews/<имя>.jpg|png|webp' });
         continue;
       }
       const abs = path.join(p.publicDir, value);
@@ -223,7 +290,33 @@ export function businessRules(name, data) {
   return { errors, warnings };
 }
 
+export function normalizeSiteData(data) {
+  if (data && typeof data === 'object' && data.desk && typeof data.desk === 'object') {
+    if (data.desk['modal-serbia-wip']) {
+      if (!data.desk['modal-trackers']) {
+        data.desk['modal-trackers'] = {
+          tag: data.desk['modal-serbia-wip'].tag || 'ТАСК-ТРЕКЕРЫ',
+          statement: data.desk['modal-serbia-wip'].statement || '«Внутренние рабочие инструменты и таск-трекеры.»',
+        };
+      } else if (data.desk['modal-serbia-wip'].tag && (!data.desk['modal-trackers'].tag || data.desk['modal-trackers'].tag === 'ТРЕКЕРЫ')) {
+        data.desk['modal-trackers'].tag = data.desk['modal-serbia-wip'].tag;
+      }
+      if (!data.desk['modal-srbija']) {
+        data.desk['modal-srbija'] = {
+          tag: 'SRBIJA',
+          statement: '«Полевое исследование и личный R&D.»',
+        };
+      }
+      delete data.desk['modal-serbia-wip'];
+    }
+  }
+  return data;
+}
+
 export function validateFile(name, data) {
+  if (name === 'site') {
+    normalizeSiteData(data);
+  }
   const schemaErrors = validateAgainstSchema(name, data);
   const rules = businessRules(name, data);
   return {

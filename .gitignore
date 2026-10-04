@@ -40,3 +40,9 @@ tools/admin/audit.log
 src/data/.backups/
 src/data/.admin.lock
 src/data/.tmp/
+
+# резервные копии картинок и скриншоты проверок (не должны попадать в репозиторий и dist)
+public/*.backup*
+public/*.before-*
+public/*.original*
+tools/admin/screenshots/

@@ -31,11 +31,15 @@
 
     <main>
       <div class="toolbar">
-        <button id="btn-save" type="button" disabled>Сохранить</button>
+        <button id="btn-save" type="button" disabled>Сохранить черновик</button>
+        <button id="btn-publish" class="publish-btn" type="button" title="Проверить данные и собрать публичную версию dist/">🚀 Опубликовать</button>
         <button id="btn-reload" class="ghost" type="button">Перезагрузить</button>
+        <button id="btn-export" class="ghost" type="button" title="Скачать все данные контента одним файлом">⬇ Экспорт</button>
+        <button id="btn-import" class="ghost" type="button" title="Загрузить данные из файла экспорта (с проверкой и резервной копией)">⬆ Импорт</button>
+        <input id="import-file" type="file" accept="application/json,.json" hidden />
         <button id="btn-raw" class="ghost" type="button">Режим JSON</button>
         <span id="dirty" class="pill"></span>
-        <span class="muted small">Сборка сайта выполняется вручную: <code>npm run build</code></span>
+        <span id="publish-pill" class="pill ok" hidden>dist готов</span>
       </div>
 
       <div id="notices" class="notices"></div>
@@ -49,6 +53,10 @@
         </div>
       </section>
 
+      <section id="slots-view" class="slots-view" hidden></section>
+      <section id="landings-view" class="landings-view" hidden></section>
+      <section id="trackers-view" class="trackers-view" hidden></section>
+      <section id="bots-view" class="bots-view" hidden></section>
       <section id="editor" class="editor"></section>
 
       <section id="history" class="history" hidden>
@@ -57,8 +65,193 @@
       </section>
     </main>
 
+    <!-- Единый модальный редактор проектов (для резервных плашек и лендингов) -->
+    <div id="project-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 id="modal-title">Редактирование проекта</h2>
+          <button id="modal-close-btn" class="ghost close-btn" type="button">✕</button>
+        </div>
+        <form id="project-form">
+          <input type="hidden" id="pf-type" value="slot" />
+          <input type="hidden" id="pf-index" value="-1" />
+
+          <div class="modal-grid">
+            <div class="field">
+              <label for="pf-name">Название проекта *</label>
+              <input type="text" id="pf-name" required placeholder="Например: English Teacher" />
+            </div>
+
+            <div class="field">
+              <label for="pf-badge">Плашка / Бейдж</label>
+              <input type="text" id="pf-badge" placeholder="Например: ЛЕНДИНГ, R&D, ПРОЕКТ" />
+            </div>
+
+            <div class="field">
+              <label for="pf-status">Статус публикации *</label>
+              <select id="pf-status">
+                <option value="published">Опубликован (виден на сайте)</option>
+                <option value="draft">Черновик (в работе)</option>
+                <option value="hidden">Скрыт (не отображается на сайте)</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="pf-lead">Краткое описание / Лид *</label>
+              <textarea id="pf-lead" rows="2" required placeholder="Основной посыл проекта для первого экрана досье"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="pf-url">Ссылка на проект (URL)</label>
+              <input type="text" id="pf-url" placeholder="https://..." />
+            </div>
+
+            <div class="field">
+              <label for="pf-telegram">Ссылка на Telegram</label>
+              <input type="text" id="pf-telegram" placeholder="https://t.me/..." />
+            </div>
+
+            <div class="field">
+              <label for="pf-screen">Изображение первого экрана</label>
+              <input type="text" id="pf-screen" placeholder="/previews/image.jpg" />
+            </div>
+
+            <div class="field">
+              <label for="pf-caption">Подпись к экрану</label>
+              <input type="text" id="pf-caption" placeholder="Описание первого экрана" />
+            </div>
+
+            <div class="field full">
+              <label for="pf-slot-assign">Назначить на резервную плашку верстака (опционально)</label>
+              <select id="pf-slot-assign">
+                <option value="">— Не назначен на резервную плашку —</option>
+                <option value="lamp">Слот 1: Лампа</option>
+                <option value="mug">Слот 2: Кружка</option>
+                <option value="compass">Слот 3: Компас</option>
+                <option value="photos">Слот 4: Две фотографии</option>
+                <option value="magnifier">Слот 5: Лупа</option>
+                <option value="pencilcup">Слот 6: Стакан с карандашами</option>
+              </select>
+            </div>
+
+            <div class="modal-divider full"><span>Содержимое правой панели (досье проекта)</span></div>
+
+            <div class="field full">
+              <label for="pf-block0-head">Блок 1 — Заголовок</label>
+              <input type="text" id="pf-block0-head" value="// О ПРОЕКТЕ" />
+            </div>
+            <div class="field full">
+              <label for="pf-block0-text">Блок 1 — Текст описания</label>
+              <textarea id="pf-block0-text" rows="3" placeholder="Подробный текст о проекте..."></textarea>
+            </div>
+
+            <div class="field full">
+              <label for="pf-block1-head">Блок 2 — Заголовок</label>
+              <input type="text" id="pf-block1-head" value="// КЛЮЧЕВЫЕ МОДУЛИ" />
+            </div>
+            <div class="field full">
+              <label for="pf-block1-items">Блок 2 — Список пунктов (по одному в строке)</label>
+              <textarea id="pf-block1-items" rows="4" placeholder="Пункт 1&#10;Пункт 2&#10;Пункт 3"></textarea>
+            </div>
+
+            <div class="field full">
+              <label for="pf-block2-head">Блок 3 — Заголовок параметров</label>
+              <input type="text" id="pf-block2-head" value="// ПАРАМЕТРЫ" />
+            </div>
+            <div class="field full">
+              <label for="pf-block2-specs">Блок 3 — Характеристики (формат «Параметр: Значение» построчно)</label>
+              <textarea id="pf-block2-specs" rows="4" placeholder="Стек: Astro / TS&#10;Тип: Промо-лендинг&#10;Статус: Запущен"></textarea>
+            </div>
+
+            <div class="field full">
+              <label for="pf-block3-head">Блок 4 — Заголовок результата</label>
+              <input type="text" id="pf-block3-head" value="// РЕЗУЛЬТАТ" />
+            </div>
+            <div class="field full">
+              <label for="pf-block3-result">Блок 4 — Текст результата</label>
+              <textarea id="pf-block3-result" rows="2" placeholder="Результат реализации проекта..."></textarea>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary">Применить изменения</button>
+            <button id="pf-preview-btn" class="ghost" type="button">Предпросмотр</button>
+            <button id="modal-cancel-btn" class="ghost" type="button">Отмена</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Модальное окно выбора проекта для назначения в слот -->
+    <div id="assign-modal" class="modal-backdrop" hidden>
+      <div class="modal-card modal-card-sm">
+        <div class="modal-header">
+          <h2 id="assign-modal-title">Назначить проект в слот</h2>
+          <button id="assign-close-btn" class="ghost close-btn" type="button">✕</button>
+        </div>
+        <div class="modal-body" style="padding: 16px;">
+          <input type="hidden" id="assign-slot-index" value="-1" />
+          <p class="muted small">Выберите существующий проект из каталога «Лендинги» или «Трекеры», либо создайте новый.</p>
+          <div class="field" style="margin-top: 12px;">
+            <label for="assign-project-select">Доступный проект</label>
+            <select id="assign-project-select" style="width: 100%;"></select>
+          </div>
+          <div class="modal-actions" style="margin-top: 20px;">
+            <button id="btn-do-assign" type="button" class="primary">Назначить проект</button>
+            <button id="btn-create-for-slot" type="button" class="ghost">+ Создать новый проект</button>
+            <button id="btn-cancel-assign" type="button" class="ghost">Отмена</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <footer class="status" id="status">—</footer>
   </div>
+
+
+    <!-- Редактор бота -->
+    <div id="bot-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 id="bot-modal-title">Бот</h2>
+          <button id="bot-modal-close" class="ghost close-btn" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <form id="bot-form">
+          <input type="hidden" id="bot-index" value="-1" />
+          <div class="modal-grid" id="bot-fields"></div>
+          <div class="modal-actions">
+            <button id="bot-preview-btn" class="ghost" type="button">Предпросмотр</button>
+            <button id="bot-cancel-btn" class="ghost" type="button">Отмена</button>
+            <button type="submit" class="primary">Применить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Предпросмотр проекта -->
+    <div id="preview-modal" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>Предпросмотр</h2>
+          <button id="preview-close" class="ghost close-btn" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div id="preview-body" class="preview-body"></div>
+      </div>
+    </div>
+
+    <!-- Подтверждение необратимых действий -->
+    <div id="danger-modal" class="modal-backdrop" hidden>
+      <div class="modal-card danger-card" role="alertdialog" aria-labelledby="danger-title">
+        <div class="modal-header"><h2 id="danger-title">Подтверждение</h2></div>
+        <div id="danger-body"></div>
+        <p class="danger-word">Название: <strong id="danger-word"></strong></p>
+        <input id="danger-input" type="text" autocomplete="off" aria-label="Введите название для подтверждения" />
+        <div class="modal-actions">
+          <button id="danger-cancel" class="ghost" type="button">Отмена</button>
+          <button id="danger-ok" class="danger-btn" type="button" disabled>Удалить навсегда</button>
+        </div>
+      </div>
+    </div>
 
   <script src="/ui/app.js"></script>
 </body>

@@ -5,7 +5,6 @@
   "additionalProperties": false,
   "required": [
     "modal-core",
-    "modal-myasnaya-troitsa",
     "modal-bots",
     "modal-sites",
     "modal-english-teacher",
@@ -14,8 +13,7 @@
     "modal-atelier",
     "modal-landasset5",
     "modal-tracker01",
-    "modal-aichatbot",
-    "modal-serbia-wip",
+    "modal-srbija",
     "modal-incoming",
     "modal-draft",
     "modal-failures",
@@ -25,339 +23,636 @@
     "modal-about"
   ],
   "properties": {
-    "modal-core": { "$ref": "#/$defs/mCore" },
-    "modal-myasnaya-troitsa": { "$ref": "#/$defs/mMyasnaya" },
-    "modal-bots": { "$ref": "#/$defs/mBots" },
-    "modal-sites": { "$ref": "#/$defs/mSites" },
-    "modal-english-teacher": { "$ref": "#/$defs/mEnglish" },
-    "modal-twohearts": { "$ref": "#/$defs/mTwoHearts" },
-    "modal-siteviza": { "$ref": "#/$defs/mSiteviza" },
-    "modal-atelier": { "$ref": "#/$defs/mAtelier" },
-    "modal-landasset5": { "$ref": "#/$defs/mLandasset5" },
-    "modal-tracker01": { "$ref": "#/$defs/mTracker01" },
-    "modal-aichatbot": { "$ref": "#/$defs/mAichatbot" },
-    "modal-serbia-wip": { "$ref": "#/$defs/mSerbia" },
-    "modal-incoming": { "$ref": "#/$defs/mIncoming" },
-    "modal-draft": { "$ref": "#/$defs/mDraft" },
-    "modal-failures": { "$ref": "#/$defs/mFailures" },
-    "modal-video": { "$ref": "#/$defs/mVideo" },
-    "modal-network": { "$ref": "#/$defs/mNetwork" },
-    "modal-manifesto": { "$ref": "#/$defs/mManifesto" },
-    "modal-about": { "$ref": "#/$defs/mAbout" }
+    "modal-core": {
+      "$ref": "#/$defs/mCore"
+    },
+    "modal-bots": {
+      "$ref": "#/$defs/mBots"
+    },
+    "modal-sites": {
+      "$ref": "#/$defs/mSites"
+    },
+    "modal-english-teacher": {
+      "$ref": "#/$defs/mEnglish"
+    },
+    "modal-twohearts": {
+      "$ref": "#/$defs/mTwoHearts"
+    },
+    "modal-siteviza": {
+      "$ref": "#/$defs/mSiteviza"
+    },
+    "modal-atelier": {
+      "$ref": "#/$defs/mAtelier"
+    },
+    "modal-landasset5": {
+      "$ref": "#/$defs/mLandasset5"
+    },
+    "modal-tracker01": {
+      "$ref": "#/$defs/mTracker01"
+    },
+    "modal-srbija": {
+      "$ref": "#/$defs/mSerbia"
+    },
+    "modal-incoming": {
+      "$ref": "#/$defs/mIncoming"
+    },
+    "modal-draft": {
+      "$ref": "#/$defs/mDraft"
+    },
+    "modal-failures": {
+      "$ref": "#/$defs/mFailures"
+    },
+    "modal-video": {
+      "$ref": "#/$defs/mVideo"
+    },
+    "modal-network": {
+      "$ref": "#/$defs/mNetwork"
+    },
+    "modal-manifesto": {
+      "$ref": "#/$defs/mManifesto"
+    },
+    "modal-about": {
+      "$ref": "#/$defs/mAbout"
+    }
   },
   "$defs": {
-    "str": { "type": "string", "minLength": 1 },
+    "str": {
+      "type": "string",
+      "minLength": 1
+    },
     "pair": {
       "type": "array",
       "minItems": 2,
       "maxItems": 2,
-      "items": { "type": "string", "minLength": 1 }
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     },
     "pairsN": {
       "type": "array",
-      "items": { "$ref": "#/$defs/pair" }
+      "items": {
+        "$ref": "#/$defs/pair"
+      }
     },
     "header": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["tag", "badge"],
+      "required": [
+        "tag",
+        "badge"
+      ],
       "properties": {
-        "tag": { "$ref": "#/$defs/str" },
-        "badge": { "$ref": "#/$defs/str" }
+        "tag": {
+          "$ref": "#/$defs/str"
+        },
+        "badge": {
+          "$ref": "#/$defs/str"
+        }
       }
     },
     "headerVideo": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["badge"],
-      "properties": { "badge": { "$ref": "#/$defs/str" } },
+      "required": [
+        "badge"
+      ],
+      "properties": {
+        "badge": {
+          "$ref": "#/$defs/str"
+        }
+      },
       "description": "тег [ АРХИВ // ВИДЕО & МОНТАЖ ] — хардкод в шаблоне"
     },
     "hero": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "title", "lead"],
+      "required": [
+        "status",
+        "title",
+        "lead"
+      ],
       "properties": {
-        "status": { "$ref": "#/$defs/str" },
-        "title": { "$ref": "#/$defs/str" },
-        "lead": { "$ref": "#/$defs/str" }
+        "status": {
+          "$ref": "#/$defs/str"
+        },
+        "title": {
+          "$ref": "#/$defs/str"
+        },
+        "lead": {
+          "$ref": "#/$defs/str"
+        }
       }
     },
     "screen": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["caption"],
-      "properties": { "caption": { "$ref": "#/$defs/str" } }
+      "required": [
+        "caption"
+      ],
+      "properties": {
+        "caption": {
+          "$ref": "#/$defs/str"
+        }
+      }
     },
-    "actions0": { "type": "array", "minItems": 0, "maxItems": 0 },
-    "actions1": { "type": "array", "minItems": 1, "maxItems": 1, "items": { "$ref": "#/$defs/str" } },
-    "actions2": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/str" } },
-    "actions3": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/$defs/str" } },
+    "actions0": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 0
+    },
+    "actions1": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "$ref": "#/$defs/str"
+      }
+    },
+    "actions2": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/str"
+      }
+    },
+    "actions3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/str"
+      }
+    },
     "bText": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "text"],
+      "required": [
+        "heading",
+        "text"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "text": { "$ref": "#/$defs/str" }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "text": {
+          "$ref": "#/$defs/str"
+        }
       }
     },
     "bResult": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "result"],
+      "required": [
+        "heading",
+        "result"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "result": { "$ref": "#/$defs/str" }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "result": {
+          "$ref": "#/$defs/str"
+        }
       }
     },
     "bQuote": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "quote"],
+      "required": [
+        "heading",
+        "quote"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "quote": { "$ref": "#/$defs/str" }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "quote": {
+          "$ref": "#/$defs/str"
+        }
       }
     },
     "bBoxText": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "boxText"],
+      "required": [
+        "heading",
+        "boxText"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "boxText": { "$ref": "#/$defs/str" }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "boxText": {
+          "$ref": "#/$defs/str"
+        }
       }
     },
     "bDossier1": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["dossier", "heading"],
+      "required": [
+        "dossier",
+        "heading"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "dossier": { "type": "array", "minItems": 1, "maxItems": 1, "items": { "$ref": "#/$defs/str" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "dossier": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        }
       }
     },
     "bItems3": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "items"],
+      "required": [
+        "heading",
+        "items"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "items": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/$defs/str" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        }
       }
     },
     "bItems4": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "items"],
+      "required": [
+        "heading",
+        "items"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "items": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/str" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        }
       }
     },
     "bItems5": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "items"],
+      "required": [
+        "heading",
+        "items"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "items": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "$ref": "#/$defs/str" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        }
       }
     },
     "bItems7": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "items"],
+      "required": [
+        "heading",
+        "items"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "items": { "type": "array", "minItems": 7, "maxItems": 7, "items": { "$ref": "#/$defs/str" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        }
       }
     },
     "bSpecs2": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "specs"],
+      "required": [
+        "heading",
+        "specs"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "specs": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/pair" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "specs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/pair"
+          }
+        }
       }
     },
     "bSpecs3": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "specs"],
+      "required": [
+        "heading",
+        "specs"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "specs": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/$defs/pair" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "specs": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/pair"
+          }
+        }
       }
     },
     "bSpecs4": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "specs"],
+      "required": [
+        "heading",
+        "specs"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "specs": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/pair" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "specs": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/pair"
+          }
+        }
       }
     },
     "bAboutAuthor": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["dossier", "dossierStatus", "dossierTag", "greeting", "heading", "subheadings"],
+      "required": [
+        "dossier",
+        "dossierStatus",
+        "dossierTag",
+        "greeting",
+        "heading",
+        "subheadings"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "greeting": { "$ref": "#/$defs/str" },
-        "dossierTag": { "$ref": "#/$defs/str" },
-        "dossierStatus": { "$ref": "#/$defs/str" },
-        "dossier": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/$defs/str" } },
-        "subheadings": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/str" } }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "greeting": {
+          "$ref": "#/$defs/str"
+        },
+        "dossierTag": {
+          "$ref": "#/$defs/str"
+        },
+        "dossierStatus": {
+          "$ref": "#/$defs/str"
+        },
+        "dossier": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        },
+        "subheadings": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        }
       }
     },
     "bAboutArtifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["heading", "quote", "seal", "signature", "tag"],
+      "required": [
+        "heading",
+        "quote",
+        "seal",
+        "signature",
+        "tag"
+      ],
       "properties": {
-        "heading": { "$ref": "#/$defs/str" },
-        "quote": { "$ref": "#/$defs/str" },
-        "tag": { "$ref": "#/$defs/str" },
-        "seal": { "$ref": "#/$defs/str" },
-        "signature": { "$ref": "#/$defs/str" }
+        "heading": {
+          "$ref": "#/$defs/str"
+        },
+        "quote": {
+          "$ref": "#/$defs/str"
+        },
+        "tag": {
+          "$ref": "#/$defs/str"
+        },
+        "seal": {
+          "$ref": "#/$defs/str"
+        },
+        "signature": {
+          "$ref": "#/$defs/str"
+        }
       },
       "description": "поле geo (45°15'N 19°51'E) — хардкод в шаблоне"
     },
     "bSpecsOnly5": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["specs"],
+      "required": [
+        "specs"
+      ],
       "properties": {
-        "specs": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "$ref": "#/$defs/pair" } }
+        "specs": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/pair"
+          }
+        }
       },
       "description": "заголовок // ПАРАМЕТРЫ & СВЯЗЬ — хардкод в шаблоне"
-    },
-    "botSecText": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["title", "text"],
-      "properties": {
-        "title": { "$ref": "#/$defs/str" },
-        "text": { "$ref": "#/$defs/str" }
-      }
-    },
-    "botSecItems4": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["title", "items"],
-      "properties": {
-        "title": { "$ref": "#/$defs/str" },
-        "items": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/str" } }
-      }
-    },
-    "cardBot": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["badge", "name", "desc", "screenBadge", "actions", "sections"],
-      "properties": {
-        "badge": { "$ref": "#/$defs/str" },
-        "name": { "$ref": "#/$defs/str" },
-        "desc": { "$ref": "#/$defs/str" },
-        "screenBadge": { "$ref": "#/$defs/str" },
-        "actions": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/str" } },
-        "sections": {
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 2,
-          "items": [
-            { "$ref": "#/$defs/botSecText" },
-            { "$ref": "#/$defs/botSecItems4" }
-          ]
-        }
-      }
     },
     "cardSiteDesc": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["badge", "name", "desc", "screenBadge", "actions", "sections"],
+      "required": [
+        "badge",
+        "name",
+        "desc",
+        "screenBadge",
+        "actions",
+        "sections"
+      ],
       "properties": {
-        "badge": { "$ref": "#/$defs/str" },
-        "name": { "$ref": "#/$defs/str" },
-        "desc": { "$ref": "#/$defs/str" },
-        "screenBadge": { "$ref": "#/$defs/str" },
-        "actions": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/str" } },
-        "sections": { "type": "array", "minItems": 0, "maxItems": 0 }
+        "badge": {
+          "$ref": "#/$defs/str"
+        },
+        "name": {
+          "$ref": "#/$defs/str"
+        },
+        "desc": {
+          "$ref": "#/$defs/str"
+        },
+        "screenBadge": {
+          "$ref": "#/$defs/str"
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        },
+        "sections": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 0
+        }
       }
     },
     "cardSiteNoDesc": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["badge", "name", "screenBadge", "actions", "sections"],
+      "required": [
+        "badge",
+        "name",
+        "screenBadge",
+        "actions",
+        "sections"
+      ],
       "properties": {
-        "badge": { "$ref": "#/$defs/str" },
-        "name": { "$ref": "#/$defs/str" },
-        "screenBadge": { "$ref": "#/$defs/str" },
-        "actions": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/str" } },
-        "sections": { "type": "array", "minItems": 0, "maxItems": 0 }
+        "badge": {
+          "$ref": "#/$defs/str"
+        },
+        "name": {
+          "$ref": "#/$defs/str"
+        },
+        "screenBadge": {
+          "$ref": "#/$defs/str"
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/str"
+          }
+        },
+        "sections": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 0
+        }
       },
       "description": "Tracker_01: desc с Drag & Drop — хардкод в шаблоне"
     },
     "rule": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["num", "title", "text"],
+      "required": [
+        "num",
+        "title",
+        "text"
+      ],
       "properties": {
-        "num": { "$ref": "#/$defs/str" },
-        "title": { "$ref": "#/$defs/str" },
-        "text": { "$ref": "#/$defs/str" }
+        "num": {
+          "$ref": "#/$defs/str"
+        },
+        "title": {
+          "$ref": "#/$defs/str"
+        },
+        "text": {
+          "$ref": "#/$defs/str"
+        }
       }
     },
     "failure": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["title", "desc"],
+      "required": [
+        "title",
+        "desc"
+      ],
       "properties": {
-        "title": { "$ref": "#/$defs/str" },
-        "desc": { "$ref": "#/$defs/str" }
+        "title": {
+          "$ref": "#/$defs/str"
+        },
+        "desc": {
+          "$ref": "#/$defs/str"
+        }
       }
     },
     "mCore": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions1" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions1"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems4" },
-            { "$ref": "#/$defs/bDossier1" },
-            { "$ref": "#/$defs/bSpecs4" }
-          ]
-        }
-      }
-    },
-    "mMyasnaya": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
-      "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions3" },
-        "blocks": {
-          "type": "array",
-          "minItems": 4,
-          "maxItems": 4,
-          "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems4" },
-            { "$ref": "#/$defs/bSpecs4" },
-            { "$ref": "#/$defs/bResult" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems4"
+            },
+            {
+              "$ref": "#/$defs/bDossier1"
+            },
+            {
+              "$ref": "#/$defs/bSpecs4"
+            }
           ]
         }
       }
@@ -365,40 +660,77 @@
     "mBots": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "cards"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions0" },
-        "blocks": { "type": "array", "minItems": 0, "maxItems": 0 },
-        "cards": {
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions0"
+        },
+        "blocks": {
           "type": "array",
-          "minItems": 2,
-          "maxItems": 2,
-          "items": { "$ref": "#/$defs/cardBot" }
+          "minItems": 0,
+          "maxItems": 0
         }
       }
     },
     "mSites": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "cards"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "cards"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions0" },
-        "blocks": { "type": "array", "minItems": 0, "maxItems": 0 },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions0"
+        },
+        "blocks": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 0
+        },
         "cards": {
           "type": "array",
           "minItems": 6,
           "maxItems": 6,
           "items": [
-            { "$ref": "#/$defs/cardSiteDesc" },
-            { "$ref": "#/$defs/cardSiteDesc" },
-            { "$ref": "#/$defs/cardSiteDesc" },
-            { "$ref": "#/$defs/cardSiteDesc" },
-            { "$ref": "#/$defs/cardSiteDesc" },
-            { "$ref": "#/$defs/cardSiteNoDesc" }
+            {
+              "$ref": "#/$defs/cardSiteDesc"
+            },
+            {
+              "$ref": "#/$defs/cardSiteDesc"
+            },
+            {
+              "$ref": "#/$defs/cardSiteDesc"
+            },
+            {
+              "$ref": "#/$defs/cardSiteDesc"
+            },
+            {
+              "$ref": "#/$defs/cardSiteDesc"
+            },
+            {
+              "$ref": "#/$defs/cardSiteNoDesc"
+            }
           ]
         }
       }
@@ -406,173 +738,303 @@
     "mEnglish": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "screen"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "screen"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions3" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions3"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems4" },
-            { "$ref": "#/$defs/bSpecs3" },
-            { "$ref": "#/$defs/bResult" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems4"
+            },
+            {
+              "$ref": "#/$defs/bSpecs3"
+            },
+            {
+              "$ref": "#/$defs/bResult"
+            }
           ]
         },
-        "screen": { "$ref": "#/$defs/screen" }
+        "screen": {
+          "$ref": "#/$defs/screen"
+        }
       }
     },
     "mTwoHearts": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "screen"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "screen"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions3" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions3"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems4" },
-            { "$ref": "#/$defs/bSpecs3" },
-            { "$ref": "#/$defs/bResult" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems4"
+            },
+            {
+              "$ref": "#/$defs/bSpecs3"
+            },
+            {
+              "$ref": "#/$defs/bResult"
+            }
           ]
         },
-        "screen": { "$ref": "#/$defs/screen" }
+        "screen": {
+          "$ref": "#/$defs/screen"
+        }
       }
     },
     "mSiteviza": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "screen"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "screen"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions3" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions3"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems4" },
-            { "$ref": "#/$defs/bSpecs3" },
-            { "$ref": "#/$defs/bResult" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems4"
+            },
+            {
+              "$ref": "#/$defs/bSpecs3"
+            },
+            {
+              "$ref": "#/$defs/bResult"
+            }
           ]
         },
-        "screen": { "$ref": "#/$defs/screen" }
+        "screen": {
+          "$ref": "#/$defs/screen"
+        }
       }
     },
     "mAtelier": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "screen"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "screen"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions3" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions3"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems4" },
-            { "$ref": "#/$defs/bSpecs3" },
-            { "$ref": "#/$defs/bResult" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems4"
+            },
+            {
+              "$ref": "#/$defs/bSpecs3"
+            },
+            {
+              "$ref": "#/$defs/bResult"
+            }
           ]
         },
-        "screen": { "$ref": "#/$defs/screen" }
+        "screen": {
+          "$ref": "#/$defs/screen"
+        }
       }
     },
     "mLandasset5": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "screen"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "screen"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions3" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions3"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems7" },
-            { "$ref": "#/$defs/bSpecs4" },
-            { "$ref": "#/$defs/bResult" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems7"
+            },
+            {
+              "$ref": "#/$defs/bSpecs4"
+            },
+            {
+              "$ref": "#/$defs/bResult"
+            }
           ]
         },
-        "screen": { "$ref": "#/$defs/screen" }
+        "screen": {
+          "$ref": "#/$defs/screen"
+        }
       }
     },
     "mTracker01": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "screen"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "screen"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions3" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions3"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems4" },
-            { "$ref": "#/$defs/bSpecs4" },
-            { "$ref": "#/$defs/bResult" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems4"
+            },
+            {
+              "$ref": "#/$defs/bSpecs4"
+            },
+            {
+              "$ref": "#/$defs/bResult"
+            }
           ]
         },
-        "screen": { "$ref": "#/$defs/screen" }
-      }
-    },
-    "mAichatbot": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
-      "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions3" },
-        "blocks": {
-          "type": "array",
-          "minItems": 4,
-          "maxItems": 4,
-          "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems5" },
-            { "$ref": "#/$defs/bSpecs4" },
-            { "$ref": "#/$defs/bResult" }
-          ]
+        "screen": {
+          "$ref": "#/$defs/screen"
         }
       }
     },
     "mSerbia": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions2" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions2"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bBoxText" },
-            { "$ref": "#/$defs/bDossier1" },
-            { "$ref": "#/$defs/bSpecs4" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bBoxText"
+            },
+            {
+              "$ref": "#/$defs/bDossier1"
+            },
+            {
+              "$ref": "#/$defs/bSpecs4"
+            }
           ]
         }
       }
@@ -580,18 +1042,33 @@
     "mIncoming": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions2" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions2"
+        },
         "blocks": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
           "items": [
-            { "$ref": "#/$defs/bItems4" },
-            { "$ref": "#/$defs/bSpecs3" }
+            {
+              "$ref": "#/$defs/bItems4"
+            },
+            {
+              "$ref": "#/$defs/bSpecs3"
+            }
           ]
         }
       }
@@ -599,20 +1076,39 @@
     "mDraft": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions1" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions1"
+        },
         "blocks": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems5" },
-            { "$ref": "#/$defs/bQuote" },
-            { "$ref": "#/$defs/bSpecs3" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems5"
+            },
+            {
+              "$ref": "#/$defs/bQuote"
+            },
+            {
+              "$ref": "#/$defs/bSpecs3"
+            }
           ]
         }
       }
@@ -620,40 +1116,73 @@
     "mFailures": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "failures"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "failures"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions0" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions0"
+        },
         "blocks": {
           "type": "array",
           "minItems": 1,
           "maxItems": 1,
-          "items": [{ "$ref": "#/$defs/bText" }]
+          "items": [
+            {
+              "$ref": "#/$defs/bText"
+            }
+          ]
         },
         "failures": {
           "type": "array",
           "minItems": 3,
           "maxItems": 3,
-          "items": { "$ref": "#/$defs/failure" }
+          "items": {
+            "$ref": "#/$defs/failure"
+          }
         }
       }
     },
     "mVideo": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/headerVideo" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions1" },
+        "header": {
+          "$ref": "#/$defs/headerVideo"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions1"
+        },
         "blocks": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bSpecs2" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bSpecs2"
+            }
           ]
         }
       }
@@ -661,19 +1190,36 @@
     "mNetwork": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions1" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions1"
+        },
         "blocks": {
           "type": "array",
           "minItems": 3,
           "maxItems": 3,
           "items": [
-            { "$ref": "#/$defs/bText" },
-            { "$ref": "#/$defs/bItems3" },
-            { "$ref": "#/$defs/bSpecs4" }
+            {
+              "$ref": "#/$defs/bText"
+            },
+            {
+              "$ref": "#/$defs/bItems3"
+            },
+            {
+              "$ref": "#/$defs/bSpecs4"
+            }
           ]
         }
       }
@@ -681,22 +1227,118 @@
     "mManifesto": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks", "rules"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks",
+        "rules"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions0" },
-        "blocks": { "type": "array", "minItems": 0, "maxItems": 0 },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions0"
+        },
+        "blocks": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 0
+        },
         "rules": {
           "type": "array",
           "minItems": 5,
           "maxItems": 5,
           "items": [
-            { "allOf": [{ "$ref": "#/$defs/rule" }, { "required": ["num"], "properties": { "num": { "const": "01" } } }] },
-            { "allOf": [{ "$ref": "#/$defs/rule" }, { "required": ["num"], "properties": { "num": { "const": "02" } } }] },
-            { "allOf": [{ "$ref": "#/$defs/rule" }, { "required": ["num"], "properties": { "num": { "const": "03" } } }] },
-            { "allOf": [{ "$ref": "#/$defs/rule" }, { "required": ["num"], "properties": { "num": { "const": "04" } } }] },
-            { "allOf": [{ "$ref": "#/$defs/rule" }, { "required": ["num"], "properties": { "num": { "const": "05" } } }] }
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/rule"
+                },
+                {
+                  "required": [
+                    "num"
+                  ],
+                  "properties": {
+                    "num": {
+                      "const": "01"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/rule"
+                },
+                {
+                  "required": [
+                    "num"
+                  ],
+                  "properties": {
+                    "num": {
+                      "const": "02"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/rule"
+                },
+                {
+                  "required": [
+                    "num"
+                  ],
+                  "properties": {
+                    "num": {
+                      "const": "03"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/rule"
+                },
+                {
+                  "required": [
+                    "num"
+                  ],
+                  "properties": {
+                    "num": {
+                      "const": "04"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/rule"
+                },
+                {
+                  "required": [
+                    "num"
+                  ],
+                  "properties": {
+                    "num": {
+                      "const": "05"
+                    }
+                  }
+                }
+              ]
+            }
           ]
         }
       }
@@ -704,19 +1346,36 @@
     "mAbout": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["header", "hero", "actions", "blocks"],
+      "required": [
+        "header",
+        "hero",
+        "actions",
+        "blocks"
+      ],
       "properties": {
-        "header": { "$ref": "#/$defs/header" },
-        "hero": { "$ref": "#/$defs/hero" },
-        "actions": { "$ref": "#/$defs/actions2" },
+        "header": {
+          "$ref": "#/$defs/header"
+        },
+        "hero": {
+          "$ref": "#/$defs/hero"
+        },
+        "actions": {
+          "$ref": "#/$defs/actions2"
+        },
         "blocks": {
           "type": "array",
           "minItems": 3,
           "maxItems": 3,
           "items": [
-            { "$ref": "#/$defs/bAboutAuthor" },
-            { "$ref": "#/$defs/bAboutArtifact" },
-            { "$ref": "#/$defs/bSpecsOnly5" }
+            {
+              "$ref": "#/$defs/bAboutAuthor"
+            },
+            {
+              "$ref": "#/$defs/bAboutArtifact"
+            },
+            {
+              "$ref": "#/$defs/bSpecsOnly5"
+            }
           ]
         }
       }

@@ -4,12 +4,71 @@ import site from '../data/site.json';
 import links from '../data/links.json';
 import media from '../data/media.json';
 import sections from '../data/sections.json';
+import projects from '../data/projects.json';
+import scene from '../data/scene.json';
+import { objects as sceneObjects, geometry as sceneGeometry } from '../scene/objects.mjs';
 
 const S = sections;
-const L = links;
+// L.<id> для кнопок разделов берётся из links.socials[] (единый источник), остальные ссылки — из links.*
+const L: any = { ...links, ...Object.fromEntries(links.socials.map((x: any) => [x.id, x.url])) };
+const socials = L.socials;
 const M = media.previews;
+// проекты из архива (status: archived) на публичный сайт не попадают
+const P: any = { ...projects, landings: projects.landings.filter((x: any) => x.status !== 'archived'), trackers: projects.trackers.filter((x: any) => x.status !== 'archived'), bots: projects.bots.filter((x: any) => x.status !== 'archived') };
 const W0 = "\n";
 const W1 = " ";
+
+const slotLamp = P.slots.find((s) => s.slotId === 'lamp');
+const slotMug = P.slots.find((s) => s.slotId === 'mug');
+const slotCompass = P.slots.find((s) => s.slotId === 'compass');
+const slotPhotos = P.slots.find((s) => s.slotId === 'photos');
+const slotMagnifier = P.slots.find((s) => s.slotId === 'magnifier');
+const slotPencilcup = P.slots.find((s) => s.slotId === 'pencilcup');
+const primaryTracker = P.trackers?.[0];
+// Адрес почты в строках параметров панелей «Автор» и «Связь» — тот же текст из данных, но ссылкой mailto:
+const aboutMail = S['modal-about'].blocks[2].specs[4][1];
+const incomingMail = S['modal-incoming'].blocks[1].specs[1][1];
+const isMail = (v: string) => /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(v);
+// Широкое фото автора (кадр avtor.png целиком) для развёрнутой записи; боковая панель использует M.authorPortrait
+const AUTHOR_WIDE = '/previews/author-wide.jpg';
+// кнопки на экране телефона свитка «Боты» (картинка содержит две карточки) работают только для опубликованных ботов
+const botDrawers = new Set(P.bots.filter((b: any) => b.status === 'published').map((b: any) => b.drawerId));
+
+// --- Новая сцена: предметы стола (контуры — src/scene/objects.mjs) ---
+const slotById: Record<string, any> = {
+  lamp: slotLamp, mug: slotMug, compass: slotCompass,
+  photos: slotPhotos, magnifier: slotMagnifier, pencilcup: slotPencilcup,
+};
+const deskTips: Record<string, { tag: string; statement: string }> = site.desk;
+const zByKind: Record<string, number> = { flat: 1, big: 2, object: 3 };
+const geometryById: Record<string, any> = Object.fromEntries(sceneObjects.map((o: any) => [o.id, o]));
+// Порядок и видимость предметов — scene.json; форма и физика — src/scene/objects.mjs
+const sceneItems = scene.items
+  .map((cfg: any, order: number) => ({ cfg, geo: geometryById[cfg.id], order }))
+  .filter((x: any) => x.geo && x.cfg.visible)
+  .map(({ cfg, geo, order }: any) => {
+    const slot = geo.slot ? slotById[geo.slot] : null;
+    const published = !!(slot?.assigned && slot?.project?.status === 'published');
+    const desk = cfg.tipKey ? deskTips[cfg.tipKey] : null;
+    return {
+      ...geo,
+      target: cfg.target,
+      label: cfg.label,
+      g: sceneGeometry(geo),
+      z: zByKind[geo.kind] * 100 + order,
+      tip: published ? (slot.project.badge || 'ПРОЕКТ') : (desk?.tag || ''),
+      sub: published ? slot.project.name : (desk?.statement || ''),
+      aria: published ? slot.project.name : (desk ? `${desk.tag}: ${desk.statement}` : `Резервный слот: ${cfg.label}`),
+    };
+  }).sort((a: any, b: any) => a.z - b.z);
+
+// Звёзды ночного окна (детерминированно, без Math.random — сборка воспроизводима)
+let seed = 11;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const stars = Array.from({ length: 34 }, () => ({
+  x: +(26 + rnd() * 62).toFixed(2), y: +(1.5 + rnd() * 25).toFixed(2),
+  s: +(1.2 + rnd() * 1.8).toFixed(1), d: +(rnd() * 6).toFixed(1),
+}));
 ---
 
 <div id="spatial-canvas-container" class="spatial-root select-none">
@@ -28,177 +87,68 @@ const W1 = " ";
       </div>
 
       <div class="meta-coords">
-        <span>ВРЕМЯ: <strong id="live-clock">22:15:00 CET</strong></span>
+        <span title="Время и часовой пояс вашего устройства">ВРЕМЯ: <strong id="live-clock">--:--:--</strong> <span id="live-tz" class="meta-tz"></span></span>
         <span>•</span>
-        <span>45°15'N 19°51'E</span>
+        <span class="meta-geo" id="live-geo" data-state="idle">
+          <span id="live-coords" data-source="author" title="Координаты авторской точки">45°15′N 19°51′E</span>
+          <em id="live-coords-src" class="meta-src">авторская точка</em>
+          <button type="button" id="geo-btn" class="geo-btn" aria-describedby="geo-hint">определить</button>
+          <span id="geo-hint" class="geo-hint" role="status" aria-live="polite">Определить ваше местоположение? Браузер спросит разрешение. Координаты остаются только в вашем браузере: не сохраняются и никуда не отправляются.</span>
+        </span>
         <span>•</span>
         <span>{site.topbar.vibe}</span>
       </div>
     </div>
 
-    <!-- Центр: бренд GONKA.BLOG -->
-    <a href="/" class="topbar-brand" title="GONKA.BLOG">
-      <span class="brand-title">GONKA<span class="brand-orange">.BLOG</span></span>
-      <span class="brand-sub">{site.topbar.brandSub}</span>
-    </a>
-
     <!-- Правая группа: Тумблер освещения + Соцсети/Связь -->
     <div class="topbar-right">
-      <button id="desk-theme-toggle" class="theme-btn" type="button" title="Переключить свет в лаборатории">
-        <span id="desk-theme-icon">☼</span>
-        <span id="desk-theme-label">ДЕНЬ</span>
+      <button id="desk-theme-toggle" class="theme-btn theme-pill" type="button" role="switch" aria-checked="false" aria-label="Ночной режим" title="Переключить день и ночь">
+        <span class="pill-side pill-sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg></span>
+        <span class="pill-side pill-moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg></span>
+        <span class="pill-knob" aria-hidden="true"></span>
+        <span id="desk-theme-icon" hidden>☼</span>
+        <span id="desk-theme-label" class="sr-only">ДЕНЬ</span>
       </button>
-
-      <div class="topbar-links-group" aria-label="Контакты и социальные сети">
-        <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="topbar-social-btn topbar-btn-tg" title="Связаться в Telegram (@lonelysvobodny)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-          </svg>
-          <span>Telegram</span>
-        </a>
-
-        <a href={L.email} class="topbar-social-btn topbar-btn-email" title="Написать на Email (textsmen@gmail.com)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect width="20" height="16" x="2" y="4" rx="2"/>
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-          </svg>
-          <span>Email</span>
-        </a>
-
-        <a href={L.youtube} class="topbar-social-btn topbar-btn-yt" title="YouTube канал (в разработке)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-          </svg>
-          <span>YouTube</span>
-        </a>
-
-        <a href={L.instagram} class="topbar-social-btn topbar-btn-ig" title="Instagram профиль (в разработке)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-          </svg>
-          <span>Instagram</span>
-        </a>
-      </div>
     </div>
 
   </header>
 
-  <!-- ЦЕНТРАЛЬНЫЙ СВЕТОВОЙ СТОЛ -->
+  <!-- ЦЕНТРАЛЬНЫЙ СВЕТОВОЙ СТОЛ (сцена v2: окно, стол, предметы-объекты; день/ночь) -->
   <main class="workbench-viewport">
-    
-    <div id="workbench-canvas" class="workbench-frame">
-      
-      <!-- Фоновое изображение верстака -->
-      <img src="/logo2.png" alt="GONKA.BLOG Digital Laboratory Workbench" class="workbench-bg-image" />
 
-      <!-- ФИЗИЧЕСКАЯ ГЕОМЕТРИЯ И ГРАНИЦЫ СТОЛЕШНИЦЫ -->
-      <div class="workbench-tabletop-geometry" aria-hidden="true">
-        <!-- 1. Контактный стык со стойкой шкафа справа -->
-        <div class="tabletop-right-junction"></div>
+    <div id="workbench-canvas" class="workbench-frame scene-frame">
+      <div class="scene-clip">
+        <div id="scene-stage" class="scene-stage">
 
-        <!-- 2. Передний торец столешницы: фаска, толщина деревянного массива и тень глубины к зрителю -->
-        <div class="tabletop-front-edge">
-          <div class="front-edge-bevel"></div>
-          <div class="front-edge-thickness"></div>
-        </div>
-      </div>
+          <img src="/scene/day.jpg" alt="GONKA.BLOG: деревянный рабочий стол у окна с видом на залив" class="scene-bg scene-bg-day" width="1672" height="940" decoding="async" fetchpriority="high" />
+          <img src="/scene/night.jpg" alt="" aria-hidden="true" class="scene-bg scene-bg-night" width="1672" height="940" decoding="async" />
 
-      <!-- Рассеянный световой луч заката -->
-      <div id="ambient-light-beam" class="workbench-light-overlay"></div>
+          <!-- Свет сцены: солнце днём, луна и лампа ночью -->
+          <div class="scene-fx scene-fx-sun" aria-hidden="true"></div>
+          <div class="scene-fx scene-fx-rays" aria-hidden="true"></div>
+          <div class="scene-fx scene-fx-moon" aria-hidden="true"></div>
+          <div class="scene-fx scene-fx-lamp" aria-hidden="true"></div>
+          <div class="scene-fx scene-fx-stars" aria-hidden="true">
+            {stars.map((st: any) => <span style={`left:${st.x}%;top:${st.y}%;width:${st.s}px;height:${st.s}px;animation-delay:${st.d}s`}></span>)}
+          </div>
+          <div class="scene-fx scene-fx-vignette" aria-hidden="true"></div>
 
-      <!-- ЛОГОТИП GONKA.BLOG НА СТОЛЕ (ССЫЛКА НА ГЛАВНУЮ) -->
-      <a 
-        href="/" 
-        class="workbench-table-logo-link" 
-        title="GONKA.BLOG — Главная страница"
-        aria-label="GONKA.BLOG: цифровая лаборатория — на главную"
-      >
-        <span class="sr-only">GONKA.BLOG: цифровая лаборатория // проекты • эксперименты • идеи</span>
-      </a>
+          <!-- ПРЕДМЕТЫ: каждая кнопка вырезана по контуру предмета; «приподнимается» копия именно этой области фона -->
+          {sceneItems.map((it: any) => (
+            <div class={`scene-obj kind-${it.kind}`} data-obj={it.id}
+              style={`left:${it.g.left}%;top:${it.g.top}%;width:${it.g.width}%;height:${it.g.height}%;z-index:${it.z};--tilt:${it.tilt}deg`}>
+              <button type="button" class="obj-hit" data-scene-target={it.target} aria-label={it.aria}
+                style={`clip-path:${it.g.poly}`}></button>
+              <div class="obj-lift" aria-hidden="true">
+                <div class="obj-art" style={`clip-path:${it.g.poly};background-size:${it.g.bgSize};background-position:${it.g.bgPos}`}></div>
+              </div>
+              {it.tip && (
+                <span class="obj-tip" aria-hidden="true"><b>{it.tip}</b>{it.sub && <i>{it.sub}</i>}</span>
+              )}
+            </div>
+          ))}
 
-      <!-- ССЫЛКИ В ПРАВОМ ВЕРХНЕМ УГЛУ СТОЛА (TELEGRAM, EMAIL, YOUTUBE, INSTAGRAM) -->
-      <a 
-        href={L.telegram} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        class="workbench-corner-link corner-link-telegram" 
-        title="Telegram (@lonelysvobodny)"
-        aria-label="Связаться в Telegram: @lonelysvobodny"
-      >
-        <span class="corner-link-tooltip">Telegram</span>
-        <span class="corner-link-aura"></span>
-      </a>
-
-      <a 
-        href={L.email} 
-        class="workbench-corner-link corner-link-email" 
-        title="Email (textsmen@gmail.com)"
-        aria-label="Написать на почту: textsmen@gmail.com"
-      >
-        <span class="corner-link-tooltip">Email</span>
-        <span class="corner-link-aura"></span>
-      </a>
-
-      <a 
-        href={L.youtube} 
-        class="workbench-corner-link corner-link-youtube" 
-        title="YouTube канал (в разработке)"
-        aria-label="YouTube канал GONKA.BLOG (в разработке)"
-      >
-        <svg class="corner-svg-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-        </svg>
-        <span class="corner-link-tooltip">YouTube</span>
-        <span class="corner-link-aura"></span>
-      </a>
-
-      <a 
-        href={L.instagram} 
-        class="workbench-corner-link corner-link-instagram" 
-        title="Instagram профиль (в разработке)"
-        aria-label="Instagram профиль GONKA.BLOG (в разработке)"
-      >
-        <svg class="corner-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-        </svg>
-        <span class="corner-link-tooltip">Instagram</span>
-        <span class="corner-link-aura"></span>
-      </a>
-
-      <!-- ИНТЕРАКТИВНЫЕ ОБЪЕКТЫ НА СТОЛЕ -->
-
-      <!-- 1. ВХОДЯЩИЙ (Винтажный красный телефон — точка прямой связи) -->
-      <button type="button" class="hotspot hotspot-phone" data-target="modal-incoming" aria-label="Входящий: Есть задача? Давай обсудим">
-        <div class="hotspot-aura"></div>
-        <div class="phone-pulse-ring"></div>
-        <div class="editorial-float-label label-switchboard-card label-below-left">
-          <span class="editorial-tag">{site.desk['modal-incoming'].tag}</span>
-          <span class="editorial-statement">{site.desk['modal-incoming'].statement}</span>
-        </div>
-      </button>
-
-      <!-- 2. ЧЕРНОВИК (Блокнот на спирали слева) -->
-      <button type="button" class="hotspot hotspot-notebook" data-target="modal-draft" aria-label="Черновик лаборатории">
-        <div class="hotspot-aura"></div>
-        <div class="editorial-float-label label-draft-parchment label-above-left">
-          <span class="parchment-tag">{site.desk['modal-draft'].tag}</span>
-          <span class="parchment-statement">{site.desk['modal-draft'].statement}</span>
-        </div>
-      </button>
-
-      <!-- 3. НЕ ПОШЛО (Блокнот закрытых экспериментов) -->
-      <button type="button" class="hotspot hotspot-failures" data-target="modal-failures" aria-label="Архив закрытых гипотез: НЕ ПОШЛО">
-        <div class="hotspot-aura"></div>
-        <div class="editorial-float-label label-failures-card label-above-left">
-          <span class="editorial-tag tag-crimson-seal">{site.desk['modal-failures'].tag}</span>
-          <span class="editorial-statement">{site.desk['modal-failures'].statement}</span>
-        </div>
-      </button>
-
+          <!-- СВИТКИ (разметка и содержимое прежние; hover — только по самому свитку) -->
       <!-- 4. СВИТОК «САЙТЫ / ЛЕНДИНГИ» (ГОРИЗОНТАЛЬНЫЙ ФИЗИЧЕСКИЙ СВИТОК) -->
       <div 
         class="hotspot hotspot-scroll-sites physical-scroll-horizontal" 
@@ -233,66 +183,18 @@ const W1 = " ";
 
               <!-- Мини-меню проектов: клик сразу открывает персональное досье -->
               <div class="sites-screens-strip">
-                <button 
-                  type="button" 
-                  class="sites-screen-chip" 
-                  data-open-drawer="modal-english-teacher" 
-                  title="English Teacher — открыть досье"
-                  aria-label="English Teacher: открыть персональное досье проекта"
-                >
-                  <img src={M.englishTeacher} alt="English Teacher — первый экран" />
-                  <span class="chip-label">{site.chips[0]}</span>
-                </button>
-                <button 
-                  type="button" 
-                  class="sites-screen-chip" 
-                  data-open-drawer="modal-twohearts" 
-                  title="TwoHearts — открыть досье"
-                  aria-label="TwoHearts: открыть персональное досье проекта"
-                >
-                  <img src={M.twohearts} alt="TwoHearts — первый экран" />
-                  <span class="chip-label">{site.chips[1]}</span>
-                </button>
-                <button 
-                  type="button" 
-                  class="sites-screen-chip" 
-                  data-open-drawer="modal-siteviza" 
-                  title="Siteviza — открыть досье"
-                  aria-label="Siteviza: открыть персональное досье проекта"
-                >
-                  <img src={M.siteviza} alt="Siteviza — первый экран" />
-                  <span class="chip-label">{site.chips[2]}</span>
-                </button>
-                <button 
-                  type="button" 
-                  class="sites-screen-chip" 
-                  data-open-drawer="modal-atelier" 
-                  title="Atelier — открыть досье"
-                  aria-label="Atelier: открыть персональное досье проекта"
-                >
-                  <img src={M.atelier} alt="Atelier — первый экран" />
-                  <span class="chip-label">{site.chips[3]}</span>
-                </button>
-                <button 
-                  type="button" 
-                  class="sites-screen-chip" 
-                  data-open-drawer="modal-landasset5" 
-                  title="LandAsset5 — открыть досье"
-                  aria-label="LandAsset5: открыть персональное досье проекта"
-                >
-                  <img src={M.landasset5} alt="LandAsset5 — первый экран" />
-                  <span class="chip-label">{site.chips[4]}</span>
-                </button>
-                <button 
-                  type="button" 
-                  class="sites-screen-chip" 
-                  data-open-drawer="modal-tracker01" 
-                  title="Tracker_01 — открыть досье"
-                  aria-label="Tracker_01: открыть персональное досье проекта"
-                >
-                  <img src={M.tracker01} alt="Tracker_01 — первый экран" />
-                  <span class="chip-label">{site.chips[5]}</span>
-                </button>
+                {P.landings.filter((l: any) => l.status === 'published').map((landing: any) => (
+                  <button 
+                    type="button" 
+                    class="sites-screen-chip" 
+                    data-open-drawer={landing.drawerId || ("modal-landing-" + landing.id)} 
+                    title={`${landing.name} — открыть досье`}
+                    aria-label={`${landing.name}: открыть персональное досье проекта`}
+                  >
+                    <img src={landing.screenPreview} alt={`${landing.name} — первый экран`} />
+                    <span class="chip-label">{landing.chipLabel || landing.name}</span>
+                  </button>
+                ))}
               </div>
 
               <div class="sites-parchment-sub">{W0}{site.scrolls.sites.sub}{W1}<span class="sites-arrow">➔</span>
@@ -308,23 +210,15 @@ const W1 = " ";
         </div>
       </div>
 
-      <!-- 5. СИСТЕМА // GONKA.BLOG (Центральный чертёж со связями) -->
-      <button type="button" class="hotspot hotspot-core" data-target="modal-core" aria-label="GONKA.BLOG Система и Ядро">
-        <div class="hotspot-aura"></div>
-        <div class="editorial-float-label label-schematic-vellum label-above-center">
-          <span class="editorial-tag">{site.desk['modal-core'].tag}</span>
-          <span class="editorial-statement">{site.desk['modal-core'].statement}</span>
-        </div>
-      </button>
 
       <!-- 6. СВИТОК «БОТЫ // TELEGRAM» (ФИЗИЧЕСКИЙ СВИТОК СО СМАРТФОНОМ ВНУТРИ) -->
       <div 
         class="hotspot hotspot-scroll-bots physical-scroll-bots" 
-        data-target="modal-myasnaya-troitsa" 
+        data-target="modal-bots" 
         role="button"
         tabindex="0"
         aria-label="Боты: Telegram-боты лаборатории"
-        title="Свиток ботов: Мясная Троица и Бот Детектив"
+        title="Боты // Telegram: открыть каталог ботов"
       >
         <!-- 1. Закрытый свиток (в исходном состоянии лежит на столе, телефон полностью скрыт внутри) -->
         <div class="bots-closed-wrapper">
@@ -337,6 +231,7 @@ const W1 = " ";
 
         <!-- 2. Развёрнутый свиток (физически разворачивается, на нём лежит настоящий смартфон с работающими ботами) -->
         <div class="bots-unrolled-wrapper">
+          <span class="bots-spine" aria-hidden="true"></span>
           <img 
             src="/svitok-bots-open.png" 
             alt="Раскрытый свиток с физическим смартфоном и Telegram-ботами" 
@@ -344,6 +239,7 @@ const W1 = " ";
           />
           
           <!-- Интерактивные кликабельные зоны поверх карточек ботов на экране смартфона -->
+          {botDrawers.has('modal-myasnaya-troitsa') && (
           <button 
             type="button" 
             class="phone-interactive-hotspot hotspot-meat" 
@@ -351,7 +247,9 @@ const W1 = " ";
             title="Мясная Троица — открыть досье"
             aria-label="Мясная Троица: открыть персональное досье проекта"
           ></button>
+          )}
 
+          {botDrawers.has('modal-aichatbot') && (
           <button 
             type="button" 
             class="phone-interactive-hotspot hotspot-detective" 
@@ -359,36 +257,11 @@ const W1 = " ";
             title="Бот Детектив — открыть досье"
             aria-label="Бот Детектив: открыть персональное досье проекта"
           ></button>
+          )}
         </div>
       </div>
 
 
-      <!-- 8. ВИДЕО (35-мм киноплёнка монтажного стола) -->
-      <button type="button" class="hotspot hotspot-video" data-target="modal-video" aria-label="Видео и монтаж">
-        <div class="hotspot-aura"></div>
-        <div class="editorial-float-label label-celluloid-strip label-above-filmstrip">
-          <span class="editorial-tag">{site.desk['modal-video'].tag}</span>
-          <span class="editorial-statement">{site.desk['modal-video'].statement}</span>
-        </div>
-      </button>
-
-      <!-- 9. ИНСТРУМЕНТЫ (Звёздная карта связей и технологий) -->
-      <button type="button" class="hotspot hotspot-network" data-target="modal-network" aria-label="Инструменты: связи, технологии, инструменты">
-        <div class="hotspot-aura"></div>
-        <div class="editorial-float-label label-starchart-card label-above-center">
-          <span class="editorial-tag tag-blue">{site.desk['modal-network'].tag}</span>
-          <span class="editorial-statement">{site.desk['modal-network'].statement}</span>
-        </div>
-      </button>
-
-      <!-- 10. РЕЛОКАНТ СЕРБИЯ (Открытка — В РАБОТЕ) -->
-      <button type="button" class="hotspot hotspot-serbia-wip" data-target="modal-serbia-wip" aria-label="Релокант Сербия: В работе">
-        <div class="hotspot-aura"></div>
-        <div class="editorial-float-label label-field-dispatch label-above-right">
-          <span class="editorial-tag">{site.desk['modal-serbia-wip'].tag}</span>
-          <span class="editorial-statement">«Полевое исследование и личный R&D.»</span>
-        </div>
-      </button>
 
       <!-- 11. СВИТОК «АВТОР» (Физический интерактивный свиток на столе) -->
       <button 
@@ -412,14 +285,36 @@ const W1 = " ";
         </div>
       </button>
 
-      <!-- 12. КРУЖКА «IDEAS BUILD TEST REPEAT» -->
-      <button type="button" class="hotspot hotspot-mug" data-target="modal-manifesto" aria-label="Манифест действия: IDEAS BUILD TEST REPEAT">
-        <div class="hotspot-aura"></div>
-        <div class="editorial-float-label label-coaster-tile label-above-right">
-          <span class="editorial-tag">{site.desk['modal-manifesto'].tag}</span>
-          <span class="editorial-statement">{site.desk['modal-manifesto'].statement}</span>
+
         </div>
-      </button>
+      </div>
+
+      <!-- Надпись и связь поверх сцены -->
+      <div class="scene-hud">
+        <a href="/" class="scene-brand" aria-label="GONKA.BLOG: цифровая лаборатория — на главную">
+          <strong>GONKA<span>.BLOG</span></strong>
+          <em>цифровая лаборатория</em>
+          <small>проекты • эксперименты • идеи</small>
+        </a>
+        <div class="scene-social">
+          {socials.filter((x: any) => x.enabled).map((x: any) => (
+            <a href={x.url} target={x.newTab ? "_blank" : undefined} rel={x.newTab ? "noopener noreferrer" : undefined} title={x.title} aria-label={x.ariaLabel}>
+              {x.icon === "telegram" && (<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 2.7 11.6c-.9.3-.9 1.1-.2 1.4l4.9 1.5 1.9 5.8c.2.6.4.8.9.8s.7-.2 1-.5l2.5-2.4 4.9 3.6c.9.5 1.5.2 1.8-.8l3.2-15.2c.3-1.3-.5-1.9-1.4-1.5ZM9 14.3l9.4-5.9c.4-.3.8-.1.5.2L11 15.6l-.3 3.3-1.7-4.6Z"/></svg>)}
+              {x.icon === "email" && (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3.5 7 8.5 6.5L20.5 7"/></svg>)}
+              {x.icon === "youtube" && (<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+        </svg>)}
+              {x.icon === "instagram" && (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+        </svg>)}
+              {x.icon === "link" && (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg>)}
+              <span class="sr-only">{x.label}</span>
+            </a>
+          ))}
+        </div>
+      </div>
 
       <!-- 13. ПРАВАЯ ВЕРТИКАЛЬНАЯ НАВИГАЦИЯ (ОГЛАВЛЕНИЕ СТОЛА ИЗ 8 ОСНОВНЫХ РАЗДЕЛОВ) -->
       <nav class="cabinet-menu-nav" aria-label="Оглавление интерактивного стола">
@@ -440,8 +335,8 @@ const W1 = " ";
           <span class="cabinet-nav-label">{site.nav[2].label}</span>
         </button>
 
-        <!-- 4. МЯСНАЯ ТРОИЦА -->
-        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-myasnaya-troitsa" aria-label="Мясная Троица: открыть досье Telegram-бота">
+        <!-- 4. ТРЕКЕРЫ -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-trackers" aria-label="Трекеры: открыть каталог таск-трекеров">
           <span class="cabinet-nav-label">{site.nav[3].label}</span>
         </button>
 
@@ -468,38 +363,6 @@ const W1 = " ";
 
     </div>
   </main>
-
-  <!-- НИЖНЯЯ ПАНЕЛЬ РАМЫ ВЕРСТАКА (Точки связи и соцсети) -->
-  <footer class="desk-bottombar">
-    <div class="bottombar-left-zone">
-      <span class="hint-bold">GONKA.BLOG</span>
-      <span class="hint-divider">•</span>
-      <span class="hint-sub">{site.footer.hint}</span>
-    </div>
-
-    <!-- Единые точки связи -->
-    <div class="bottombar-actions">
-      <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="contact-wire-btn" title="Написать в Telegram (@lonelysvobodny)">
-        <span class="wire-dot dot-sky"></span>
-        <span>TELEGRAM</span>
-      </a>
-
-      <a href={L.email} class="contact-wire-btn" title="Отправить email (textsmen@gmail.com)">
-        <span class="wire-dot dot-amber"></span>
-        <span>EMAIL</span>
-      </a>
-
-      <a href={L.youtube} class="contact-wire-btn" title="YouTube канал (в разработке)">
-        <span class="wire-dot dot-rose"></span>
-        <span>YOUTUBE</span>
-      </a>
-
-      <a href={L.instagram} class="contact-wire-btn" title="Instagram профиль (в разработке)">
-        <span class="wire-dot dot-purple"></span>
-        <span>INSTAGRAM</span>
-      </a>
-    </div>
-  </footer>
 
   <!-- ВЫДВИЖНЫЕ ПРАВЫЕ ПАНЕЛИ (КРАТКИЕ ФАКТЫ, БЕЗ ВОДЫ И МАРКЕТИНГА) -->
 
@@ -575,14 +438,15 @@ const W1 = " ";
     </div>
   </aside>
 
-  <!-- 2. МЯСНАЯ ТРОИЦА (TELEGRAM-БОТ) -->
-  <aside id="modal-myasnaya-troitsa" class="workbench-drawer">
+  <!-- 2. ДОСЬЕ TELEGRAM-БОТОВ (ДИНАМИЧЕСКИЕ ИЗ P.bots) -->
+  {P.bots.map((bot: any) => (
+  <aside id={bot.drawerId} class="workbench-drawer">
     <div class="drawer-content">
-      
+
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-emerald">{S['modal-myasnaya-troitsa'].header.tag}</span>
-          <span class="case-badge">{S['modal-myasnaya-troitsa'].header.badge}</span>
+          <span class={"drawer-tag text-" + bot.accent}>{bot.headerTag}</span>
+          <span class="case-badge">{bot.headerBadge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -597,48 +461,44 @@ const W1 = " ";
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">{S['modal-myasnaya-troitsa'].hero.status}</div>
-          <h2 class="case-title">{S['modal-myasnaya-troitsa'].hero.title}</h2>
-          <p class="case-lead">{S['modal-myasnaya-troitsa'].hero.lead}</p>
+          <div class="status-live">{bot.heroStatus}</div>
+          <h2 class="case-title">{bot.name}</h2>
+          <p class="case-lead">{bot.lead}</p>
           <div class="case-actions">
-            <a href={L.myasnayaTroitsa} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-myasnaya-troitsa'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-myasnaya-troitsa'].actions[1]}{W0}</a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">{W0}{S['modal-myasnaya-troitsa'].actions[2]}{W0}</button>
+            <a href={bot.botUrl} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{bot.actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{bot.actions[1]}{W0}</a>
+            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">{W0}{bot.actions[2]}{W0}</button>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-myasnaya-troitsa'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-myasnaya-troitsa'].blocks[0].text}{W0}</p>
+              <h3 class="section-heading">{bot.blocks[0].heading}</h3>
+              <p class="section-text">{W0}{bot.blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-myasnaya-troitsa'].blocks[1].heading}</h3>
+              <h3 class="section-heading">{bot.blocks[1].heading}</h3>
               <ul class="facts-list">
-                <li>{S['modal-myasnaya-troitsa'].blocks[1].items[0]}</li>
-                <li>{S['modal-myasnaya-troitsa'].blocks[1].items[1]}</li>
-                <li>{S['modal-myasnaya-troitsa'].blocks[1].items[2]}</li>
-                <li>{S['modal-myasnaya-troitsa'].blocks[1].items[3]}</li>
+                {bot.blocks[1].items.map((it: string) => <li>{it}</li>)}
               </ul>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-myasnaya-troitsa'].blocks[2].heading}</h3>
+              <h3 class="section-heading">{bot.blocks[2].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-myasnaya-troitsa'].blocks[2].specs[0][0]}</span><strong>{S['modal-myasnaya-troitsa'].blocks[2].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-myasnaya-troitsa'].blocks[2].specs[1][0]}</span><strong>{S['modal-myasnaya-troitsa'].blocks[2].specs[1][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-myasnaya-troitsa'].blocks[2].specs[2][0]}</span><strong>{S['modal-myasnaya-troitsa'].blocks[2].specs[2][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-myasnaya-troitsa'].blocks[2].specs[3][0]}</span><strong>{S['modal-myasnaya-troitsa'].blocks[2].specs[3][1]}</strong></div>
+                {bot.blocks[2].specs.map((sp: [string, string]) => (
+                  <div class="spec-row"><span>{sp[0]}</span><strong>{sp[1]}</strong></div>
+                ))}
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-myasnaya-troitsa'].blocks[3].heading}</h3>
-              <div class="result-status-box">{W0}{S['modal-myasnaya-troitsa'].blocks[3].result}{W0}</div>
+              <h3 class="section-heading">{bot.blocks[3].heading}</h3>
+              <div class="result-status-box">{W0}{bot.blocks[3].result}{W0}</div>
             </div>
           </div>
         </div>
@@ -646,6 +506,7 @@ const W1 = " ";
 
     </div>
   </aside>
+  ))}
 
   <!-- 2.5 КАТАЛОГ TELEGRAM-БОТОВ (ОТКРЫВАЕТСЯ ИЗ ПРАВОГО МЕНЮ «БОТЫ») -->
   <aside id="modal-bots" class="workbench-drawer drawer-bots-catalog">
@@ -675,75 +536,35 @@ const W1 = " ";
         </div>
 
         <div class="sites-catalog-grid bots-catalog-grid">
-          <!-- 1. Мясная Троица -->
-          <div class="catalog-project-card bot-card-meat">
-            <div class="catalog-card-screen">
-              <img src={M.myasnayaTroitsa} alt="Мясная Троица — Telegram-бот" class="catalog-screen-img" loading="lazy" />
-              <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">{S['modal-bots'].cards[0].screenBadge}</span>
+          {P.bots.filter((bot: any) => bot.status === 'published').map((bot: any) => (
+            <div class={"catalog-project-card " + bot.cardClass}>
+              <div class="catalog-card-screen">
+                <img src={bot.screenPreview} alt={bot.screenAlt} class="catalog-screen-img" loading="lazy" />
+                <div class="catalog-screen-overlay">
+                  <span class="screen-url-badge">{bot.screenBadge}</span>
+                </div>
+              </div>
+              <div class="catalog-card-header">
+                <span class="catalog-project-name">{bot.name}</span>
+                <span class={"catalog-badge badge-" + bot.accent}>{bot.badge}</span>
+              </div>
+              <p class="catalog-project-desc">{bot.catalogDesc}</p>
+
+              {bot.catalogSections.map((sec: any) => (
+                <div class="catalog-card-block">
+                  <span class="catalog-block-title">{sec.title}</span>
+                  {sec.items
+                    ? <ul class="catalog-features-list">{sec.items.map((it: string) => <li>{it}</li>)}</ul>
+                    : <p class="catalog-block-text">{sec.text}</p>}
+                </div>
+              ))}
+
+              <div class="catalog-project-actions">
+                <button type="button" class="catalog-open-btn" data-open-drawer={bot.drawerId}>{W0}{bot.catalogActions[0]}{W0}</button>
+                <a href={bot.botUrl} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title={bot.launchTitle}>{W0}{bot.catalogActions[1]}{W0}</a>
               </div>
             </div>
-            <div class="catalog-card-header">
-              <span class="catalog-project-name">{S['modal-bots'].cards[0].name}</span>
-              <span class="catalog-badge badge-emerald">{S['modal-bots'].cards[0].badge}</span>
-            </div>
-            <p class="catalog-project-desc">{S['modal-bots'].cards[0].desc}</p>
-            
-            <div class="catalog-card-block">
-              <span class="catalog-block-title">{S['modal-bots'].cards[0].sections[0].title}</span>
-              <p class="catalog-block-text">{S['modal-bots'].cards[0].sections[0].text}</p>
-            </div>
-
-            <div class="catalog-card-block">
-              <span class="catalog-block-title">{S['modal-bots'].cards[0].sections[1].title}</span>
-              <ul class="catalog-features-list">
-                <li>{S['modal-bots'].cards[0].sections[1].items[0]}</li>
-                <li>{S['modal-bots'].cards[0].sections[1].items[1]}</li>
-                <li>{S['modal-bots'].cards[0].sections[1].items[2]}</li>
-                <li>{S['modal-bots'].cards[0].sections[1].items[3]}</li>
-              </ul>
-            </div>
-
-            <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-myasnaya-troitsa">{W0}{S['modal-bots'].cards[0].actions[0]}{W0}</button>
-              <a href={L.myasnayaTroitsa} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Запустить бота @myasnaya_troitsa_bot в Telegram">{W0}{S['modal-bots'].cards[0].actions[1]}{W0}</a>
-            </div>
-          </div>
-
-          <!-- 2. Бот Детектив -->
-          <div class="catalog-project-card bot-card-detective">
-            <div class="catalog-card-screen">
-              <img src={M.botDetective} alt="Бот Детектив — интерактивные детективные истории" class="catalog-screen-img" loading="lazy" />
-              <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">{S['modal-bots'].cards[1].screenBadge}</span>
-              </div>
-            </div>
-            <div class="catalog-card-header">
-              <span class="catalog-project-name">{S['modal-bots'].cards[1].name}</span>
-              <span class="catalog-badge badge-purple">{S['modal-bots'].cards[1].badge}</span>
-            </div>
-            <p class="catalog-project-desc">{S['modal-bots'].cards[1].desc}</p>
-
-            <div class="catalog-card-block">
-              <span class="catalog-block-title">{S['modal-bots'].cards[1].sections[0].title}</span>
-              <p class="catalog-block-text">{S['modal-bots'].cards[1].sections[0].text}</p>
-            </div>
-
-            <div class="catalog-card-block">
-              <span class="catalog-block-title">{S['modal-bots'].cards[1].sections[1].title}</span>
-              <ul class="catalog-features-list">
-                <li>{S['modal-bots'].cards[1].sections[1].items[0]}</li>
-                <li>{S['modal-bots'].cards[1].sections[1].items[1]}</li>
-                <li>{S['modal-bots'].cards[1].sections[1].items[2]}</li>
-                <li>{S['modal-bots'].cards[1].sections[1].items[3]}</li>
-              </ul>
-            </div>
-
-            <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-aichatbot">{W0}{S['modal-bots'].cards[1].actions[0]}{W0}</button>
-              <a href={L.botDetective} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Запустить бота @AI_CH_BOT_univers_bot в Telegram">{W0}{S['modal-bots'].cards[1].actions[1]}{W0}</a>
-            </div>
-          </div>
+          ))}
 
         </div>
       </div>
@@ -779,119 +600,32 @@ const W1 = " ";
         </div>
 
         <div class="sites-catalog-grid">
-          <!-- 1. English Teacher -->
-          <div class="catalog-project-card">
-            <div class="catalog-card-screen">
-              <img src={M.englishTeacher} alt="English Teacher — реальный первый экран" class="catalog-screen-img" loading="lazy" />
-              <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">{S['modal-sites'].cards[0].screenBadge}</span>
+          {P.landings.filter((l: any) => l.status === 'published').map((landing: any) => (
+            <div class="catalog-project-card">
+              <div class="catalog-card-screen">
+                <img src={landing.screenPreview} alt={`${landing.name} — реальный первый экран`} class="catalog-screen-img" loading="lazy" />
+                <div class="catalog-screen-overlay">
+                  <span class="screen-url-badge">{landing.screenBadge}</span>
+                </div>
+              </div>
+              <div class="catalog-card-header">
+                <span class="catalog-project-name">
+                  {landing.id === 'tracker01' && <span class="tracker-led-mini"></span>}
+                  {landing.name}
+                </span>
+                <span class={`catalog-badge ${landing.badgeClass || 'badge-blue'}`}>{landing.badge}</span>
+              </div>
+              <p class="catalog-project-desc">{landing.desc}</p>
+              <div class="catalog-project-actions">
+                <button type="button" class="catalog-open-btn" data-open-drawer={landing.drawerId || ("modal-landing-" + landing.id)}>{W0}ПОДРОБНЕЕ{W0}</button>
+                {landing.url && (
+                  <a href={landing.url} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title={landing.urlTitle || `Перейти на ${landing.url}`}>
+                    {W0}САЙТ ↗{W0}
+                  </a>
+                )}
               </div>
             </div>
-            <div class="catalog-card-header">
-              <span class="catalog-project-name">{S['modal-sites'].cards[0].name}</span>
-              <span class="catalog-badge badge-blue">{S['modal-sites'].cards[0].badge}</span>
-            </div>
-            <p class="catalog-project-desc">{S['modal-sites'].cards[0].desc}</p>
-            <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-english-teacher">{W0}{S['modal-sites'].cards[0].actions[0]}{W0}</button>
-              <a href={L.english} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт english.gonka.blog">{W0}{S['modal-sites'].cards[0].actions[1]}{W0}</a>
-            </div>
-          </div>
-
-          <!-- 2. TwoHearts -->
-          <div class="catalog-project-card">
-            <div class="catalog-card-screen">
-              <img src={M.twohearts} alt="TwoHearts — реальный первый экран" class="catalog-screen-img" loading="lazy" />
-              <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">{S['modal-sites'].cards[1].screenBadge}</span>
-              </div>
-            </div>
-            <div class="catalog-card-header">
-              <span class="catalog-project-name">{S['modal-sites'].cards[1].name}</span>
-              <span class="catalog-badge badge-pink">{S['modal-sites'].cards[1].badge}</span>
-            </div>
-            <p class="catalog-project-desc">{S['modal-sites'].cards[1].desc}</p>
-            <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-twohearts">{W0}{S['modal-sites'].cards[1].actions[0]}{W0}</button>
-              <a href={L.twohearts} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт twohearts.gonka.blog">{W0}{S['modal-sites'].cards[1].actions[1]}{W0}</a>
-            </div>
-          </div>
-
-          <!-- 3. Siteviza -->
-          <div class="catalog-project-card">
-            <div class="catalog-card-screen">
-              <img src={M.siteviza} alt="Siteviza — реальный первый экран" class="catalog-screen-img" loading="lazy" />
-              <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">{S['modal-sites'].cards[2].screenBadge}</span>
-              </div>
-            </div>
-            <div class="catalog-card-header">
-              <span class="catalog-project-name">{S['modal-sites'].cards[2].name}</span>
-              <span class="catalog-badge badge-cyan">{S['modal-sites'].cards[2].badge}</span>
-            </div>
-            <p class="catalog-project-desc">{S['modal-sites'].cards[2].desc}</p>
-            <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-siteviza">{W0}{S['modal-sites'].cards[2].actions[0]}{W0}</button>
-              <a href={L.siteviza} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт siteviza.gonka.blog">{W0}{S['modal-sites'].cards[2].actions[1]}{W0}</a>
-            </div>
-          </div>
-
-          <!-- 4. Atelier -->
-          <div class="catalog-project-card">
-            <div class="catalog-card-screen">
-              <img src={M.atelier} alt="Atelier — реальный первый экран" class="catalog-screen-img" loading="lazy" />
-              <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">{S['modal-sites'].cards[3].screenBadge}</span>
-              </div>
-            </div>
-            <div class="catalog-card-header">
-              <span class="catalog-project-name">{S['modal-sites'].cards[3].name}</span>
-              <span class="catalog-badge badge-amber">{S['modal-sites'].cards[3].badge}</span>
-            </div>
-            <p class="catalog-project-desc">{S['modal-sites'].cards[3].desc}</p>
-            <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-atelier">{W0}{S['modal-sites'].cards[3].actions[0]}{W0}</button>
-              <a href={L.atelier} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт atelier.gonka.blog">{W0}{S['modal-sites'].cards[3].actions[1]}{W0}</a>
-            </div>
-          </div>
-
-          <!-- 5. LandAsset5 -->
-          <div class="catalog-project-card">
-            <div class="catalog-card-screen">
-              <img src={M.landasset5} alt="LandAsset5 — реальный первый экран" class="catalog-screen-img" loading="lazy" />
-              <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">{S['modal-sites'].cards[4].screenBadge}</span>
-              </div>
-            </div>
-            <div class="catalog-card-header">
-              <span class="catalog-project-name">{S['modal-sites'].cards[4].name}</span>
-              <span class="catalog-badge badge-emerald">{S['modal-sites'].cards[4].badge}</span>
-            </div>
-            <p class="catalog-project-desc">{S['modal-sites'].cards[4].desc}</p>
-            <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-landasset5">{W0}{S['modal-sites'].cards[4].actions[0]}{W0}</button>
-              <a href={L.landasset5} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Перейти на сайт landasset5.gonka.blog">{W0}{S['modal-sites'].cards[4].actions[1]}{W0}</a>
-            </div>
-          </div>
-
-          <!-- 6. Tracker_01 -->
-          <div class="catalog-project-card">
-            <div class="catalog-card-screen">
-              <img src={M.tracker01} alt="Tracker_01 — реальный первый экран" class="catalog-screen-img" loading="lazy" />
-              <div class="catalog-screen-overlay">
-                <span class="screen-url-badge">{S['modal-sites'].cards[5].screenBadge}</span>
-              </div>
-            </div>
-            <div class="catalog-card-header">
-              <span class="catalog-project-name"><span class="tracker-led-mini"></span>{S['modal-sites'].cards[5].name}</span>
-              <span class="catalog-badge badge-amber">{S['modal-sites'].cards[5].badge}</span>
-            </div>
-            <p class="catalog-project-desc">Полнофункциональный веб-трекер задач для сервисных команд: Канбан Drag & Drop, PHP 8.3, 14/14 тестов пройдены.</p>
-            <div class="catalog-project-actions">
-              <button type="button" class="catalog-open-btn" data-open-drawer="modal-tracker01">{W0}{S['modal-sites'].cards[5].actions[0]}{W0}</button>
-              <a href={L.tracker01} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title="Открыть демо трекера">{W0}{S['modal-sites'].cards[5].actions[1]}{W0}</a>
-            </div>
-          </div>
+          ))}
         </div>
 
       </div>
@@ -899,14 +633,13 @@ const W1 = " ";
     </div>
   </aside>
 
-  <!-- 3. ENGLISH TEACHER (ЛЕНДИНГ) -->
-  <aside id="modal-english-teacher" class="workbench-drawer">
+  <!-- КАТАЛОГ И ДОСЬЕ ТРЕКЕРОВ (ОТКРЫВАЕТСЯ ПРИ КЛИКЕ НА ПЛАШКУ «ТРЕКЕРЫ» ИЛИ ПУНКТ МЕНЮ) -->
+  <aside id="modal-trackers" class="workbench-drawer">
     <div class="drawer-content">
-      
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-blue">{S['modal-english-teacher'].header.tag}</span>
-          <span class="case-badge">{S['modal-english-teacher'].header.badge}</span>
+          <span class="drawer-tag text-orange">{primaryTracker?.headerTag || "[ ТРЕКЕР // TASK-TRACKER ]"}</span>
+          <span class="case-badge">{primaryTracker?.badge || "РАБОЧИЙ ПРОДУКТ"}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -921,70 +654,306 @@ const W1 = " ";
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">{S['modal-english-teacher'].hero.status}</div>
-          <h2 class="case-title">{S['modal-english-teacher'].hero.title}</h2>
-          <p class="case-lead">{S['modal-english-teacher'].hero.lead}</p>
+          <div class="status-live">{primaryTracker?.heroStatus || "● ДЕЙСТВУЮЩИЙ ПРОДУКТ"}</div>
+          <h2 class="case-title">{primaryTracker?.name || "Таск-трекер"}</h2>
+          <p class="case-lead">{primaryTracker?.lead || "Внутренний инструмент управления задачами, спринтами и фокусом для соло-разработчиков."}</p>
+          
           <div class="case-actions">
-            <a href={L.english} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-english-teacher'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-english-teacher'].actions[1]}{W0}</a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-english-teacher'].actions[2]}{W0}</button>
+            {primaryTracker?.url && (
+              <a href={primaryTracker.url} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" title={primaryTracker.urlTitle || `Перейти в ${primaryTracker.name}`}>
+                {W0}ОТКРЫТЬ ТАСК-ТРЕКЕР (tracker-01.gonka.blog) ↗{W0}
+              </a>
+            )}
+            {primaryTracker?.telegram && (
+              <a href={primaryTracker.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+                {W0}ОБСУДИТЬ В TELEGRAM ↗{W0}
+              </a>
+            )}
           </div>
         </div>
 
-        <!-- Реальный первый экран проекта -->
-        <div class="dossier-screen-preview">
-          <img src={M.englishTeacher} alt="English Teacher — реальный первый экран" class="dossier-screen-img" loading="lazy" />
-          <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span>{W1}{S['modal-english-teacher'].screen.caption}{W0}</div>
-        </div>
+        {primaryTracker?.screenPreview && (
+          <div class="dossier-screen-preview">
+            <img src={primaryTracker.screenPreview} alt={`${primaryTracker.name} — экран проекта`} class="dossier-screen-img" loading="lazy" />
+            {primaryTracker.caption && (
+              <div class="dossier-screen-caption">
+                <span class="caption-dot">●</span>{W1}{primaryTracker.caption}{W0}
+              </div>
+            )}
+          </div>
+        )}
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-english-teacher'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-english-teacher'].blocks[0].text}{W0}</p>
+              <h3 class="section-heading">{primaryTracker?.blocks?.[0]?.heading || "// О ТРЕКЕРЕ"}</h3>
+              <p class="section-text">{W0}{primaryTracker?.blocks?.[0]?.text || ""}{W0}</p>
             </div>
 
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-english-teacher'].blocks[1].heading}</h3>
-              <ul class="facts-list">
-                <li>{S['modal-english-teacher'].blocks[1].items[0]}</li>
-                <li>{S['modal-english-teacher'].blocks[1].items[1]}</li>
-                <li>{S['modal-english-teacher'].blocks[1].items[2]}</li>
-                <li>{S['modal-english-teacher'].blocks[1].items[3]}</li>
-              </ul>
-            </div>
+            {primaryTracker?.blocks?.[1]?.items && (
+              <div class="case-section">
+                <h3 class="section-heading">{primaryTracker.blocks[1].heading || "// ФУНКЦИОНАЛ"}</h3>
+                <ul class="facts-list">
+                  {primaryTracker.blocks[1].items.map((it: string) => <li>{it}</li>)}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-english-teacher'].blocks[2].heading}</h3>
+              <h3 class="section-heading">{primaryTracker?.blocks?.[2]?.heading || "// СТЕК & ПАРАМЕТРЫ"}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-english-teacher'].blocks[2].specs[0][0]}</span><strong>{S['modal-english-teacher'].blocks[2].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-english-teacher'].blocks[2].specs[1][0]}</span><strong>{S['modal-english-teacher'].blocks[2].specs[1][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-english-teacher'].blocks[2].specs[2][0]}</span><strong>{S['modal-english-teacher'].blocks[2].specs[2][1]}</strong></div>
+                {primaryTracker?.blocks?.[2]?.specs?.map((sp: [string, string]) => (
+                  <div class="spec-row">
+                    <span>{sp[0]}</span>
+                    <strong>{sp[1]}</strong>
+                  </div>
+                ))}
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-english-teacher'].blocks[3].heading}</h3>
-              <div class="result-status-box">{W0}{S['modal-english-teacher'].blocks[3].result}{W0}</div>
+              <h3 class="section-heading">{primaryTracker?.blocks?.[3]?.heading || "// РЕЗУЛЬТАТ"}</h3>
+              <p class="section-text">{W0}{primaryTracker?.blocks?.[3]?.result || ""}{W0}</p>
             </div>
           </div>
         </div>
-      </div>
 
+        {P.trackers.length > 1 && (
+          <div class="sites-catalog-grid" style="margin-top: 32px;">
+            {P.trackers.filter((tr: any) => tr.status === 'published').map((tr: any) => (
+              <div class="catalog-project-card">
+                {tr.screenPreview && (
+                  <div class="catalog-card-screen">
+                    <img src={tr.screenPreview} alt={`${tr.name} — экран`} class="catalog-screen-img" loading="lazy" />
+                    <div class="catalog-screen-overlay">
+                      <span class="screen-url-badge">{tr.screenBadge || tr.url?.replace(/^https?:\/\//, '')}</span>
+                    </div>
+                  </div>
+                )}
+                <div class="catalog-card-header">
+                  <span class="catalog-project-name">{tr.name}</span>
+                  <span class={`catalog-badge ${tr.badgeClass || 'badge-blue'}`}>{tr.badge}</span>
+                </div>
+                <p class="catalog-project-desc">{tr.lead || tr.desc}</p>
+                <div class="catalog-project-actions">
+                  <button type="button" class="catalog-open-btn" data-open-drawer={tr.drawerId || ("modal-" + tr.id)}>{W0}ПОДРОБНЕЕ{W0}</button>
+                  {tr.url && (
+                    <a href={tr.url} target="_blank" rel="noopener noreferrer" class="catalog-link-btn" title={tr.urlTitle || `Перейти в ${tr.name}`}>
+                      {W0}ОТКРЫТЬ ↗{W0}
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+      </div>
     </div>
   </aside>
 
-  <!-- 4. TWOHEARTS (ЛЕНДИНГ) -->
-  <aside id="modal-twohearts" class="workbench-drawer">
+  <!-- ДОСЬЕ ТРЕКЕРОВ (ДИНАМИЧЕСКИЕ ИЗ P.trackers) -->
+  {P.trackers.map((tracker: any) => (
+    <aside id={tracker.drawerId || ("modal-" + tracker.id)} class="workbench-drawer">
+      <div class="drawer-content">
+        <div class="drawer-header">
+          <div class="drawer-header-left">
+            <span class="drawer-tag text-orange">{tracker.headerTag || `[ ТРЕКЕР // ${tracker.name.toUpperCase()} ]`}</span>
+            <span class="case-badge">{tracker.badge || "ТРЕКЕР"}</span>
+          </div>
+          <div class="drawer-header-actions">
+            <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+              <span class="expand-icon">⛶</span>
+              <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+            </button>
+            <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+              <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="case-body">
+          <div class="case-hero-strip">
+            <div class="status-live">{tracker.heroStatus || "● ДЕЙСТВУЮЩИЙ ПРОДУКТ"}</div>
+            <h2 class="case-title">{tracker.name}</h2>
+            <p class="case-lead">{tracker.lead}</p>
+            
+            <div class="case-actions">
+              {tracker.url && (
+                <a href={tracker.url} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" title={tracker.urlTitle || `Перейти в ${tracker.name}`}>
+                  {W0}ОТКРЫТЬ ПРОЕКТ ↗{W0}
+                </a>
+              )}
+              {tracker.telegram && (
+                <a href={tracker.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+                  {W0}ОБСУДИТЬ В TELEGRAM ↗{W0}
+                </a>
+              )}
+              <button type="button" class="case-action-btn btn-secondary" data-open-drawer="modal-trackers">
+                {W0}← К КАТАЛОГУ ТРЕКЕРОВ{W0}
+              </button>
+            </div>
+          </div>
+
+          {tracker.screenPreview && (
+            <div class="dossier-screen-preview">
+              <img src={tracker.screenPreview} alt={`${tracker.name} — экран проекта`} class="dossier-screen-img" loading="lazy" />
+              {tracker.caption && (
+                <div class="dossier-screen-caption">
+                  <span class="caption-dot">●</span>{W1}{tracker.caption}{W0}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div class="case-grid">
+            <div class="case-col-left">
+              <div class="case-section">
+                <h3 class="section-heading">{tracker.blocks?.[0]?.heading || "// О ТРЕКЕРЕ"}</h3>
+                <p class="section-text">{W0}{tracker.blocks?.[0]?.text || ""}{W0}</p>
+              </div>
+
+              {tracker.blocks?.[1]?.items && (
+                <div class="case-section">
+                  <h3 class="section-heading">{tracker.blocks[1].heading || "// ФУНКЦИОНАЛ"}</h3>
+                  <ul class="facts-list">
+                    {tracker.blocks[1].items.map((it: string) => <li>{it}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div class="case-col-right">
+              <div class="case-section">
+                <h3 class="section-heading">{tracker.blocks?.[2]?.heading || "// СТЕК & ПАРАМЕТРЫ"}</h3>
+                <div class="tech-spec-box">
+                  {tracker.blocks?.[2]?.specs?.map((sp: [string, string]) => (
+                    <div class="spec-row">
+                      <span>{sp[0]}</span>
+                      <strong>{sp[1]}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div class="case-section">
+                <h3 class="section-heading">{tracker.blocks?.[3]?.heading || "// РЕЗУЛЬТАТ"}</h3>
+                <p class="section-text">{W0}{tracker.blocks?.[3]?.result || ""}{W0}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </aside>
+  ))}
+
+  <!-- ДОСЬЕ ЛЕНДИНГОВ (ДИНАМИЧЕСКИЕ ИЗ P.landings) -->
+  {P.landings.map((landing: any) => (
+    <aside id={landing.drawerId || ("modal-landing-" + landing.id)} class="workbench-drawer">
+      <div class="drawer-content">
+        <div class="drawer-header">
+          <div class="drawer-header-left">
+            <span class="drawer-tag text-cyan">{landing.headerTag || `[ ЛЕНДИНГ // ${landing.name.toUpperCase()} ]`}</span>
+            <span class="case-badge">{landing.badge}</span>
+          </div>
+          <div class="drawer-header-actions">
+            <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+              <span class="expand-icon">⛶</span>
+              <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+            </button>
+            <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+              <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="case-body">
+          <div class="case-hero-strip">
+            <div class="status-live">{landing.heroStatus || "● ДЕЙСТВУЮЩИЙ ЛЕНДИНГ"}</div>
+            <h2 class="case-title">{landing.name}</h2>
+            <p class="case-lead">{landing.lead}</p>
+            <div class="case-actions">
+              {landing.url && (
+                <a href={landing.url} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}ОТКРЫТЬ САЙТ ↗{W0}</a>
+              )}
+              {landing.telegram && (
+                <a href={landing.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}ОБСУДИТЬ В TELEGRAM ↗{W0}</a>
+              )}
+              <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}← К СПИСКУ ПРОЕКТОВ{W0}</button>
+            </div>
+          </div>
+
+          {landing.screenPreview && (
+            <div class="dossier-screen-preview">
+              <img src={landing.screenPreview} alt={`${landing.name} — экран`} class="dossier-screen-img" loading="lazy" />
+              {landing.caption && (
+                <div class="dossier-screen-caption">
+                  <span class="caption-dot">●</span>{W1}{landing.caption}{W0}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div class="case-grid">
+            <div class="case-col-left">
+              {landing.blocks?.[0] && (
+                <div class="case-section">
+                  <h3 class="section-heading">{landing.blocks[0].heading || "// О ПРОЕКТЕ"}</h3>
+                  <p class="section-text">{W0}{landing.blocks[0].text}{W0}</p>
+                </div>
+              )}
+
+              {landing.blocks?.[1]?.items && (
+                <div class="case-section">
+                  <h3 class="section-heading">{landing.blocks[1].heading || "// КЛЮЧЕВЫЕ МОДУЛИ"}</h3>
+                  <ul class="facts-list">
+                    {landing.blocks[1].items.map((it: string) => <li>{it}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div class="case-col-right">
+              {landing.blocks?.[2]?.specs && (
+                <div class="case-section">
+                  <h3 class="section-heading">{landing.blocks[2].heading || "// ПАРАМЕТРЫ"}</h3>
+                  <div class="tech-spec-box">
+                    {landing.blocks[2].specs.map((sp: [string, string]) => (
+                      <div class="spec-row">
+                        <span>{sp[0]}</span>
+                        <strong>{sp[1]}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {landing.blocks?.[3]?.result && (
+                <div class="case-section">
+                  <h3 class="section-heading">{landing.blocks[3].heading || "// РЕЗУЛЬТАТ"}</h3>
+                  <div class="result-status-box">{W0}{landing.blocks[3].result}{W0}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  ))}
+
+
+  <!-- 10. SRBIJA (ПОЛЕВОЕ ИССЛЕДОВАНИЕ / ЛИЧНЫЙ R&D) -->
+  <aside id="modal-srbija" class="workbench-drawer drawer-serbia">
     <div class="drawer-content">
       
       <div class="drawer-header">
         <div class="drawer-header-left">
-          <span class="drawer-tag text-pink">{S['modal-twohearts'].header.tag}</span>
-          <span class="case-badge">{S['modal-twohearts'].header.badge}</span>
+          <span class="drawer-tag text-amber">{S['modal-srbija'].header.tag}</span>
+          <span class="case-badge">{S['modal-srbija'].header.badge}</span>
         </div>
         <div class="drawer-header-actions">
           <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
@@ -998,514 +967,48 @@ const W1 = " ";
       </div>
 
       <div class="case-body">
+        <figure class="srbija-photo">
+          <img src={M.srbijaBelgrade} alt={"Белград на закате: " + S['modal-srbija'].hero.title} width="1600" height="900" loading="lazy" decoding="async" />
+        </figure>
         <div class="case-hero-strip">
-          <div class="status-live">{S['modal-twohearts'].hero.status}</div>
-          <h2 class="case-title">{S['modal-twohearts'].hero.title}</h2>
-          <p class="case-lead">{S['modal-twohearts'].hero.lead}</p>
+          <div class="status-live">{S['modal-srbija'].hero.status}</div>
+          <h2 class="case-title">{S['modal-srbija'].hero.title}</h2>
+          <p class="case-lead">{S['modal-srbija'].hero.lead}</p>
           <div class="case-actions">
-            <a href={L.twohearts} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-twohearts'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-twohearts'].actions[1]}{W0}</a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-twohearts'].actions[2]}{W0}</button>
-          </div>
-        </div>
-
-        <!-- Реальный первый экран проекта -->
-        <div class="dossier-screen-preview">
-          <img src={M.twohearts} alt="TwoHearts — реальный первый экран" class="dossier-screen-img" loading="lazy" />
-          <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span>{W1}{S['modal-twohearts'].screen.caption}{W0}</div>
-        </div>
-
-        <div class="case-grid">
-          <div class="case-col-left">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-twohearts'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-twohearts'].blocks[0].text}{W0}</p>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-twohearts'].blocks[1].heading}</h3>
-              <ul class="facts-list">
-                <li>{S['modal-twohearts'].blocks[1].items[0]}</li>
-                <li>{S['modal-twohearts'].blocks[1].items[1]}</li>
-                <li>{S['modal-twohearts'].blocks[1].items[2]}</li>
-                <li>{S['modal-twohearts'].blocks[1].items[3]}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="case-col-right">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-twohearts'].blocks[2].heading}</h3>
-              <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-twohearts'].blocks[2].specs[0][0]}</span><strong>{S['modal-twohearts'].blocks[2].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-twohearts'].blocks[2].specs[1][0]}</span><strong>{S['modal-twohearts'].blocks[2].specs[1][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-twohearts'].blocks[2].specs[2][0]}</span><strong>{S['modal-twohearts'].blocks[2].specs[2][1]}</strong></div>
-              </div>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-twohearts'].blocks[3].heading}</h3>
-              <div class="result-status-box">{W0}{S['modal-twohearts'].blocks[3].result}{W0}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </aside>
-
-  <!-- 5. SITEVIZA (САЙТ-ВИЗИТКА) -->
-  <aside id="modal-siteviza" class="workbench-drawer">
-    <div class="drawer-content">
-      
-      <div class="drawer-header">
-        <div class="drawer-header-left">
-          <span class="drawer-tag text-cyan">{S['modal-siteviza'].header.tag}</span>
-          <span class="case-badge">{S['modal-siteviza'].header.badge}</span>
-        </div>
-        <div class="drawer-header-actions">
-          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
-            <span class="expand-icon">⛶</span>
-            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
-          </button>
-          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
-            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="case-body">
-        <div class="case-hero-strip">
-          <div class="status-live">{S['modal-siteviza'].hero.status}</div>
-          <h2 class="case-title">{S['modal-siteviza'].hero.title}</h2>
-          <p class="case-lead">{S['modal-siteviza'].hero.lead}</p>
-          <div class="case-actions">
-            <a href={L.siteviza} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-siteviza'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-siteviza'].actions[1]}{W0}</a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-siteviza'].actions[2]}{W0}</button>
-          </div>
-        </div>
-
-        <!-- Реальный первый экран проекта -->
-        <div class="dossier-screen-preview">
-          <img src={M.siteviza} alt="Siteviza — реальный первый экран" class="dossier-screen-img" loading="lazy" />
-          <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span>{W1}{S['modal-siteviza'].screen.caption}{W0}</div>
-        </div>
-
-        <div class="case-grid">
-          <div class="case-col-left">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-siteviza'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-siteviza'].blocks[0].text}{W0}</p>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-siteviza'].blocks[1].heading}</h3>
-              <ul class="facts-list">
-                <li>{S['modal-siteviza'].blocks[1].items[0]}</li>
-                <li>{S['modal-siteviza'].blocks[1].items[1]}</li>
-                <li>{S['modal-siteviza'].blocks[1].items[2]}</li>
-                <li>{S['modal-siteviza'].blocks[1].items[3]}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="case-col-right">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-siteviza'].blocks[2].heading}</h3>
-              <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-siteviza'].blocks[2].specs[0][0]}</span><strong>{S['modal-siteviza'].blocks[2].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-siteviza'].blocks[2].specs[1][0]}</span><strong>{S['modal-siteviza'].blocks[2].specs[1][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-siteviza'].blocks[2].specs[2][0]}</span><strong>{S['modal-siteviza'].blocks[2].specs[2][1]}</strong></div>
-              </div>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-siteviza'].blocks[3].heading}</h3>
-              <div class="result-status-box">{W0}{S['modal-siteviza'].blocks[3].result}{W0}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </aside>
-
-  <!-- 6. ATELIER (ЛЕНДИНГ) -->
-  <aside id="modal-atelier" class="workbench-drawer">
-    <div class="drawer-content">
-      
-      <div class="drawer-header">
-        <div class="drawer-header-left">
-          <span class="drawer-tag text-amber">{S['modal-atelier'].header.tag}</span>
-          <span class="case-badge">{S['modal-atelier'].header.badge}</span>
-        </div>
-        <div class="drawer-header-actions">
-          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
-            <span class="expand-icon">⛶</span>
-            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
-          </button>
-          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
-            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="case-body">
-        <div class="case-hero-strip">
-          <div class="status-live">{S['modal-atelier'].hero.status}</div>
-          <h2 class="case-title">{S['modal-atelier'].hero.title}</h2>
-          <p class="case-lead">{S['modal-atelier'].hero.lead}</p>
-          <div class="case-actions">
-            <a href={L.atelier} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-atelier'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-atelier'].actions[1]}{W0}</a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-atelier'].actions[2]}{W0}</button>
-          </div>
-        </div>
-
-        <!-- Реальный первый экран проекта -->
-        <div class="dossier-screen-preview">
-          <img src={M.atelier} alt="Atelier — реальный первый экран" class="dossier-screen-img" loading="lazy" />
-          <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span>{W1}{S['modal-atelier'].screen.caption}{W0}</div>
-        </div>
-
-        <div class="case-grid">
-          <div class="case-col-left">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-atelier'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-atelier'].blocks[0].text}{W0}</p>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-atelier'].blocks[1].heading}</h3>
-              <ul class="facts-list">
-                <li>{S['modal-atelier'].blocks[1].items[0]}</li>
-                <li>{S['modal-atelier'].blocks[1].items[1]}</li>
-                <li>{S['modal-atelier'].blocks[1].items[2]}</li>
-                <li>{S['modal-atelier'].blocks[1].items[3]}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="case-col-right">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-atelier'].blocks[2].heading}</h3>
-              <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-atelier'].blocks[2].specs[0][0]}</span><strong>{S['modal-atelier'].blocks[2].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-atelier'].blocks[2].specs[1][0]}</span><strong>{S['modal-atelier'].blocks[2].specs[1][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-atelier'].blocks[2].specs[2][0]}</span><strong>{S['modal-atelier'].blocks[2].specs[2][1]}</strong></div>
-              </div>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-atelier'].blocks[3].heading}</h3>
-              <div class="result-status-box">{W0}{S['modal-atelier'].blocks[3].result}{W0}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </aside>
-
-  <!-- 7. LANDASSET5 (ИНВЕСТИЦИОННЫЙ ЛЕНДИНГ) -->
-  <aside id="modal-landasset5" class="workbench-drawer">
-    <div class="drawer-content">
-      
-      <div class="drawer-header">
-        <div class="drawer-header-left">
-          <span class="drawer-tag text-emerald">{S['modal-landasset5'].header.tag}</span>
-          <span class="case-badge">{S['modal-landasset5'].header.badge}</span>
-        </div>
-        <div class="drawer-header-actions">
-          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
-            <span class="expand-icon">⛶</span>
-            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
-          </button>
-          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
-            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="case-body">
-        <div class="case-hero-strip">
-          <div class="status-live">{S['modal-landasset5'].hero.status}</div>
-          <h2 class="case-title">{S['modal-landasset5'].hero.title}</h2>
-          <p class="case-lead">{S['modal-landasset5'].hero.lead}</p>
-          <div class="case-actions">
-            <a href={L.landasset5} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-landasset5'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-landasset5'].actions[1]}{W0}</a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-landasset5'].actions[2]}{W0}</button>
-          </div>
-        </div>
-
-        <!-- Реальный первый экран проекта -->
-        <div class="dossier-screen-preview">
-          <img src={M.landasset5} alt="LandAsset5 — реальный первый экран" class="dossier-screen-img" loading="lazy" />
-          <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span>{W1}{S['modal-landasset5'].screen.caption}{W0}</div>
-        </div>
-
-        <div class="case-grid">
-          <div class="case-col-left">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-landasset5'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-landasset5'].blocks[0].text}{W0}</p>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-landasset5'].blocks[1].heading}</h3>
-              <ul class="facts-list">
-                <li>{S['modal-landasset5'].blocks[1].items[0]}</li>
-                <li>{S['modal-landasset5'].blocks[1].items[1]}</li>
-                <li>{S['modal-landasset5'].blocks[1].items[2]}</li>
-                <li>{S['modal-landasset5'].blocks[1].items[3]}</li>
-                <li>{S['modal-landasset5'].blocks[1].items[4]}</li>
-                <li>{S['modal-landasset5'].blocks[1].items[5]}</li>
-                <li>{S['modal-landasset5'].blocks[1].items[6]}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="case-col-right">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-landasset5'].blocks[2].heading}</h3>
-              <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-landasset5'].blocks[2].specs[0][0]}</span><strong>{S['modal-landasset5'].blocks[2].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-landasset5'].blocks[2].specs[1][0]}</span><strong>{S['modal-landasset5'].blocks[2].specs[1][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-landasset5'].blocks[2].specs[2][0]}</span><strong>{S['modal-landasset5'].blocks[2].specs[2][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-landasset5'].blocks[2].specs[3][0]}</span><strong>{S['modal-landasset5'].blocks[2].specs[3][1]}</strong></div>
-              </div>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-landasset5'].blocks[3].heading}</h3>
-              <div class="result-status-box">{W0}{S['modal-landasset5'].blocks[3].result}{W0}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </aside>
-
-  <!-- 8. TRACKER_01 (КОМАНДНЫЙ ТРЕКЕР) -->
-  <aside id="modal-tracker01" class="workbench-drawer">
-    <div class="drawer-content">
-      
-      <div class="drawer-header">
-        <div class="drawer-header-left">
-          <span class="drawer-tag text-amber">{S['modal-tracker01'].header.tag}</span>
-          <span class="case-badge">{S['modal-tracker01'].header.badge}</span>
-        </div>
-        <div class="drawer-header-actions">
-          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
-            <span class="expand-icon">⛶</span>
-            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
-          </button>
-          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
-            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="case-body">
-        <div class="case-hero-strip">
-          <div class="status-live">{S['modal-tracker01'].hero.status}</div>
-          <h2 class="case-title">{S['modal-tracker01'].hero.title}</h2>
-          <p class="case-lead">{S['modal-tracker01'].hero.lead}</p>
-          <div class="case-actions">
-            <a href={L.tracker01} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-tracker01'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-tracker01'].actions[1]}{W0}</a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-sites">{W0}{S['modal-tracker01'].actions[2]}{W0}</button>
-          </div>
-        </div>
-
-        <!-- Реальный первый экран Канбан-доски -->
-        <div class="dossier-screen-preview">
-          <img src={M.tracker01} alt="Tracker_01 — реальный экран Канбан-доски" class="dossier-screen-img" loading="lazy" />
-          <div class="dossier-screen-caption">
-            <span class="caption-dot">●</span>{W1}{S['modal-tracker01'].screen.caption}{W0}</div>
-        </div>
-
-        <div class="case-grid">
-          <div class="case-col-left">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-tracker01'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-tracker01'].blocks[0].text}{W0}</p>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-tracker01'].blocks[1].heading}</h3>
-              <ul class="facts-list">
-                <li>Интерактивный Канбан на 5 колонок с native HTML5 Drag & Drop.</li>
-                <li>{S['modal-tracker01'].blocks[1].items[0]}</li>
-                <li>{S['modal-tracker01'].blocks[1].items[1]}</li>
-                <li>{S['modal-tracker01'].blocks[1].items[2]}</li>
-                <li>{S['modal-tracker01'].blocks[1].items[3]}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="case-col-right">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-tracker01'].blocks[2].heading}</h3>
-              <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-tracker01'].blocks[2].specs[0][0]}</span><strong>{S['modal-tracker01'].blocks[2].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-tracker01'].blocks[2].specs[1][0]}</span><strong>{S['modal-tracker01'].blocks[2].specs[1][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-tracker01'].blocks[2].specs[2][0]}</span><strong>{S['modal-tracker01'].blocks[2].specs[2][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-tracker01'].blocks[2].specs[3][0]}</span><strong>{S['modal-tracker01'].blocks[2].specs[3][1]}</strong></div>
-              </div>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-tracker01'].blocks[3].heading}</h3>
-              <div class="result-status-box">{W0}{S['modal-tracker01'].blocks[3].result}{W0}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </aside>
-
-  <!-- 9. БОТ ДЕТЕКТИВ (TELEGRAM-БОТ) -->
-  <aside id="modal-aichatbot" class="workbench-drawer">
-    <div class="drawer-content">
-      
-      <div class="drawer-header">
-        <div class="drawer-header-left">
-          <span class="drawer-tag text-purple">{S['modal-aichatbot'].header.tag}</span>
-          <span class="case-badge">{S['modal-aichatbot'].header.badge}</span>
-        </div>
-        <div class="drawer-header-actions">
-          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
-            <span class="expand-icon">⛶</span>
-            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
-          </button>
-          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
-            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="case-body">
-        <div class="case-hero-strip">
-          <div class="status-live">{S['modal-aichatbot'].hero.status}</div>
-          <h2 class="case-title">{S['modal-aichatbot'].hero.title}</h2>
-          <p class="case-lead">{S['modal-aichatbot'].hero.lead}</p>
-          <div class="case-actions">
-            <a href={L.botDetective} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-aichatbot'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-aichatbot'].actions[1]}{W0}</a>
-            <button type="button" class="case-action-btn btn-catalog-back" data-open-drawer="modal-bots">{W0}{S['modal-aichatbot'].actions[2]}{W0}</button>
+            <a href={L.reloca} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" title="Открыть проект reloca.gonka.blog">{W0}{S['modal-srbija'].actions[0]}{W0}</a>
+            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-srbija'].actions[1]}{W0}</a>
           </div>
         </div>
 
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-aichatbot'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-aichatbot'].blocks[0].text}{W0}</p>
+              <h3 class="section-heading">{S['modal-srbija'].blocks[0].heading}</h3>
+              <p class="section-text">{W0}{S['modal-srbija'].blocks[0].text}{W0}</p>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-aichatbot'].blocks[1].heading}</h3>
-              <ul class="facts-list">
-                <li>{S['modal-aichatbot'].blocks[1].items[0]}</li>
-                <li>{S['modal-aichatbot'].blocks[1].items[1]}</li>
-                <li>{S['modal-aichatbot'].blocks[1].items[2]}</li>
-                <li>{S['modal-aichatbot'].blocks[1].items[3]}</li>
-                <li>{S['modal-aichatbot'].blocks[1].items[4]}</li>
-              </ul>
+              <h3 class="section-heading">{S['modal-srbija'].blocks[1].heading}</h3>
+              <div class="tech-spec-box" style="font-size: 13px; color: #ede8df; line-height: 1.55;">{W0}{S['modal-srbija'].blocks[1].boxText}{W0}</div>
             </div>
           </div>
 
           <div class="case-col-right">
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-aichatbot'].blocks[2].heading}</h3>
-              <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-aichatbot'].blocks[2].specs[0][0]}</span><strong>{S['modal-aichatbot'].blocks[2].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-aichatbot'].blocks[2].specs[1][0]}</span><strong>{S['modal-aichatbot'].blocks[2].specs[1][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-aichatbot'].blocks[2].specs[2][0]}</span><strong>{S['modal-aichatbot'].blocks[2].specs[2][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-aichatbot'].blocks[2].specs[3][0]}</span><strong>{S['modal-aichatbot'].blocks[2].specs[3][1]}</strong></div>
-              </div>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-aichatbot'].blocks[3].heading}</h3>
-              <div class="result-status-box">{W0}{S['modal-aichatbot'].blocks[3].result}{W0}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </aside>
-
-  <!-- 10. РЕЛОКАНТ СЕРБИЯ (ПОЛЕВОЕ ИССЛЕДОВАНИЕ / ЛИЧНЫЙ R&D) -->
-  <aside id="modal-serbia-wip" class="workbench-drawer drawer-serbia">
-    <div class="drawer-content">
-      
-      <div class="drawer-header">
-        <div class="drawer-header-left">
-          <span class="drawer-tag text-amber">{S['modal-serbia-wip'].header.tag}</span>
-          <span class="case-badge">{S['modal-serbia-wip'].header.badge}</span>
-        </div>
-        <div class="drawer-header-actions">
-          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
-            <span class="expand-icon">⛶</span>
-            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
-          </button>
-          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
-            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="case-body">
-        <div class="case-hero-strip">
-          <div class="status-live">{S['modal-serbia-wip'].hero.status}</div>
-          <h2 class="case-title">{S['modal-serbia-wip'].hero.title}</h2>
-          <p class="case-lead">{S['modal-serbia-wip'].hero.lead}</p>
-          <div class="case-actions">
-            <a href={L.reloca} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" title="Открыть проект reloca.gonka.blog">{W0}{S['modal-serbia-wip'].actions[0]}{W0}</a>
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-serbia-wip'].actions[1]}{W0}</a>
-          </div>
-        </div>
-
-        <div class="case-grid">
-          <div class="case-col-left">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-serbia-wip'].blocks[0].heading}</h3>
-              <p class="section-text">{W0}{S['modal-serbia-wip'].blocks[0].text}{W0}</p>
-            </div>
-
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-serbia-wip'].blocks[1].heading}</h3>
-              <div class="tech-spec-box" style="font-size: 13px; color: #ede8df; line-height: 1.55;">{W0}{S['modal-serbia-wip'].blocks[1].boxText}{W0}</div>
-            </div>
-          </div>
-
-          <div class="case-col-right">
-            <div class="case-section">
-              <h3 class="section-heading">{S['modal-serbia-wip'].blocks[2].heading}</h3>
+              <h3 class="section-heading">{S['modal-srbija'].blocks[2].heading}</h3>
               <div class="lab-dossier-card">
-                <p class="dossier-text">{W0}{S['modal-serbia-wip'].blocks[2].dossier[0]}{W0}</p>
+                <p class="dossier-text">{W0}{S['modal-srbija'].blocks[2].dossier[0]}{W0}</p>
               </div>
             </div>
 
             <div class="case-section">
-              <h3 class="section-heading">{S['modal-serbia-wip'].blocks[3].heading}</h3>
+              <h3 class="section-heading">{S['modal-srbija'].blocks[3].heading}</h3>
               <div class="tech-spec-box">
-                <div class="spec-row"><span>{S['modal-serbia-wip'].blocks[3].specs[0][0]}</span><strong><a href={L.reloca} target="_blank" rel="noopener noreferrer" style="color: #f59e0b; text-decoration: underline;">{S['modal-serbia-wip'].blocks[3].specs[0][1]}</a></strong></div>
-                <div class="spec-row"><span>{S['modal-serbia-wip'].blocks[3].specs[1][0]}</span><strong class="text-amber-400">{S['modal-serbia-wip'].blocks[3].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-srbija'].blocks[3].specs[0][0]}</span><strong><a href={L.reloca} target="_blank" rel="noopener noreferrer" style="color: #f59e0b; text-decoration: underline;">{S['modal-srbija'].blocks[3].specs[0][1]}</a></strong></div>
+                <div class="spec-row"><span>{S['modal-srbija'].blocks[3].specs[1][0]}</span><strong class="text-amber-400">{S['modal-srbija'].blocks[3].specs[1][1]}</strong></div>
                 <div class="spec-row"><span>Характер:</span><strong>Личный R&D-проект</strong></div>
-                <div class="spec-row"><span>{S['modal-serbia-wip'].blocks[3].specs[2][0]}</span><strong>{S['modal-serbia-wip'].blocks[3].specs[2][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-serbia-wip'].blocks[3].specs[3][0]}</span><strong>{S['modal-serbia-wip'].blocks[3].specs[3][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-srbija'].blocks[3].specs[2][0]}</span><strong>{S['modal-srbija'].blocks[3].specs[2][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-srbija'].blocks[3].specs[3][0]}</span><strong>{S['modal-srbija'].blocks[3].specs[3][1]}</strong></div>
               </div>
             </div>
           </div>
@@ -1514,6 +1017,127 @@ const W1 = " ";
 
     </div>
   </aside>
+
+  <!-- РЕЗЕРВНЫЕ СЛОТЫ ВЕРСТАКА (6 СЛОТОВ) -->
+  {P.slots.map((slot) => {
+    const isAssigned = slot.assigned && slot.project && slot.project.status === 'published';
+    const p = slot.project;
+    return (
+      <aside id={"modal-slot-" + slot.slotId} class="workbench-drawer">
+        <div class="drawer-content">
+          <div class="drawer-header">
+            <div class="drawer-header-left">
+              <span class="drawer-tag text-amber">
+                {isAssigned ? (p.headerTag || `[ ПРОЕКТ // ${p.name.toUpperCase()} ]`) : `[ РЕЗЕРВНЫЙ СЛОТ // ${slot.slotName.toUpperCase()} ]`}
+              </span>
+              <span class="case-badge">{isAssigned ? (p.badge || "ПРОЕКТ") : "РЕЗЕРВ"}</span>
+            </div>
+            <div class="drawer-header-actions">
+              <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+                <span class="expand-icon">⛶</span>
+                <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+              </button>
+              <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+                <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="case-body">
+            <div class="case-hero-strip">
+              <div class="status-live">
+                {isAssigned ? (p.heroStatus || "● ПРОЕКТ ЛАБОРАТОРИИ") : "● РЕЗЕРВНЫЙ СЛОТ ВЕРСТАКА"}
+              </div>
+              <h2 class="case-title">{isAssigned ? p.name : `Резервный слот: ${slot.slotName}`}</h2>
+              <p class="case-lead">
+                {isAssigned ? p.lead : "Слот зарезервирован для нового проекта лаборатории. Назначение проекта и наполнение содержимого выполняются через панель управления."}
+              </p>
+              {isAssigned && (
+                <div class="case-actions">
+                  {p.url && (
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">
+                      {W0}ОТКРЫТЬ ПРОЕКТ ↗{W0}
+                    </a>
+                  )}
+                  {p.telegram && (
+                    <a href={p.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">
+                      {W0}ОБСУДИТЬ В TELEGRAM ↗{W0}
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {isAssigned && p.screenPreview && (
+              <div class="dossier-screen-preview">
+                <img src={p.screenPreview} alt={`${p.name} — экран проекта`} class="dossier-screen-img" loading="lazy" />
+                {p.caption && (
+                  <div class="dossier-screen-caption">
+                    <span class="caption-dot">●</span>{W1}{p.caption}{W0}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div class="case-grid">
+              <div class="case-col-left">
+                <div class="case-section">
+                  <h3 class="section-heading">{isAssigned ? (p.blocks?.[0]?.heading || "// О ПРОЕКТЕ") : "// СТАТУС СЛОТА"}</h3>
+                  <p class="section-text">
+                    {W0}
+                    {isAssigned 
+                      ? (p.blocks?.[0]?.text || "Описание проекта.") 
+                      : `Объект верстака «${slot.slotName}» готов к подключению нового проекта или R&D-исследования.`}
+                    {W0}
+                  </p>
+                </div>
+
+                {isAssigned && p.blocks?.[1]?.items && (
+                  <div class="case-section">
+                    <h3 class="section-heading">{p.blocks[1].heading || "// КЛЮЧЕВЫЕ МОДУЛИ"}</h3>
+                    <ul class="facts-list">
+                      {p.blocks[1].items.map((it: string) => <li>{it}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div class="case-col-right">
+                <div class="case-section">
+                  <h3 class="section-heading">{isAssigned ? (p.blocks?.[2]?.heading || "// ПАРАМЕТРЫ") : "// ХАРАКТЕРИСТИКИ"}</h3>
+                  <div class="tech-spec-box">
+                    <div class="spec-row">
+                      <span>Слот:</span>
+                      <strong>{slot.slotName}</strong>
+                    </div>
+                    <div class="spec-row">
+                      <span>Статус:</span>
+                      <strong class={isAssigned ? "text-emerald" : "text-amber"}>
+                        {isAssigned ? "Активен" : "Свободен"}
+                      </strong>
+                    </div>
+                    {isAssigned && p.blocks?.[2]?.specs && p.blocks[2].specs.map((sp: [string, string]) => (
+                      <div class="spec-row">
+                        <span>{sp[0]}</span>
+                        <strong>{sp[1]}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {isAssigned && p.blocks?.[3]?.result && (
+                  <div class="case-section">
+                    <h3 class="section-heading">{p.blocks[3].heading || "// РЕЗУЛЬТАТ"}</h3>
+                    <div class="result-status-box">{W0}{p.blocks[3].result}{W0}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    );
+  })}
 
   <!-- 11. ВХОДЯЩИЙ (ПРЯМАЯ СВЯЗЬ) -->
   <aside id="modal-incoming" class="workbench-drawer">
@@ -1564,7 +1188,7 @@ const W1 = " ";
               <h3 class="section-heading">{S['modal-incoming'].blocks[1].heading}</h3>
               <div class="tech-spec-box">
                 <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[0][0]}</span><strong>{S['modal-incoming'].blocks[1].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[1][0]}</span><strong>{S['modal-incoming'].blocks[1].specs[1][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[1][0]}</span><strong>{isMail(incomingMail) ? <a href={"mailto:" + incomingMail} class="mail-link">{incomingMail}</a> : incomingMail}</strong></div>
                 <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[2][0]}</span><strong>{S['modal-incoming'].blocks[1].specs[2][1]}</strong></div>
               </div>
             </div>
@@ -1910,12 +1534,20 @@ const W1 = " ";
 
       <div class="case-body">
         <div class="case-hero-strip">
-          <div class="status-live">{S['modal-about'].hero.status}</div>
-          <h2 class="case-title">{S['modal-about'].hero.title}</h2>
-          <p class="case-lead">{S['modal-about'].hero.lead}</p>
-          <div class="case-actions">
-            <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-about'].actions[0]}{W0}</a>
-            <a href={L.email} class="case-action-btn btn-secondary">{W0}{S['modal-about'].actions[1]}{W0}</a>
+          <figure class="author-portrait">
+            <img src={M.authorPortrait} alt={"Фото автора: " + S['modal-about'].hero.title} width="600" height="800" loading="lazy" decoding="async" />
+          </figure>
+          <figure class="author-wide">
+            <img src={AUTHOR_WIDE} alt={"Автор за рабочим столом у окна: " + S['modal-about'].hero.title} width="1536" height="1024" loading="lazy" decoding="async" />
+          </figure>
+          <div class="author-hero-text">
+            <div class="status-live">{S['modal-about'].hero.status}</div>
+            <h2 class="case-title">{S['modal-about'].hero.title}</h2>
+            <p class="case-lead">{S['modal-about'].hero.lead}</p>
+            <div class="case-actions">
+              <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-about'].actions[0]}{W0}</a>
+              <a href={L.email} class="case-action-btn btn-secondary">{W0}{S['modal-about'].actions[1]}{W0}</a>
+            </div>
           </div>
         </div>
 
@@ -1985,7 +1617,7 @@ const W1 = " ";
                 <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[1][0]}</span><strong>{S['modal-about'].blocks[2].specs[1][1]}</strong></div>
                 <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[2][0]}</span><strong>{S['modal-about'].blocks[2].specs[2][1]}</strong></div>
                 <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[3][0]}</span><strong>{S['modal-about'].blocks[2].specs[3][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[4][0]}</span><strong>{S['modal-about'].blocks[2].specs[4][1]}</strong></div>
+                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[4][0]}</span><strong>{isMail(aboutMail) ? <a href={"mailto:" + aboutMail} class="mail-link">{aboutMail}</a> : aboutMail}</strong></div>
               </div>
             </div>
 
@@ -2192,7 +1824,7 @@ const W1 = " ";
     height: auto;
     min-height: 100vh;
     padding-top: 42px;
-    padding-bottom: 60px;
+    padding-bottom: 0px;
     margin: 0;
     box-sizing: border-box;
     display: block;
@@ -2479,9 +2111,18 @@ const W1 = " ";
   .hotspot-phone {
     top: 3.5%;
     left: 0.8%;
-    width: 23.5%;
-    height: 30.0%;
+    width: 16.0%;
+    height: 18.5%;
     border-radius: 16px;
+  }
+
+  /* СЛОТ 5: ЛУПА */
+  .hotspot-slot-magnifier {
+    top: 21.0%;
+    left: 4.5%;
+    width: 20.0%;
+    height: 12.5%;
+    border-radius: 20px;
   }
   .phone-pulse-ring {
     position: absolute;
@@ -3027,7 +2668,7 @@ const W1 = " ";
   }
 
   .hotspot-scroll-bots:hover .bots-closed-wrapper,
-  .hotspot-scroll-bots:focus-within .bots-closed-wrapper,
+  .hotspot-scroll-bots:has(:focus-visible) .bots-closed-wrapper,
   .hotspot-scroll-bots.is-hovered .bots-closed-wrapper {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.88);
@@ -3035,7 +2676,7 @@ const W1 = " ";
   }
 
   .hotspot-scroll-bots:hover .bots-unrolled-wrapper,
-  .hotspot-scroll-bots:focus-within .bots-unrolled-wrapper,
+  .hotspot-scroll-bots:has(:focus-visible) .bots-unrolled-wrapper,
   .hotspot-scroll-bots.is-hovered .bots-unrolled-wrapper {
     opacity: 1;
     pointer-events: auto;
@@ -3131,7 +2772,83 @@ const W1 = " ";
     box-shadow: 0 0 26px rgba(59, 130, 246, 0.4), inset 0 0 14px rgba(59, 130, 246, 0.2);
   }
 
-  /* 10. РЕЛОКАНТ СЕРБИЯ (В РАБОТЕ) */
+  /* СЛОТ 1: ЛАМПА */
+  .hotspot-slot-lamp {
+    top: 0.0%;
+    left: 33.0%;
+    width: 9.0%;
+    height: 17.0%;
+    border-radius: 50% 50% 20% 20%;
+    border: 1px dashed transparent;
+    transition: all 0.3s ease;
+  }
+  .hotspot-slot-lamp:hover,
+  .hotspot-slot-lamp.is-hovered {
+    border-color: rgba(245, 158, 11, 0.7);
+    background: rgba(245, 158, 11, 0.03);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+  }
+
+  /* СЛОТ 2: КРУЖКА */
+  .hotspot-slot-mug,
+  .hotspot-mug {
+    top: 11.0%;
+    left: 68.0%;
+    width: 10.5%;
+    height: 18.0%;
+    border-radius: 50%;
+    border: 1px dashed transparent;
+    transition: all 0.3s ease;
+  }
+  .hotspot-slot-mug:hover,
+  .hotspot-slot-mug.is-hovered,
+  .hotspot-mug:hover,
+  .hotspot-mug.is-hovered {
+    border-color: rgba(245, 158, 11, 0.7);
+    background: rgba(245, 158, 11, 0.03);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+  }
+
+  /* СЛОТ 3: КОМПАС */
+  .hotspot-slot-compass {
+    top: 20.0%;
+    left: 46.0%;
+    width: 5.5%;
+    height: 9.0%;
+    border-radius: 50%;
+    border: 1px dashed transparent;
+    transition: all 0.3s ease;
+  }
+  .hotspot-slot-compass:hover,
+  .hotspot-slot-compass.is-hovered {
+    border-color: rgba(245, 158, 11, 0.7);
+    background: rgba(245, 158, 11, 0.03);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+  }
+
+  /* СЛОТ 4: ДВЕ ФОТОГРАФИИ */
+  .hotspot-slot-photos {
+    top: 18.9%;
+    left: 54.0%;
+    width: 14.0%;
+    height: 13.0%;
+    border-radius: 8px;
+    border: 1px dashed transparent;
+    transition: all 0.3s ease;
+  }
+  .hotspot-slot-photos:hover,
+  .hotspot-slot-photos.is-hovered {
+    border-color: rgba(245, 158, 11, 0.7);
+    background: rgba(245, 158, 11, 0.03);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+  }
+
+  /* ПЛАШКА «ТРЕКЕРЫ» (БЫВШИЙ РЕЛОКАНТ СЕРБИЯ) */
+  .hotspot-trackers,
   .hotspot-serbia-wip {
     top: 64.0%;
     left: 65.5%;
@@ -3143,6 +2860,8 @@ const W1 = " ";
     overflow: visible;
     transition: all 0.3s ease;
   }
+  .hotspot-trackers:hover,
+  .hotspot-trackers.is-hovered,
   .hotspot-serbia-wip:hover,
   .hotspot-serbia-wip.is-hovered {
     border-color: rgba(245, 158, 11, 0.9);
@@ -3150,8 +2869,60 @@ const W1 = " ";
     transform: translateY(-2px);
     box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
   }
+  .hotspot-trackers:hover .hotspot-aura,
+  .hotspot-trackers.is-hovered .hotspot-aura,
   .hotspot-serbia-wip:hover .hotspot-aura,
   .hotspot-serbia-wip.is-hovered .hotspot-aura {
+    opacity: 1;
+    box-shadow: 0 0 28px rgba(245, 158, 11, 0.35), inset 0 0 14px rgba(245, 158, 11, 0.15);
+  }
+
+  /* СЛОТ 6: СТАКАН С КАРАНДАШАМИ И РУЧКАМИ */
+  .hotspot-slot-pencilcup {
+    top: 16.5%;
+    left: 37.4%;
+    width: 6.8%;
+    height: 19.5%;
+    border-radius: 8px;
+    border: 1px dashed transparent;
+    background: transparent;
+    overflow: visible;
+    transition: all 0.3s ease;
+  }
+  .hotspot-slot-pencilcup:hover,
+  .hotspot-slot-pencilcup.is-hovered {
+    border-color: rgba(245, 158, 11, 0.9);
+    background: rgba(245, 158, 11, 0.04);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+  }
+  .hotspot-slot-pencilcup:hover .hotspot-aura,
+  .hotspot-slot-pencilcup.is-hovered .hotspot-aura {
+    opacity: 1;
+    box-shadow: 0 0 28px rgba(245, 158, 11, 0.35), inset 0 0 14px rgba(245, 158, 11, 0.15);
+  }
+
+  /* АКТИВНЫЙ ПРОЕКТ: ПЛАШКА SRBIJA */
+  .hotspot-srbija {
+    top: 10.9%;
+    left: 77.9%;
+    width: 7.2%;
+    height: 13.5%;
+    border-radius: 6px;
+    border: 1px dashed transparent;
+    background: transparent;
+    overflow: visible;
+    transition: all 0.3s ease;
+  }
+  .hotspot-srbija:hover,
+  .hotspot-srbija.is-hovered {
+    border-color: rgba(245, 158, 11, 0.9);
+    background: rgba(245, 158, 11, 0.04);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+  }
+  .hotspot-srbija:hover .hotspot-aura,
+  .hotspot-srbija.is-hovered .hotspot-aura {
     opacity: 1;
     box-shadow: 0 0 28px rgba(245, 158, 11, 0.35), inset 0 0 14px rgba(245, 158, 11, 0.15);
   }
@@ -3835,8 +3606,10 @@ const W1 = " ";
   .hotspot-failures.is-hovered .label-failures-card {
     transform: rotate(1.5deg) translateY(0);
   }
-  .hotspot-serbia-wip:hover .label-field-dispatch,
-  .hotspot-serbia-wip.is-hovered .label-field-dispatch {
+  .hotspot-trackers:hover .label-field-dispatch,
+  .hotspot-trackers.is-hovered .label-field-dispatch,
+  .hotspot-srbija:hover .label-field-dispatch,
+  .hotspot-srbija.is-hovered .label-field-dispatch {
     transform: rotate(-1.2deg) translateY(0);
   }
   .hotspot-core:hover .editorial-float-label,
@@ -3844,79 +3617,12 @@ const W1 = " ";
     transform: translate(-50%, 0);
   }
 
-
-  /* НИЖНЯЯ ПАНЕЛЬ */
-  .desk-bottombar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 32px;
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--nav-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(245, 158, 11, 0.2);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    z-index: 50;
-    flex-shrink: 0;
-  }
-
-  .bottombar-left-zone {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .hint-bold { font-weight: 700; color: #ea580c; }
-  .hint-divider { color: #5e5950; }
-  .hint-sub { color: #a8a29e; }
-
-  .bottombar-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .contact-wire-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: var(--desk-card);
-    border: 1px solid var(--desk-border);
-    color: var(--desk-text);
-    text-decoration: none;
-    font-size: 10px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-  }
-  .contact-wire-btn:hover {
-    border-color: #ea580c;
-    color: #ea580c;
-    transform: translateY(-1px);
-  }
-
-  .wire-dot { width: 5px; height: 5px; border-radius: 9999px; }
-  .dot-sky { background: #0284c7; }
-  .dot-amber { background: #d97706; }
-  .dot-rose { background: #e11d48; }
-  .dot-purple { background: #9333ea; }
-
   /* ПРАВАЯ ВЫДВИЖНАЯ ПАНЕЛЬ (DRAWER) — ЧАСТЬ ОБЩЕЙ СРЕДЫ РАБОЧЕГО СТОЛА */
   .workbench-drawer {
     position: fixed;
     top: 42px;
     right: 0;
-    bottom: 32px;
+    bottom: 0;
     width: 500px;
     max-width: 100vw;
     background: #171412;
@@ -4023,7 +3729,7 @@ const W1 = " ";
   }
 
   /* 7. РЕЛОКАНТ СЕРБИЯ (полевой дневник / исследование / реальный опыт) */
-  #modal-serbia-wip {
+  #modal-srbija {
     background: #1a1612;
     background-image: 
       radial-gradient(circle at 90% 12%, rgba(245, 158, 11, 0.12) 0%, transparent 55%),
@@ -4197,6 +3903,12 @@ const W1 = " ";
     align-items: center;
     gap: 8px;
   }
+  /* узкий экран: подпись раздела и кнопки управления переносятся, «Свернуть/Закрыть» всегда на экране */
+  @media (max-width: 600px) {
+    .drawer-header { flex-wrap: wrap; row-gap: 10px; }
+    .drawer-header-left { flex-wrap: wrap; min-width: 0; max-width: 100%; row-gap: 6px; }
+    .drawer-header-actions { flex-wrap: wrap; margin-left: auto; max-width: 100%; }
+  }
 
   .expand-drawer-btn, .close-drawer-btn {
     padding: 5px 11px;
@@ -4308,6 +4020,11 @@ const W1 = " ";
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+  }
+  .sites-catalog-grid > * { min-width: 0; }
+  /* узкий экран: карточки каталога в одну колонку */
+  @media (max-width: 860px) {
+    .workbench-drawer.is-expanded .sites-catalog-grid { grid-template-columns: minmax(0, 1fr); }
   }
   .catalog-project-card {
     background: rgba(26, 21, 17, 0.85);
@@ -4554,6 +4271,11 @@ const W1 = " ";
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 32px;
+  }
+  .case-col-left, .case-col-right { min-width: 0; }
+  /* узкий экран: развёрнутая запись в одну колонку (две колонки обрезались справа) */
+  @media (max-width: 860px) {
+    .workbench-drawer.is-expanded .case-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
   }
 
   .case-section {
@@ -4907,23 +4629,448 @@ const W1 = " ";
     opacity: 1;
     pointer-events: auto;
   }
+
+  /* Верхняя панель: время, пояс и координаты без скачков ширины */
+  .meta-coords { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .meta-tz { display: inline-block; min-width: 4.5ch; color: #a8a29e; }
+  .meta-geo { display: inline-flex; align-items: baseline; gap: 6px; }
+  #live-coords { display: inline-block; min-width: 16ch; }
+  .meta-geo { position: relative; }
+  .geo-btn { font: 600 9px/1 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #d6c9b0; background: transparent; border: 1px solid rgba(255, 214, 150, 0.35); border-radius: 999px; padding: 3px 0; width: 84px; text-align: center; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .geo-btn:hover, .geo-btn:focus-visible { color: #fff; border-color: #ffb84d; outline: none; }
+  .geo-btn:disabled { opacity: 0.6; cursor: progress; }
+  .geo-btn[hidden] { display: none; }
+  .geo-hint { position: absolute; left: 0; top: calc(100% + 10px); z-index: 80; width: 330px; padding: 8px 10px; white-space: normal; font: 500 11px/1.4 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0; text-transform: none; color: #2b180d; background: linear-gradient(135deg, #f6ebd2 0%, #dcc397 100%); border: 1px solid rgba(120, 75, 30, 0.55); border-radius: 4px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; }
+  .meta-geo:hover .geo-hint, .meta-geo:focus-within .geo-hint, .geo-hint.is-shown { opacity: 1; transform: none; }
+  [data-state="granted"] #live-coords { color: #e7f5d9; }
+  .meta-src { display: inline-block; width: 98px; font-style: normal; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: #78716c; }
+
+  /* адрес почты в строках параметров — ссылка mailto: без изменения вида (цвет и начертание наследуются) */
+  .mail-link { color: inherit; text-decoration: none; }
+  .mail-link:hover, .mail-link:focus-visible { text-decoration: underline; text-underline-offset: 3px; outline: none; }
+  /* ---- фото автора и фото Белграда в панелях ---- */
+  .author-portrait, .srbija-photo { margin: 0; position: relative; }
+  .author-portrait img, .srbija-photo img { display: block; width: 100%; height: auto; object-fit: cover; }
+  .author-portrait {
+    width: min(190px, 46%); aspect-ratio: 3 / 4; border-radius: 10px; overflow: hidden;
+    border: 1px solid rgba(245, 158, 11, 0.38);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+  .author-portrait img { height: 100%; object-position: 50% 22%; }
+  .author-portrait::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 62%, rgba(10, 6, 3, 0.35) 100%); }
+  .drawer-about .case-hero-strip { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 12px; }
+  .drawer-about .case-hero-strip > .author-portrait { margin-bottom: 4px; }
+  .author-hero-text { display: grid; row-gap: 12px; min-width: 0; align-content: start; }
+  .author-wide { display: none; margin: 0; position: relative; }
+  /* Развёрнутая запись: кадр avtor.png целиком (3:2) справа от текста; левый край растворяется в фоне панели, фото «стоит» на том же столе */
+  .workbench-drawer.is-expanded.drawer-about .case-hero-strip { grid-template-columns: minmax(0, 1fr) clamp(300px, 36%, 420px); column-gap: 32px; align-items: center; }
+  .workbench-drawer.is-expanded.drawer-about .case-hero-strip > .author-portrait { display: none; }
+  .workbench-drawer.is-expanded.drawer-about .case-hero-strip > .author-wide { display: block; grid-column: 2; grid-row: 1; aspect-ratio: 3 / 2; border-radius: 12px; overflow: hidden; border: 1px solid rgba(245, 158, 11, 0.32); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 40px rgba(245, 158, 11, 0.10); }
+  .workbench-drawer.is-expanded.drawer-about .case-hero-strip > .author-hero-text { grid-column: 1; grid-row: 1; row-gap: 10px; }
+  /* без лишних воздушных зазоров: иерархия «метка → заголовок → описание → кнопки» сохранена, но плотнее */
+  .workbench-drawer.is-expanded.drawer-about .author-hero-text > .case-title { margin: 0; }
+  .workbench-drawer.is-expanded.drawer-about .author-hero-text > .case-lead { margin: 0; }
+  .workbench-drawer.is-expanded.drawer-about .author-hero-text > .case-actions { margin-top: 8px; }
+  .author-wide img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+  .author-wide::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(23, 20, 18, 0.55) 0%, transparent 22%), linear-gradient(0deg, rgba(23, 20, 18, 0.30) 0%, transparent 28%); }
+  /* узкий экран: фото над текстом, во всю ширину */
+  @media (max-width: 860px) {
+    .workbench-drawer.is-expanded.drawer-about .case-hero-strip { grid-template-columns: minmax(0, 1fr); row-gap: 14px; }
+    .workbench-drawer.is-expanded.drawer-about .case-hero-strip > .author-wide { grid-column: 1; grid-row: 1; width: 100%; max-width: 620px; }   /* естественные пропорции 3:2, лицо не обрезается */
+    .workbench-drawer.is-expanded.drawer-about .case-hero-strip > .author-hero-text { grid-row: 2; }
+  }
+  .srbija-photo { aspect-ratio: 16 / 9; max-height: 340px; border-radius: 10px; overflow: hidden; margin: 0 0 16px; border: 1px solid rgba(245, 158, 11, 0.38); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
+  .srbija-photo img { height: 100%; object-position: 50% 45%; }
+  .workbench-drawer.is-expanded .srbija-photo { aspect-ratio: 21 / 8; max-height: 300px; }
+  @media (max-width: 520px) { .author-portrait { width: min(150px, 44%); } }
+
+  /* ==================================================
+     СЦЕНА v2: стол у окна, предметы-объекты, день/ночь
+     Контуры предметов: src/scene/objects.mjs
+     ================================================== */
+  .scene-frame.workbench-frame {
+    --menu-w: clamp(132px, 10vw, 168px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--menu-w);
+    width: 100vw;
+    max-width: 100vw;
+    height: calc(100svh - 42px);
+    min-height: 520px;
+    aspect-ratio: auto;
+    background: #0d0907;
+    overflow: hidden;
+  }
+
+  .scene-clip {
+    position: relative;
+    overflow: hidden;
+    container-type: size;
+    min-width: 0;
+  }
+
+  .scene-stage {
+    --k: 1;
+    --scene-img: url('/scene/day.jpg');
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100cqw, calc(100cqh * 1672 / 940));
+    aspect-ratio: 1672 / 940;
+    translate: -47% -50%;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  :global([data-theme="night"]) .scene-stage { --scene-img: url('/scene/night.jpg'); }
+
+  .scene-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+  .scene-bg-night { opacity: 0; transition: opacity 1.4s ease; }
+  :global([data-theme="night"]) .scene-bg-night { opacity: 1; }
+
+  /* ---- свет сцены ---- */
+  .scene-fx { position: absolute; inset: 0; pointer-events: none; transition: opacity 1.4s ease; }
+  .scene-fx-sun {
+    background: radial-gradient(ellipse 36% 44% at 45.4% 25.5%, rgba(255, 220, 150, 0.6) 0%, rgba(255, 170, 70, 0.2) 45%, transparent 74%);
+    mix-blend-mode: screen; opacity: 0.55;
+  }
+  .scene-fx-rays {
+    background: repeating-conic-gradient(from 0deg at 45.4% 25.5%, rgba(255, 228, 165, 0.22) 0deg 2.6deg, transparent 2.6deg 13deg);
+    -webkit-mask-image: radial-gradient(ellipse 50% 78% at 45.4% 25.5%, #000 0%, rgba(0, 0, 0, 0.35) 30%, transparent 62%);
+    mask-image: radial-gradient(ellipse 50% 78% at 45.4% 25.5%, #000 0%, rgba(0, 0, 0, 0.35) 30%, transparent 62%);
+    mix-blend-mode: screen; opacity: 0.5;
+    animation: scene-rays 9s ease-in-out infinite alternate;
+  }
+  @keyframes scene-rays { from { opacity: 0.32; } to { opacity: 0.62; } }
+  .scene-fx-moon {
+    background:
+      radial-gradient(ellipse 26% 38% at 56.5% 43%, rgba(160, 195, 255, 0.42) 0%, rgba(90, 120, 220, 0.14) 45%, transparent 75%),
+      radial-gradient(ellipse 48% 22% at 52% 74%, rgba(110, 150, 255, 0.12) 0%, transparent 70%);
+    mix-blend-mode: screen; opacity: 0;
+  }
+  .scene-fx-lamp {
+    background:
+      radial-gradient(ellipse 20% 34% at 13.4% 37%, rgba(255, 205, 120, 0.7) 0%, rgba(255, 150, 60, 0.26) 45%, transparent 76%),
+      radial-gradient(ellipse 34% 30% at 17% 70%, rgba(255, 170, 80, 0.2) 0%, transparent 70%);
+    mix-blend-mode: screen; opacity: 0.16;
+  }
+  .scene-fx-stars { opacity: 0; }
+  .scene-fx-stars span { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 4px rgba(200, 220, 255, 0.9); animation: scene-twinkle 4.6s ease-in-out infinite; }
+  @keyframes scene-twinkle { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+  .scene-fx-vignette { background: radial-gradient(ellipse 88% 92% at 50% 52%, transparent 58%, rgba(10, 5, 2, 0.5) 100%); }
+
+  :global([data-theme="night"]) .scene-fx-sun,
+  :global([data-theme="night"]) .scene-fx-rays { opacity: 0; animation: none; }
+  :global([data-theme="night"]) .scene-fx-moon { opacity: 1; }
+  :global([data-theme="night"]) .scene-fx-stars { opacity: 1; }
+  :global([data-theme="night"]) .scene-fx-lamp { opacity: 0.95; animation: scene-lamp 6s ease-in-out infinite alternate; }
+  @keyframes scene-lamp { from { opacity: 0.86; } to { opacity: 1; } }
+
+  /* ---- предметы ---- */
+  .scene-obj { position: absolute; pointer-events: none; --lift: 7px; --pop: 1.035; --tilt: 0deg; }
+  .scene-obj.kind-big { --lift: 4px; --pop: 1.012; }
+  .scene-obj.kind-flat { --lift: 0px; --pop: 1; }
+
+  .obj-hit {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    margin: 0; padding: 0; border: 0; background: transparent;
+    cursor: pointer; pointer-events: auto;
+    -webkit-tap-highlight-color: transparent; outline: none;
+  }
+  .obj-lift {
+    position: absolute; inset: 0; pointer-events: none;
+    opacity: 0;
+    transform-origin: 50% 78%;
+    transition: transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.34s ease, opacity 0s linear 0.36s;
+  }
+  .obj-art { position: absolute; inset: 0; background-image: var(--scene-img); background-repeat: no-repeat; }
+
+  @media (hover: hover) {
+    .obj-hit:hover + .obj-lift {
+      opacity: 1;
+      transition: transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.34s ease, opacity 0s;
+      transform: translate3d(0, calc(var(--lift) * -1), 0) scale(var(--pop)) rotate(var(--tilt));
+      filter: drop-shadow(0 calc(var(--lift) * 1.9) calc(var(--lift) * 1.5) rgba(0, 0, 0, 0.5)) brightness(1.1) saturate(1.1);
+    }
+    .scene-obj.kind-flat .obj-hit:hover + .obj-lift {
+      transform: none;
+      filter: brightness(1.13) saturate(1.12) drop-shadow(0 0 10px rgba(255, 200, 120, 0.5));
+    }
+    .obj-hit:hover ~ .obj-tip { opacity: 1; transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 8px)); }
+  }
+  .obj-hit:focus-visible + .obj-lift {
+    opacity: 1;
+    transition: transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.34s ease, opacity 0s;
+    transform: translate3d(0, calc(var(--lift) * -1), 0) scale(var(--pop)) rotate(var(--tilt));
+    filter: drop-shadow(0 0 2px #ffe3a1) drop-shadow(0 0 7px rgba(255, 184, 77, 0.95)) drop-shadow(0 calc(var(--lift) * 1.9) calc(var(--lift) * 1.5) rgba(0, 0, 0, 0.5)) brightness(1.1);
+  }
+  .obj-hit:focus-visible ~ .obj-tip { opacity: 1; transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 8px)); }
+  .obj-hit:active + .obj-lift {
+    opacity: 1;
+    transition-duration: 0.08s;
+    transform: translate3d(0, calc(var(--lift) * -0.25), 0) scale(1.005);
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55)) brightness(0.96);
+  }
+
+  .obj-tip {
+    position: absolute; left: 50%; top: 0;
+    transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 2px));
+    opacity: 0; pointer-events: none; white-space: nowrap;
+    display: flex; flex-direction: column; gap: 1px;
+    padding: 5px 10px 6px;
+    background: linear-gradient(135deg, #f6ebd2 0%, #dcc397 100%);
+    border: 1px solid rgba(120, 75, 30, 0.55); border-radius: 3px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 5;
+  }
+  .obj-tip b { font: 800 10px/1.2 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0.14em; color: #431407; text-transform: uppercase; }
+  .obj-tip i { font: italic 500 11px/1.25 'Space Grotesk', system-ui, sans-serif; color: #5a3519; max-width: 220px; white-space: normal; }
+  /* ---- свитки: hover/клик только по самому свитку, а не по прямоугольнику вокруг ---- */
+  .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal,
+  .scene-stage .hotspot-scroll-bots.physical-scroll-bots,
+  .scene-stage .hotspot-scroll.physical-scroll-object {
+    pointer-events: none;
+    transform-origin: 0 0;
+    scale: var(--k);
+    z-index: 500;
+  }
+  .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal { left: 11.4%; top: 80.4%; width: 253px; height: 131px; }
+  .scene-stage .hotspot-scroll.physical-scroll-object { left: 28.6%; top: 77.6%; width: 223px; height: 212px; scale: calc(var(--k) * 0.8); }
+  .scene-stage .hotspot-scroll-bots.physical-scroll-bots { left: 37.1%; top: 79.8%; width: 275px; height: 160px; }
+
+  .scene-stage .sites-closed-wrapper,
+  .scene-stage .bots-closed-wrapper,
+  .scene-stage .scroll-closed-wrapper { pointer-events: none; }
+  /* Область наведения/клика = реальный силуэт закрытого свитка (по альфа-каналу svitok-closed.png), а не рамка вокруг */
+  .scene-stage .sites-closed-img,
+  .scene-stage .bots-closed-img,
+  .scene-stage .scroll-closed-img {
+    pointer-events: auto; cursor: pointer;
+    clip-path: polygon(0.0% 65.0%, 2.2% 51.1%, 9.0% 38.7%, 64.8% 0.0%, 92.1% 0.7%, 94.8% 8.0%, 99.6% 43.1%, 99.3% 50.4%, 94.4% 55.5%, 18.7% 99.3%, 11.2% 97.8%, 6.4% 92.7%, 1.5% 81.0%);
+  }
+  /* Раскрытая часть свитка — только картинка: мышь проходит сквозь неё к соседним предметам */
+  .scene-stage .bots-unrolled-wrapper,
+  .scene-stage .scroll-unrolled-wrapper,
+  .scene-stage .bots-unrolled-img,
+  .scene-stage .scroll-open-img { pointer-events: none !important; }
+  /* Лендинги: пергамент компактный и лежит на карте — он остаётся кликабельным (клик вне чипов открывает каталог) */
+  .scene-stage .sites-unrolled-wrapper { pointer-events: none; }
+  .scene-stage .hotspot-scroll-sites:hover .sites-unrolled-wrapper,
+  .scene-stage .hotspot-scroll-sites.is-hovered .sites-unrolled-wrapper,
+  .scene-stage .hotspot-scroll-sites:has(:focus-visible) .sites-unrolled-wrapper { pointer-events: auto; }
+  /* Кликабельные элементы раскрытого свитка существуют для мыши только пока свиток раскрыт (иначе это «невидимые зоны») */
+  .scene-stage .bots-spine,
+  .scene-stage .phone-interactive-hotspot,
+  .scene-stage .sites-screens-strip { pointer-events: none; }
+  .scene-stage .hotspot-scroll-bots:hover .bots-spine,
+  .scene-stage .hotspot-scroll-bots:hover .phone-interactive-hotspot,
+  .scene-stage .hotspot-scroll-bots.is-hovered .bots-spine,
+  .scene-stage .hotspot-scroll-bots.is-hovered .phone-interactive-hotspot,
+  .scene-stage .hotspot-scroll-bots:focus-visible .phone-interactive-hotspot,
+  .scene-stage .hotspot-scroll-bots:has(:focus-visible) .phone-interactive-hotspot,
+  .scene-stage .hotspot-scroll-sites:hover .sites-screens-strip,
+  .scene-stage .hotspot-scroll-sites.is-hovered .sites-screens-strip,
+  .scene-stage .hotspot-scroll-sites:has(:focus-visible) .sites-screens-strip { pointer-events: auto; }
+  /* «мостик» от закрытого свитка к карточкам на телефоне: узкая колонка, чтобы можно было дойти до кнопок и не закрыть телефон */
+  .scene-stage .bots-spine { position: absolute; left: 41%; width: 18%; top: 25%; height: 58%; z-index: 9; }
+  /* раскрытый свиток визуально выше соседних, но события мыши он не перехватывает */
+  .scene-stage .hotspot-scroll-sites:hover,
+  .scene-stage .hotspot-scroll-bots:hover,
+  .scene-stage .hotspot-scroll:hover,
+  .scene-stage .hotspot-scroll-sites.is-hovered,
+  .scene-stage .hotspot-scroll-bots.is-hovered,
+  .scene-stage .hotspot-scroll.is-hovered { z-index: 620; }
+  /* телефон «Боты» раскрывается вверх от свитка и не выходит за нижний край сцены */
+  .scene-stage .bots-unrolled-wrapper { top: auto; bottom: 0; transform: translate(-50%, 0) scale(0.92) rotate(-1.5deg); transition-duration: 0.55s; }
+  .scene-stage .hotspot-scroll-bots:hover .bots-unrolled-wrapper,
+  .scene-stage .hotspot-scroll-bots:has(:focus-visible) .bots-unrolled-wrapper,
+  .scene-stage .hotspot-scroll-bots.is-hovered .bots-unrolled-wrapper { transform: translate(-50%, 0) scale(1) rotate(-1.5deg); }
+  /* клавиатура: те же состояния, что у hover */
+  .scene-stage .hotspot-scroll-sites:focus-visible .sites-closed-wrapper,
+  .scene-stage .hotspot-scroll:focus-visible .scroll-closed-wrapper { opacity: 0; pointer-events: none; }
+  .scene-stage .hotspot-scroll-sites:focus-visible .sites-unrolled-wrapper,
+  .scene-stage .hotspot-scroll:focus-visible .scroll-unrolled-wrapper { opacity: 1; pointer-events: auto; transform: none; clip-path: inset(0 0 0 0); }
+  .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal:focus-visible,
+  .scene-stage .hotspot-scroll-bots.physical-scroll-bots:focus-visible,
+  .scene-stage .hotspot-scroll.physical-scroll-object:focus-visible { outline: none; }
+
+  /* ---- надпись и связь ---- */
+  .scene-hud {
+    position: absolute; z-index: 60; top: 10px; left: 16px; right: calc(var(--menu-w) + 16px);
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    pointer-events: none;
+  }
+  .scene-brand {
+    pointer-events: auto; display: inline-flex; flex-direction: column; gap: 2px;
+    color: #fff; text-decoration: none;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 0, 0, 0.7);
+  }
+  .scene-brand strong { font: 700 clamp(20px, 2.3vw, 34px)/1 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.02em; }
+  .scene-brand strong span { color: #f97316; }
+  .scene-brand em { font-style: normal; font-size: clamp(11px, 1.1vw, 15px); color: #f6e3bf; }
+  .scene-brand small { font-size: 10px; letter-spacing: 0.12em; color: #ead6b0; opacity: 0.9; }
+  .scene-social { pointer-events: auto; display: flex; gap: 8px; }
+  .scene-social a {
+    width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(18, 12, 8, 0.55); border: 1px solid rgba(255, 214, 150, 0.35); color: #f7e7c8;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+  }
+  .scene-social a svg { width: 18px; height: 18px; }
+  .scene-social a:hover, .scene-social a:focus-visible {
+    transform: translateY(-2px); color: #fff; border-color: #ffb84d; outline: none;
+    box-shadow: 0 0 14px rgba(255, 184, 77, 0.45), 0 6px 12px rgba(0, 0, 0, 0.5);
+  }
+  .scene-social a:active { transform: translateY(0); }
+
+  /* ---- переключатель день/ночь ---- */
+  .theme-pill {
+    position: relative; width: 62px; height: 28px; padding: 0; border-radius: 999px;
+    display: block; overflow: hidden;
+    background: linear-gradient(90deg, #3a2a14 0%, #1a2340 100%);
+    border: 1px solid rgba(255, 214, 150, 0.45);
+    box-shadow: 0 0 10px rgba(255, 190, 90, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+  .pill-side { position: absolute; top: 0; bottom: 0; width: 50%; display: grid; place-items: center; z-index: 2; transition: color 0.6s ease, opacity 0.6s ease; }
+  .pill-side svg { width: 16px; height: 16px; }
+  .pill-sun { left: 0; color: #3a2400; }
+  .pill-moon { right: 0; color: #9db4e8; }
+  .pill-knob {
+    position: absolute; top: 2px; left: 2px; width: 30px; height: 22px; border-radius: 999px; z-index: 1;
+    background: radial-gradient(circle at 40% 35%, #fff4cf 0%, #ffc857 60%, #f29a2e 100%);
+    box-shadow: 0 0 12px rgba(255, 190, 80, 0.8);
+    transition: transform 0.6s cubic-bezier(0.5, 0, 0.2, 1), background 0.6s ease, box-shadow 0.6s ease;
+  }
+  :global([data-theme="night"]) .pill-knob { transform: translateX(28px); background: radial-gradient(circle at 40% 35%, #ffffff 0%, #cfdcff 60%, #8ea6e0 100%); box-shadow: 0 0 12px rgba(160, 190, 255, 0.8); }
+  :global([data-theme="night"]) .pill-sun { color: #c9a35a; }
+  :global([data-theme="night"]) .pill-moon { color: #1c2a55; }
+  .theme-pill:focus-visible { outline: 2px solid #ffd27a; outline-offset: 2px; }
+
+  /* ---- правое меню: колонка деревянных планок рядом со сценой ---- */
+  .scene-frame .cabinet-menu-nav {
+    position: relative; top: auto; left: auto; width: auto; height: auto;
+    grid-column: 2; align-self: stretch;
+    justify-content: center; gap: clamp(6px, 1.3vh, 12px);
+    padding: 16px 14px;
+    border-left: 1px solid #000;
+    box-shadow: inset 10px 0 18px rgba(0, 0, 0, 0.55), -8px 0 22px rgba(0, 0, 0, 0.45);
+  }
+  .scene-frame .cabinet-nav-backdrop { inset: 0; border-radius: 0; box-shadow: none; }
+  .scene-frame .cabinet-nav-item { flex: 0 0 auto; height: clamp(34px, 5.2vh, 46px); max-height: none; }
+
+  /* ---- мобильная версия: сцена прокручивается по горизонтали, меню — плитками под ней ---- */
+  @media (max-width: 767px) {
+    .scene-frame.workbench-frame { display: flex; flex-direction: column; height: auto; min-height: calc(100svh - 42px); overflow: visible; }
+    .scene-clip { flex: none; height: min(66svh, 560px); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+    .scene-stage { position: relative; left: auto; top: auto; translate: none; width: calc(min(66svh, 560px) * 1672 / 940); height: min(66svh, 560px); }
+    .scene-hud { right: 16px; flex-direction: column; align-items: flex-start; }
+    .scene-social a { width: 44px; height: 44px; }
+    .scene-frame .cabinet-menu-nav { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 12px 20px; border-left: 0; box-shadow: none; }
+    .scene-frame .cabinet-nav-item { height: 46px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .obj-lift, .obj-tip, .scene-bg-night, .scene-fx, .pill-knob, .pill-side { transition-duration: 0.01s !important; }
+    .scene-fx-rays, .scene-fx-lamp, .scene-fx-stars span { animation: none !important; }
+    .obj-hit:hover + .obj-lift, .obj-hit:focus-visible + .obj-lift { transform: none !important; }
+    .scene-stage .bots-unrolled-wrapper { transition-duration: 0.01s; }
+  }
 </style>
 
 <script>
+  import { AUTHOR_POINT, formatCoords, tzLabel, tzName, clockText, GEO_TEXT, stateFromError } from '../scene/geo.mjs';
+
   function initSpatialWorkbench() {
-    // 1. Часы
+    // 1. Часы и часовой пояс посетителя (по системным часам устройства)
     const clockEl = document.getElementById('live-clock');
+    const tzEl = document.getElementById('live-tz');
     function updateClock() {
-      if (clockEl) {
-        const now = new Date();
-        const h = String(now.getHours()).padStart(2, '0');
-        const m = String(now.getMinutes()).padStart(2, '0');
-        const s = String(now.getSeconds()).padStart(2, '0');
-        clockEl.textContent = `${h}:${m}:${s} CET`;
+      const now = new Date();
+      if (clockEl) clockEl.textContent = clockText(now);
+      if (tzEl) {
+        tzEl.textContent = tzLabel(now);
+        const zone = tzName();
+        if (zone) tzEl.setAttribute('title', zone);
       }
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    // 1b. Координаты: геолокация браузера по нажатию кнопки (или сразу, если доступ уже разрешён), иначе авторская точка.
+    // Координаты живут только в памяти страницы: не сохраняются и никуда не отправляются.
+    const geoRoot = document.getElementById('live-geo');
+    const coordsEl = document.getElementById('live-coords');
+    const coordsSrcEl = document.getElementById('live-coords-src');
+    const geoBtn = document.getElementById('geo-btn') as HTMLButtonElement | null;
+    const geoHint = document.getElementById('geo-hint');
+    let hintTimer: number | undefined;
+    function setGeoState(state: string, lat?: number, lon?: number) {
+      let text: string | null = null;
+      if (state === 'granted') text = formatCoords(lat as number, lon as number);
+      if (state === 'granted' && !text) { state = 'error'; }
+      const tt = (GEO_TEXT as any)[state];
+      geoRoot?.setAttribute('data-state', state);
+      if (coordsEl) {
+        coordsEl.textContent = state === 'granted' && text ? text : AUTHOR_POINT.text;
+        coordsEl.setAttribute('data-source', state === 'granted' ? 'geolocation' : 'author');
+        coordsEl.setAttribute('title', state === 'granted' ? 'Ваше местоположение (видно только вам)' : 'Координаты авторской точки');
+      }
+      if (coordsSrcEl) coordsSrcEl.textContent = tt.src;
+      if (geoBtn) {
+        geoBtn.textContent = tt.btn;
+        geoBtn.hidden = state === 'fallback';
+        geoBtn.disabled = state === 'loading';
+      }
+      if (geoHint) {
+        geoHint.textContent = tt.hint;
+        if (state !== 'idle') {                       // показываем причину несколько секунд
+          geoHint.classList.add('is-shown');
+          window.clearTimeout(hintTimer);
+          hintTimer = window.setTimeout(() => geoHint.classList.remove('is-shown'), 7000);
+        }
+      }
+    }
+    let geoBusy = false;
+    function requestVisitorPosition() {
+      if (geoBusy) return;                              // не более одного запроса одновременно
+      if (!('geolocation' in navigator) || !navigator.geolocation || !window.isSecureContext) { setGeoState('fallback'); return; }
+      geoBusy = true;
+      setGeoState('loading');
+      // страховка от «вечной загрузки», если браузер не вызвал ни один из обработчиков
+      const watchdog = window.setTimeout(() => { if (geoBusy) { geoBusy = false; setGeoState('timeout'); } }, 16000);
+      const finish = (fn: () => void) => { if (!geoBusy) return; geoBusy = false; window.clearTimeout(watchdog); fn(); };
+      try {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => finish(() => setGeoState('granted', pos.coords.latitude, pos.coords.longitude)),
+          (err) => finish(() => setGeoState(stateFromError(err))),
+          { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 }
+        );
+      } catch { finish(() => setGeoState('error')); }
+    }
+    geoBtn?.addEventListener('click', async () => {
+      // Если доступ уже запрещён в браузере, повторный запрос ничего не покажет — объясняем, что делать
+      try {
+        const st = await navigator.permissions?.query({ name: 'geolocation' as PermissionName });
+        if (st && st.state === 'denied') { setGeoState('denied'); return; }
+      } catch { /* Permissions API недоступен */ }
+      requestVisitorPosition();
+    });
+    // Без навязчивых запросов: сайт сам ничего не спрашивает. Если доступ уже был разрешён ранее — просто показываем место.
+    if (!('geolocation' in navigator) || !navigator.geolocation || !window.isSecureContext) {
+      setGeoState('fallback');
+    } else if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' as PermissionName }).then((st) => {
+        if (st.state === 'granted') setTimeout(requestVisitorPosition, 800);
+        else if (st.state === 'denied') setGeoState('denied');
+      }, () => { /* оставляем кнопку */ });
+    }
 
     // 2. Открытие, разворачивание и закрытие досье
     const hotspots = document.querySelectorAll('.hotspot');
@@ -4948,6 +5095,12 @@ const W1 = " ";
         }
       });
     }
+
+    // Предметы сцены (src/scene) просят открыть панель через событие — порядок загрузки скриптов не важен
+    document.addEventListener('gonka:open', (e) => {
+      const id = (e as CustomEvent).detail?.target;
+      if (id) openDrawer(id);
+    });
 
     function toggleExpand(drawer: HTMLElement) {
       const isExpanded = drawer.classList.contains('is-expanded');
@@ -4979,6 +5132,16 @@ const W1 = " ";
         e.stopPropagation();
         const targetId = btn.getAttribute('data-target');
         if (targetId) {
+          if (btn.classList.contains('cabinet-nav-item')) {
+            const deskHotspot = document.querySelector(`.workbench-frame .hotspot[data-target="${targetId}"]`) as HTMLElement;
+            if (deskHotspot) {
+              deskHotspot.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+              deskHotspot.classList.add('is-hovered');
+              setTimeout(() => {
+                deskHotspot.classList.remove('is-hovered');
+              }, 1800);
+            }
+          }
           openDrawer(targetId);
         }
       });
@@ -4990,7 +5153,19 @@ const W1 = " ";
               e.preventDefault();
               e.stopPropagation();
               const targetId = btn.getAttribute('data-target');
-              if (targetId) openDrawer(targetId);
+              if (targetId) {
+                if (btn.classList.contains('cabinet-nav-item')) {
+                  const deskHotspot = document.querySelector(`.workbench-frame .hotspot[data-target="${targetId}"]`) as HTMLElement;
+                  if (deskHotspot) {
+                    deskHotspot.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    deskHotspot.classList.add('is-hovered');
+                    setTimeout(() => {
+                      deskHotspot.classList.remove('is-hovered');
+                    }, 1800);
+                  }
+                }
+                openDrawer(targetId);
+              }
             }
           }
         });
@@ -5014,7 +5189,7 @@ const W1 = " ";
       });
     });
 
-    document.querySelectorAll('a.topbar-brand, a.workbench-table-logo-link').forEach((brandLink) => {
+    document.querySelectorAll('a.topbar-brand, a.workbench-table-logo-link, a.scene-brand').forEach((brandLink) => {
       brandLink.addEventListener('click', (e) => {
         const anyOpen = document.querySelector('.workbench-drawer.is-open');
         if (anyOpen) {
@@ -5052,29 +5227,94 @@ const W1 = " ";
     const html = document.documentElement;
 
     function applyDeskTheme(theme: string) {
+      if (theme !== 'night' && theme !== 'day') theme = 'day';
       html.setAttribute('data-theme', theme);
+      const night = theme === 'night';
+      toggleBtn?.setAttribute('aria-checked', String(night));
+      toggleBtn?.setAttribute('aria-label', night ? 'Ночной режим включён. Переключить на день' : 'Дневной режим включён. Переключить на ночь');
       if (themeIcon && themeLabel) {
-        if (theme === 'night') {
-          themeIcon.textContent = '☽';
-          themeLabel.textContent = 'НОЧЬ';
-        } else {
-          themeIcon.textContent = '☼';
-          themeLabel.textContent = 'ДЕНЬ';
-        }
+        themeIcon.textContent = night ? '☽' : '☼';
+        themeLabel.textContent = night ? 'НОЧЬ' : 'ДЕНЬ';
       }
     }
 
     const currentHour = new Date().getHours();
     const defaultTheme = (currentHour >= 20 || currentHour < 7) ? 'night' : 'day';
-    const saved = localStorage.getItem('gonka-theme') || defaultTheme;
+    let saved = defaultTheme;
+    try { saved = localStorage.getItem('gonka-theme') || defaultTheme; } catch { /* приватный режим */ }
     applyDeskTheme(saved);
 
     toggleBtn?.addEventListener('click', () => {
       const current = html.getAttribute('data-theme');
       const next = current === 'night' ? 'day' : 'night';
-      localStorage.setItem('gonka-theme', next);
+      try { localStorage.setItem('gonka-theme', next); } catch { /* приватный режим */ }
       applyDeskTheme(next);
     });
+
+    // 3b. Сцена: масштаб свитков (--k), положение на мобильных, касания свитков
+    const stage = document.getElementById('scene-stage');
+    if (stage) {
+      const clip = stage.parentElement as HTMLElement;
+      const updateScale = () => stage.style.setProperty('--k', String(stage.clientWidth / 1619));
+      updateScale();
+      if ('ResizeObserver' in window) new ResizeObserver(updateScale).observe(stage);
+      else window.addEventListener('resize', updateScale);
+      if (window.matchMedia('(max-width: 767px)').matches) {
+        clip.scrollLeft = (clip.scrollWidth - clip.clientWidth) * 0.3;
+      }
+
+      // Мышиный клик не должен оставлять фокус на свитке: иначе :focus-within удерживает раскрытие после ухода курсора
+      stage.querySelectorAll<HTMLElement>('.sites-closed-img, .bots-closed-img, .scroll-closed-img').forEach((img) => {
+        img.addEventListener('mousedown', (e) => e.preventDefault());
+      });
+
+      // Подписи предметов у края сцены сдвигаются внутрь видимой области
+      const placeTip = (e: Event) => {
+        const hit = (e.target as HTMLElement).closest?.('.obj-hit');
+        const tip = hit?.parentElement?.querySelector<HTMLElement>('.obj-tip');
+        if (!tip) return;
+        tip.style.transition = 'none';                 // измеряем без анимации, иначе getBoundingClientRect вернёт промежуточное положение
+        tip.style.setProperty('--tip-dx', '0px');
+        const r = tip.getBoundingClientRect();
+        const c = clip.getBoundingClientRect();
+        const left = Math.max(c.left, 0) + 6, right = Math.min(c.right, window.innerWidth) - 6;
+        const dx = Math.max(0, left - r.left) - Math.max(0, r.right - right);
+        tip.style.setProperty('--tip-dx', `${dx}px`);
+        void tip.offsetWidth;
+        tip.style.transition = '';
+      };
+      stage.addEventListener('mouseover', placeTip);
+      stage.addEventListener('focusin', placeTip);
+
+      // На сенсорных экранах первое касание раскрывает свиток, второе — открывает его панель
+      const touchOnly = window.matchMedia('(hover: none)');
+      const scrolls = Array.from(stage.querySelectorAll<HTMLElement>('.hotspot-scroll-sites, .hotspot-scroll-bots, .hotspot-scroll'));
+      const closeScrolls = (except?: HTMLElement) => scrolls.forEach((sc) => { if (sc !== except) sc.classList.remove('is-hovered'); });
+      scrolls.forEach((sc) => {
+        sc.addEventListener('click', (e) => {
+          if (!touchOnly.matches) return;
+          const inside = (e.target as HTMLElement).closest('[data-open-drawer], .sites-screen-chip');
+          if (inside) return;
+          if (!sc.classList.contains('is-hovered')) {
+            e.stopPropagation();
+            e.preventDefault();
+            closeScrolls(sc);
+            sc.classList.add('is-hovered');
+          }
+        }, true);
+      });
+      document.addEventListener('click', (e) => {
+        if (!touchOnly.matches) return;
+        if (!(e.target as HTMLElement).closest('.hotspot-scroll-sites, .hotspot-scroll-bots, .hotspot-scroll')) closeScrolls();
+      });
+
+      // Предметы стола: клик/Enter/касание открывают панель
+      stage.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-scene-target]');
+        const id = btn?.getAttribute('data-scene-target');
+        if (id) document.dispatchEvent(new CustomEvent('gonka:open', { detail: { target: id } }));
+      });
+    }
 
     // 4. Проверка URL-параметров
     const urlParams = new URLSearchParams(window.location.search);
