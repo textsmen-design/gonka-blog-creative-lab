@@ -2686,7 +2686,7 @@ const stars = Array.from({ length: 34 }, () => ({
     aspect-ratio: 400 / 658;
     pointer-events: none;
     opacity: 0;
-    filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.9));
+    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.92));
     transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
                 filter 0.38s ease;
@@ -2706,8 +2706,8 @@ const stars = Array.from({ length: 34 }, () => ({
   .hotspot-scroll-bots.is-hovered .bots-unrolled-wrapper {
     opacity: 1;
     pointer-events: auto;
-    transform: translate(-50%, -50%) scale(1) rotate(-1.5deg);
-    filter: drop-shadow(0 26px 52px rgba(0, 0, 0, 0.95));
+    transform: translate(-50%, -50%) scale(1.02) rotate(-1.5deg);
+    filter: drop-shadow(0 28px 56px rgba(0, 0, 0, 0.96)) drop-shadow(0 4px 12px rgba(16, 185, 129, 0.2));
   }
 
   .bots-unrolled-img {
@@ -2726,7 +2726,7 @@ const stars = Array.from({ length: 34 }, () => ({
     border: 1.5px solid transparent;
     border-radius: 14px;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     outline: none;
     z-index: 10;
     -webkit-tap-highlight-color: transparent;
@@ -2741,10 +2741,10 @@ const stars = Array.from({ length: 34 }, () => ({
 
   .phone-interactive-hotspot.hotspot-meat:hover,
   .phone-interactive-hotspot.hotspot-meat:focus-visible {
-    border-color: rgba(34, 197, 94, 0.85);
-    background: rgba(34, 197, 94, 0.12);
-    box-shadow: 0 0 16px rgba(34, 197, 94, 0.35);
-    transform: scale(1.02);
+    border-color: rgba(34, 197, 94, 0.95);
+    background: rgba(34, 197, 94, 0.16);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.45), inset 0 0 10px rgba(34, 197, 94, 0.2);
+    transform: scale(1.03);
   }
 
   .phone-interactive-hotspot.hotspot-detective {
@@ -2756,10 +2756,10 @@ const stars = Array.from({ length: 34 }, () => ({
 
   .phone-interactive-hotspot.hotspot-detective:hover,
   .phone-interactive-hotspot.hotspot-detective:focus-visible {
-    border-color: rgba(168, 85, 247, 0.85);
-    background: rgba(168, 85, 247, 0.12);
-    box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
-    transform: scale(1.02);
+    border-color: rgba(168, 85, 247, 0.95);
+    background: rgba(168, 85, 247, 0.16);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.45), inset 0 0 10px rgba(168, 85, 247, 0.2);
+    transform: scale(1.03);
   }
 
 
@@ -4640,7 +4640,7 @@ const stars = Array.from({ length: 34 }, () => ({
     color: #fed7aa;
   }
 
-  /* БЭКДРОП */
+  /* БЭКДРОП: клик в любую свободную область стола закрывает досье */
   .drawer-backdrop {
     position: fixed;
     inset: 0;
@@ -4650,6 +4650,7 @@ const stars = Array.from({ length: 34 }, () => ({
     pointer-events: none;
     transition: opacity 0.35s ease;
     z-index: 55;
+    cursor: pointer;
   }
   .drawer-backdrop.is-active {
     opacity: 1;
@@ -4723,7 +4724,7 @@ const stars = Array.from({ length: 34 }, () => ({
     height: calc(100svh - 42px);
     min-height: 520px;
     aspect-ratio: auto;
-    background: #0d0907;
+    background: radial-gradient(circle at 50% 50%, #1c140e 0%, #090604 100%);
     overflow: hidden;
   }
 
@@ -4743,7 +4744,8 @@ const stars = Array.from({ length: 34 }, () => ({
     position: absolute;
     left: 50%;
     top: 50%;
-    width: min(100cqw, calc(100cqh * 1672 / 940));
+    width: max(100cqw, calc(100cqh * 1672 / 940));
+    max-width: calc(100cqh * 1672 / 940 + 60px);
     aspect-ratio: 1672 / 940;
     translate: -50% -50%;
     user-select: none;
@@ -4802,9 +4804,24 @@ const stars = Array.from({ length: 34 }, () => ({
   @keyframes scene-lamp { from { opacity: 0.86; } to { opacity: 1; } }
 
   /* ---- предметы ---- */
-  .scene-obj { position: absolute; pointer-events: none; --lift: 7px; --pop: 1.035; --tilt: 0deg; }
-  .scene-obj.kind-big { --lift: 4px; --pop: 1.012; }
+  .scene-obj { position: absolute; pointer-events: none; --lift: 0px; --pop: 1; --tilt: 0deg; }
+  .scene-obj.kind-big { --lift: 0px; --pop: 1; }
   .scene-obj.kind-flat { --lift: 0px; --pop: 1; }
+
+  /* Деликатный сигнал кликабельности (affordance beacon): мягкий отблеск контура при первом знакомстве со сценой */
+  .scene-obj::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  @keyframes obj-beacon-idle {
+    0%, 100% { opacity: 0; filter: drop-shadow(0 0 0 rgba(245, 158, 11, 0)); }
+    50% { opacity: 0.45; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.65)); }
+  }
 
   .obj-hit {
     position: absolute; inset: 0; width: 100%; height: 100%;
@@ -4815,52 +4832,98 @@ const stars = Array.from({ length: 34 }, () => ({
   .obj-lift {
     position: absolute; inset: 0; pointer-events: none;
     opacity: 0;
-    transform-origin: 50% 78%;
-    transition: transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.34s ease, opacity 0s linear 0.36s;
+    transform-origin: 50% 85%;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), filter 0.32s ease, opacity 0.15s ease;
   }
-  .obj-art { position: absolute; inset: 0; background-image: var(--scene-img); background-repeat: no-repeat; }
+  .obj-art {
+    position: absolute; inset: 0;
+    background-image: var(--scene-img);
+    background-repeat: no-repeat;
+  }
 
   @media (hover: hover) {
-    .obj-hit:hover + .obj-lift {
+    .obj-hit:hover + .obj-lift,
+    .scene-obj.is-hovered .obj-lift,
+    .scene-obj.is-linked-hover .obj-lift {
       opacity: 1;
-      transition: transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.34s ease, opacity 0s;
-      transform: translate3d(0, calc(var(--lift) * -1), 0) scale(var(--pop)) rotate(var(--tilt));
-      filter: drop-shadow(0 calc(var(--lift) * 1.9) calc(var(--lift) * 1.5) rgba(0, 0, 0, 0.5)) brightness(1.1) saturate(1.1);
+      transform: translate3d(0, -6px, 0);
+      filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55)) brightness(1.08) contrast(1.03);
     }
-    .scene-obj.kind-flat .obj-hit:hover + .obj-lift {
+    .scene-obj.kind-flat .obj-hit:hover + .obj-lift,
+    .scene-obj.kind-flat.is-hovered .obj-lift,
+    .scene-obj.kind-flat.is-linked-hover .obj-lift {
       transform: none;
-      filter: brightness(1.13) saturate(1.12) drop-shadow(0 0 10px rgba(255, 200, 120, 0.5));
+      filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.4)) brightness(1.08);
     }
-    .obj-hit:hover ~ .obj-tip { opacity: 1; transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 8px)); }
+    .obj-hit:hover ~ .obj-tip,
+    .scene-obj.is-hovered .obj-tip,
+    .scene-obj.is-linked-hover .obj-tip { opacity: 1; transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 8px)); }
   }
-  .obj-hit:focus-visible + .obj-lift {
+  .obj-hit:focus-visible + .obj-lift,
+  .scene-obj:focus-within .obj-lift {
     opacity: 1;
-    transition: transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.34s ease, opacity 0s;
-    transform: translate3d(0, calc(var(--lift) * -1), 0) scale(var(--pop)) rotate(var(--tilt));
-    filter: drop-shadow(0 0 2px #ffe3a1) drop-shadow(0 0 7px rgba(255, 184, 77, 0.95)) drop-shadow(0 calc(var(--lift) * 1.9) calc(var(--lift) * 1.5) rgba(0, 0, 0, 0.5)) brightness(1.1);
+    transform: translate3d(0, -6px, 0);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)) drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55)) brightness(1.1);
   }
-  .obj-hit:focus-visible ~ .obj-tip { opacity: 1; transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 8px)); }
+  .obj-hit:focus-visible ~ .obj-tip,
+  .scene-obj:focus-within .obj-tip { opacity: 1; transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 8px)); }
   .obj-hit:active + .obj-lift {
     opacity: 1;
-    transition-duration: 0.08s;
-    transform: translate3d(0, calc(var(--lift) * -0.25), 0) scale(1.005);
-    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55)) brightness(0.96);
+    transform: translate3d(0, -1px, 0);
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.6)) brightness(0.98);
   }
 
   .obj-tip {
     position: absolute; left: 50%; top: 0;
-    transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 2px));
+    transform: translate(calc(-50% + var(--tip-dx, 0px)), calc(-100% - 4px));
     opacity: 0; pointer-events: none; white-space: nowrap;
-    display: flex; flex-direction: column; gap: 1px;
-    padding: 5px 10px 6px;
-    background: linear-gradient(135deg, #f6ebd2 0%, #dcc397 100%);
-    border: 1px solid rgba(120, 75, 30, 0.55); border-radius: 3px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    z-index: 5;
+    display: flex; flex-direction: column; gap: 3px; align-items: center;
+    padding: 6px 12px 7px;
+    background: linear-gradient(180deg, rgba(30, 22, 16, 0.96) 0%, rgba(18, 13, 9, 0.98) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.65);
+    border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), 0 0 10px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(254, 215, 170, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 60;
   }
-  .obj-tip b { font: 800 10px/1.2 'Space Grotesk', system-ui, sans-serif; letter-spacing: 0.14em; color: #431407; text-transform: uppercase; }
-  .obj-tip i { font: italic 500 11px/1.25 'Space Grotesk', system-ui, sans-serif; color: #5a3519; max-width: 220px; white-space: normal; }
+  .obj-tip::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid rgba(245, 158, 11, 0.7);
+  }
+  .obj-tip b {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.16em;
+    color: #fbbf24;
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.45), 0 1px 2px rgba(0, 0, 0, 0.9);
+    text-transform: uppercase;
+    display: block;
+  }
+  .obj-tip i {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 11px;
+    line-height: 1.3;
+    color: #f5f5f4;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    max-width: 240px;
+    white-space: normal;
+    text-align: center;
+    opacity: 0.92;
+  }
   /* ---- свитки: hover/клик только по самому свитку, а не по прямоугольнику вокруг ---- */
   .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal,
   .scene-stage .hotspot-scroll-bots.physical-scroll-bots,
@@ -4870,9 +4933,10 @@ const stars = Array.from({ length: 34 }, () => ({
     scale: var(--k);
     z-index: 500;
   }
-  .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal { left: 11.4%; top: 80.4%; width: 253px; height: 131px; }
-  .scene-stage .hotspot-scroll.physical-scroll-object { left: 28.6%; top: 77.6%; width: 223px; height: 212px; scale: calc(var(--k) * 0.8); }
-  .scene-stage .hotspot-scroll-bots.physical-scroll-bots { left: 37.1%; top: 79.8%; width: 275px; height: 160px; }
+  /* Расположение свитков на карте SRBIJA: аккуратно распределены слева направо без коллизий */
+  .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal { left: 5.8%; top: 81.2%; width: 235px; height: 125px; }
+  .scene-stage .hotspot-scroll-bots.physical-scroll-bots { left: 19.8%; top: 80.5%; width: 250px; height: 155px; }
+  .scene-stage .hotspot-scroll.physical-scroll-object { left: 34.2%; top: 78.4%; width: 215px; height: 205px; scale: calc(var(--k) * 0.8); }
 
   .scene-stage .sites-closed-wrapper,
   .scene-stage .bots-closed-wrapper,
@@ -5342,6 +5406,51 @@ const stars = Array.from({ length: 34 }, () => ({
         const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-scene-target]');
         const id = btn?.getAttribute('data-scene-target');
         if (id) document.dispatchEvent(new CustomEvent('gonka:open', { detail: { target: id } }));
+      });
+
+      // Двусторонняя подсветка: Предмет на столе ⇄ Плашка меню справа
+      const cabinetNavItems = Array.from(document.querySelectorAll<HTMLElement>('.cabinet-nav-item'));
+      const sceneObjects = Array.from(stage.querySelectorAll<HTMLElement>('.scene-obj'));
+
+      // Наведение на предмет на столе → мягко подсвечивает пункт в правом меню
+      sceneObjects.forEach((obj) => {
+        const hitBtn = obj.querySelector<HTMLElement>('[data-scene-target]');
+        const targetId = hitBtn?.getAttribute('data-scene-target');
+        if (!targetId) return;
+
+        obj.addEventListener('mouseenter', () => {
+          cabinetNavItems.forEach((nav) => {
+            if (nav.getAttribute('data-target') === targetId) nav.classList.add('is-hovered');
+          });
+        });
+        obj.addEventListener('mouseleave', () => {
+          cabinetNavItems.forEach((nav) => {
+            if (nav.getAttribute('data-target') === targetId) nav.classList.remove('is-hovered');
+          });
+        });
+      });
+
+      // Наведение на плашку в правом меню → приподнимает и подсвечивает предмет на столе
+      cabinetNavItems.forEach((nav) => {
+        const targetId = nav.getAttribute('data-target');
+        if (!targetId) return;
+
+        nav.addEventListener('mouseenter', () => {
+          sceneObjects.forEach((obj) => {
+            const hitBtn = obj.querySelector<HTMLElement>('[data-scene-target]');
+            if (hitBtn?.getAttribute('data-scene-target') === targetId) {
+              obj.classList.add('is-linked-hover');
+            }
+          });
+        });
+        nav.addEventListener('mouseleave', () => {
+          sceneObjects.forEach((obj) => {
+            const hitBtn = obj.querySelector<HTMLElement>('[data-scene-target]');
+            if (hitBtn?.getAttribute('data-scene-target') === targetId) {
+              obj.classList.remove('is-linked-hover');
+            }
+          });
+        });
       });
     }
 

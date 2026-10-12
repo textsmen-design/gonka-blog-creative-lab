@@ -17,9 +17,6 @@ const description = site.meta.description;
   <title>{title}</title>
   <meta name="description" content={description} />
 
-  <!-- Tailwind CDN для мгновенной сборки стилей -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
   <!-- Google Fonts: Space Grotesk, JetBrains Mono, Inter, Caveat, Unbounded, Literata -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,8 +58,19 @@ const description = site.meta.description;
       font-family: 'Inter', system-ui, sans-serif;
       background-color: var(--desk-base);
       color: var(--desk-text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+      -webkit-user-select: none;
       transition: background-color 0.8s ease, color 0.8s ease;
     }
+
+    .min-h-screen { min-height: 100vh; }
+    .w-full { width: 100%; }
+    .overflow-x-hidden { overflow-x: hidden; }
+    .antialiased { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    .select-none { user-select: none; -webkit-user-select: none; }
+    .text-amber-400 { color: #fbbf24; }
 
     ::selection {
       background-color: #ea580c;
