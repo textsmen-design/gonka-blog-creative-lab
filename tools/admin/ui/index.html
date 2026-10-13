@@ -12,10 +12,20 @@
     <form id="gate-form" class="gate-card" autocomplete="off">
       <h1>GONKA.BLOG · админка</h1>
       <p class="muted">Введите пароль администратора.</p>
-      <p class="muted small">Пароль задан в конфигурации PM2 (ADMIN_HASH).</p>
       <input id="gate-token" type="password" placeholder="ПАРОЛЬ" required />
       <button id="gate-submit" type="submit">Войти</button>
+      <button id="btn-show-chpw" class="ghost" type="button">Сменить пароль</button>
       <p id="gate-error" class="error" hidden></p>
+    </form>
+    <form id="chpw-form" class="gate-card" autocomplete="off" hidden>
+      <h1>Смена пароля</h1>
+      <p class="muted small">Нужно знать текущий пароль. После смены все входы завершатся.</p>
+      <input id="chpw-current" type="password" placeholder="ТЕКУЩИЙ ПАРОЛЬ" autocomplete="current-password" required />
+      <input id="chpw-new" type="password" placeholder="НОВЫЙ ПАРОЛЬ (от 10 символов)" autocomplete="new-password" minlength="10" required />
+      <input id="chpw-repeat" type="password" placeholder="ПОВТОРИТЕ НОВЫЙ ПАРОЛЬ" autocomplete="new-password" minlength="10" required />
+      <button id="chpw-submit" type="submit">Сохранить новый пароль</button>
+      <button id="btn-hide-chpw" class="ghost" type="button">Назад ко входу</button>
+      <p id="chpw-msg" class="error" hidden></p>
     </form>
   </div>
 

@@ -46,3 +46,6 @@ public/*.backup*
 public/*.before-*
 public/*.original*
 tools/admin/screenshots/
+
+tools/admin/.password-hash
+tools/admin/.password-hash.tmp

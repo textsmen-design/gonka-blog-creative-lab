@@ -59,10 +59,27 @@ const TOKEN = loadToken();
 const TOKEN_SHA = crypto.createHash('sha256').update(TOKEN).digest();
 
 
+// --- пароль: хеш из файла (его пишет «Сменить пароль»), иначе из ADMIN_HASH ---
+const HASH_FILE = process.env.ADMIN_HASH_FILE || path.join(HERE, '.password-hash');
+function currentHash() {
+  try {
+    const h = fs.readFileSync(HASH_FILE, 'utf8').trim();
+    if (/^[0-9a-f]{32}:[0-9a-f]{128}$/.test(h)) return h;
+  } catch {}
+  return process.env.ADMIN_HASH || '';
+}
+function writeHash(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const h = crypto.scryptSync(password, salt, 64).toString('hex');
+  const tmp = HASH_FILE + '.tmp';
+  fs.writeFileSync(tmp, `${salt}:${h}`, { mode: 0o600 });
+  fs.renameSync(tmp, HASH_FILE);
+}
+
 function tokenMatches(provided) {
   if (typeof provided !== 'string' || provided.length === 0) return false;
   
-  const stored = process.env.ADMIN_HASH;
+  const stored = currentHash();
   if (!stored) {
     // fallback to original behavior if no hash is provided
     const given = crypto.createHash('sha256').update(provided).digest();
@@ -237,6 +254,32 @@ async function handleApi(req, res, url) {
       registerFail(ip);
       return send(res, 401, { error: 'Неверный пароль' });
     } catch(e) {
+      return send(res, 400, { error: 'Bad request' });
+    }
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/change-password') {
+    if (!originOk(req)) return send(res, 403, { error: 'запрос с чужого источника' });
+    if (rateLimited(ip)) return send(res, 429, { error: 'слишком много попыток, подождите минуту' });
+    try {
+      const raw = await readBody(req, 4096);
+      const { current, next } = JSON.parse(raw.toString('utf8'));
+      if (typeof current !== 'string' || typeof next !== 'string') return send(res, 400, { error: 'Bad request' });
+      if (!tokenMatches(current)) {
+        registerFail(ip);
+        return send(res, 401, { error: 'Текущий пароль указан неверно' });
+      }
+      if (next.length < 10) return send(res, 400, { error: 'Новый пароль слишком короткий (минимум 10 символов)' });
+      if (next.length > 200) return send(res, 400, { error: 'Новый пароль слишком длинный' });
+      if (next === current) return send(res, 400, { error: 'Новый пароль совпадает с текущим' });
+      resetFails(ip);
+      writeHash(next);
+      SESSIONS.clear(); // все активные входы завершаются
+      appendAudit('password-change', '', '', '');
+      return send(res, 200, { ok: true }, {
+        'Set-Cookie': 'admin_session=; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=0'
+      });
+    } catch (e) {
       return send(res, 400, { error: 'Bad request' });
     }
   }

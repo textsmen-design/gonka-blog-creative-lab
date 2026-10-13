@@ -1548,6 +1548,51 @@
     }
   });
 
+  // ---------- смена пароля на экране входа ----------
+  function chpwMsg(text, ok) {
+    const m = $('#chpw-msg');
+    m.hidden = !text;
+    m.textContent = text || '';
+    m.className = ok ? 'muted' : 'error';
+  }
+  $('#btn-show-chpw').addEventListener('click', () => {
+    $('#gate-form').hidden = true;
+    $('#chpw-form').hidden = false;
+    chpwMsg('');
+    $('#chpw-current').focus();
+  });
+  $('#btn-hide-chpw').addEventListener('click', () => {
+    $('#chpw-form').hidden = true;
+    $('#gate-form').hidden = false;
+  });
+  $('#chpw-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const current = $('#chpw-current').value;
+    const next = $('#chpw-new').value;
+    if (next !== $('#chpw-repeat').value) return chpwMsg('Новые пароли не совпадают', false);
+    if (next.length < 10) return chpwMsg('Новый пароль слишком короткий (минимум 10 символов)', false);
+    $('#chpw-submit').disabled = true;
+    try {
+      const r = await fetch('/api/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current, next }),
+      });
+      const b = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        return chpwMsg(r.status === 404 ? 'Сервер админки ещё не обновлён, перезапустите его' : (b.error || 'Ошибка ' + r.status), false);
+      }
+      $('#chpw-form').reset();
+      $('#chpw-form').hidden = true;
+      $('#gate-form').hidden = false;
+      showGate('Пароль изменён. Войдите с новым паролем.');
+    } catch (err) {
+      chpwMsg('Ошибка сети', false);
+    } finally {
+      $('#chpw-submit').disabled = false;
+    }
+  });
+
   $('#btn-logout').addEventListener('click', async () => {
     await fetch('/api/logout', { method: 'POST' });
     sessionStorage.removeItem('gonka-admin-token');
