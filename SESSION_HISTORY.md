@@ -1,6 +1,8 @@
 # GONKA.BLOG — Контекст и статус разработки верстака (Spatial Workbench)
 
-Дата фиксации: 12 октября 2026
+Дата фиксации: 12 октября 2026 (Вечерняя сессия)
+
+---
 
 ## 1. Что было выполнено в текущей сессии
 
@@ -28,18 +30,49 @@
   - Название раздела: золотистый `#fbbf24`, `Space Grotesk`, трекинг `0.16em` с мягким неоновым свечением.
   - Поясняющий девиз: чистый контрастный молочный `#f5f5f4`, `Inter`.
 
+### Г. Внедрение пакета SEO, метаданных и согласованных текстов (HANDOFF)
+1. **Тексты проектов и досье:**
+   - Обновлены `src/data/projects.json` (лендинги `english-teacher`, `twohearts`, `siteviza`, `atelier`, `landasset5`; трекер `tracker-01`; боты `myasnaya-troitsa`, `bot-detective`; видео `Gonka-Lab`). Убраны все неподтверждённые метрики («98/100 PageSpeed», «Loro Piana», срок аренды 49 лет и пр.). Стек трекера зафиксирован как «Уточняется».
+2. **Тексты разделов:**
+   - Обновлены `src/data/sections.json` (`modal-core`, `modal-sites`, `modal-bots`, `modal-about`, `modal-incoming`, `modal-draft`, `modal-failures`, `modal-video`, `modal-network`, `modal-manifesto`, `modal-srbija`).
+3. **Метаданные и SEO:**
+   - В [src/pages/index.astro](file:///Users/macbook/Desktop/GONKA-BLOG-CREATIVE-LAB/src/pages/index.astro) добавлены `<link rel="canonical">`, `<meta name="robots" content="index, follow">`, полные теги Open Graph и Twitter Card, а также валидный JSON-LD Schema.org (`WebSite`, `Person`).
+   - Логотип `GONKA.BLOG` обёрнут в семантический `<h1>` (`.scene-brand-heading`) без малейших визуальных сдвигов.
+   - Созданы [public/robots.txt](file:///Users/macbook/Desktop/GONKA-BLOG-CREATIVE-LAB/public/robots.txt) (с закрытием `/archive-v1/`) и [public/sitemap.xml](file:///Users/macbook/Desktop/GONKA-BLOG-CREATIVE-LAB/public/sitemap.xml).
+   - В [src/pages/archive-v1.astro](file:///Users/macbook/Desktop/GONKA-BLOG-CREATIVE-LAB/src/pages/archive-v1.astro) добавлен тег `<meta name="robots" content="noindex, nofollow">`, удалён `public/test-tailwind.html`.
+4. **Instagram:**
+   - В [src/data/links.json](file:///Users/macbook/Desktop/GONKA-BLOG-CREATIVE-LAB/src/data/links.json) прописан реальный адрес профиля: `https://instagram.com/gonka_lab` (открытие в новой вкладке, кликабельная иконка).
+
+### Д. Мобильная адаптация (iOS & Android)
+- Проверена адаптивность в Chrome CDP для вьюпортов **Apple iPhone (393×852)** и **Android (412×915)**:
+  - Сцена масштабируется с плавным горизонтальным скроллом и инерцией (`-webkit-overflow-scrolling: touch`).
+  - Под сценой размещается удобное меню-плитка 2×4 для мгновенного доступа ко всем разделам.
+  - Модальные окна раскрываются на полный экран мобильного устройства с крупными кнопками закрытия («Положить на стол») и перехода в Telegram.
+
+### Е. Аудит безопасности и проверка админки
+- **Админка (`npm run admin` → http://127.0.0.1:4310):**
+  - Подтверждена работоспособность вкладки **«Киноплёнка»** (добавление видео, автопарсинг ссылок `youtu.be`, `watch?v=`, `shorts/`, живой предпросмотр в iframe и прямая ссылка-фоллбэк).
+  - Проверена авторизация по сессионным cookies через токен [tools/admin/.token](file:///Users/macbook/Desktop/GONKA-BLOG-CREATIVE-LAB/tools/admin/.token).
+- **Безопасность:**
+  - В `dist/` не попадают служебные файлы (58 файлов в продакшене, `verify-dist.mjs` — OK).
+  - Пароль `GonkaAdmin2026!` из `INCIDENT_REPORT.md` и временных файлов `tools/test-admin-*.mjs` находится в untracked статусе — **не добавлять в Git перед деплоем**.
+
 ---
 
 ## 2. Ключевые файлы конфигурации
 - `src/scene/objects.mjs` — координаты полигонов всех 15 объектов по матрице 1672×940.
 - `src/components/SpatialWorkbench.astro` — интерактивная сцена, свитки, ховер-эффекты и шильды.
-- `src/pages/index.astro` — точка входа, подключение стилей без внешних CDN Tailwind.
-- `src/data/scene.json` — привязка предметов к модальным окнам и разделам.
-- `src/data/site.json` — тексты подсказок и девизов для предметов верстака.
+- `src/pages/index.astro` — метатеги, SEO, Schema.org, Open Graph, H1.
+- `src/data/projects.json` — каталоги лендингов, трекеров, ботов, видео.
+- `src/data/sections.json` — тексты всех модальных панелей верстака.
+- `src/data/links.json` — соцсети (включая Instagram `@gonka_lab`) и внешние адреса.
+- `src/data/site.json` — глобальные тексты подсказок и метаданные.
+- `tools/admin/` — локальный сервер админки, схемы данных и интерфейс управления.
 
 ---
 
 ## 3. Инструкция для следующей сессии
-1. Запустить локальный сервер: `npm run dev` (доступен на `http://localhost:4321/`).
-2. Проект собирается начисто: `npm run build` (2 страницы, без ошибок).
-3. Все наработки зафиксированы в Git.
+1. **Запуск верстака (основной сайт):** `npm run dev` → [http://localhost:4321/](http://localhost:4321/)
+2. **Запуск админки:** `npm run admin` → [http://127.0.0.1:4310/](http://127.0.0.1:4310/) (токен: `cat tools/admin/.token`)
+3. **Сборка проекта:** `npm run build` (чистая сборка за ~7с)
+4. **Валидация данных:** `tools/admin/validate.mjs` и `npm run check:bindings` (0 ошибок)

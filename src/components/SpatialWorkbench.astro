@@ -302,11 +302,13 @@ const stars = Array.from({ length: 34 }, () => ({
 
       <!-- Надпись и связь поверх сцены -->
       <div class="scene-hud">
-        <a href="/" class="scene-brand" aria-label="GONKA.BLOG: цифровая лаборатория — на главную">
-          <strong>GONKA<span>.BLOG</span></strong>
-          <em>цифровая лаборатория</em>
-          <small>проекты • эксперименты • идеи</small>
-        </a>
+        <h1 class="scene-brand-heading">
+          <a href="/" class="scene-brand" aria-label="GONKA.BLOG: цифровая лаборатория — на главную">
+            <strong>GONKA<span>.BLOG</span></strong>
+            <em>цифровая лаборатория</em>
+            <small>проекты • эксперименты • идеи</small>
+          </a>
+        </h1>
         <div class="scene-social">
           {socials.filter((x: any) => x.enabled).map((x: any) => (
             <a href={x.url} target={x.newTab ? "_blank" : undefined} rel={x.newTab ? "noopener noreferrer" : undefined} title={x.title} aria-label={x.ariaLabel}>
@@ -4999,6 +5001,14 @@ const stars = Array.from({ length: 34 }, () => ({
     position: absolute; z-index: 60; top: 10px; left: 16px; right: calc(var(--menu-w) + 16px);
     display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
     pointer-events: none;
+  }
+  .scene-brand-heading {
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    display: inline-flex;
   }
   .scene-brand {
     pointer-events: auto; display: inline-flex; flex-direction: column; gap: 2px;

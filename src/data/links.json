@@ -33,12 +33,12 @@
     {
       "id": "instagram",
       "label": "Instagram",
-      "url": "#instagram",
+      "url": "https://instagram.com/gonka_lab",
       "enabled": true,
       "icon": "instagram",
-      "newTab": false,
-      "title": "Instagram профиль (в разработке)",
-      "ariaLabel": "Instagram профиль GONKA.BLOG (в разработке)"
+      "newTab": true,
+      "title": "Instagram (@gonka_lab)",
+      "ariaLabel": "Instagram профиль GONKA.BLOG: @gonka_lab"
     }
   ],
   "english": "https://english.gonka.blog",

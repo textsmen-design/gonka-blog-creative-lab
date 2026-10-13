@@ -25,8 +25,8 @@
     {
       "id": "compass",
       "label": "Компас",
-      "target": "modal-slot-compass",
-      "tipKey": "",
+      "target": "modal-trackers",
+      "tipKey": "modal-trackers",
       "visible": true
     },
     {
@@ -97,7 +97,7 @@
       "label": "Лист: таск-трекеры",
       "target": "modal-trackers",
       "tipKey": "modal-trackers",
-      "visible": true
+      "visible": false
     },
     {
       "id": "map",
