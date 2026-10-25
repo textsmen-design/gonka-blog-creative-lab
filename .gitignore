@@ -49,3 +49,4 @@ tools/admin/screenshots/
 
 tools/admin/.password-hash
 tools/admin/.password-hash.tmp
+src/data/projects.backup.json
