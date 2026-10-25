@@ -3,16 +3,16 @@
   "items": [
     {
       "id": "lamp",
-      "label": "Лампа",
-      "target": "modal-slot-lamp",
-      "tipKey": "",
+      "label": "Лампа: смотреть проекты",
+      "target": "modal-showcase",
+      "tipKey": "modal-showcase",
       "visible": true
     },
     {
       "id": "pencilcup",
-      "label": "Стакан с карандашами",
-      "target": "modal-slot-pencilcup",
-      "tipKey": "",
+      "label": "Стакан: инструменты",
+      "target": "modal-network",
+      "tipKey": "modal-network",
       "visible": true
     },
     {
@@ -45,9 +45,9 @@
     },
     {
       "id": "photo-left",
-      "label": "Фотографии",
-      "target": "modal-slot-photos",
-      "tipKey": "",
+      "label": "Фото: SERBIA",
+      "target": "modal-srbija",
+      "tipKey": "modal-srbija",
       "visible": true
     },
     {
@@ -59,8 +59,8 @@
     },
     {
       "id": "mug",
-      "label": "Кружка: манифест",
-      "target": "modal-slot-mug",
+      "label": "Кружка: как я работаю",
+      "target": "modal-manifesto",
       "tipKey": "modal-manifesto",
       "visible": true
     },
@@ -73,9 +73,9 @@
     },
     {
       "id": "globe",
-      "label": "Глобус: инструменты",
-      "target": "modal-network",
-      "tipKey": "modal-network",
+      "label": "Глобус (резерв)",
+      "target": "modal-slot-pencilcup",
+      "tipKey": "",
       "visible": true
     },
     {
@@ -101,10 +101,10 @@
     },
     {
       "id": "map",
-      "label": "Карта: SRBIJA",
+      "label": "Карта (фон)",
       "target": "modal-srbija",
       "tipKey": "modal-srbija",
-      "visible": true
+      "visible": false
     }
   ]
 }

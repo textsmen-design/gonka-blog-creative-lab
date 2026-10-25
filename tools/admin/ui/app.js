@@ -255,11 +255,11 @@
 
     const objectLabels = {
       lamp: 'Объект: Настольная металлическая лампа (вверху)',
-      mug: 'Объект: Керамическая кружка «IDEAS BUILD TEST REPEAT»',
+      mug: 'Объект: Кружка «HOW I WORK» (на столе)',
       compass: 'Объект: Морской латунный компас (по центру)',
       photos: 'Объект: Две фотографии пейзажей (блок-плашка)',
       magnifier: 'Объект: Увеличительное стекло (под телефоном)',
-      pencilcup: 'Объект: Стакан с карандашами и ручками (в центре)',
+      pencilcup: 'Объект: Глобус справа (резервный слот)',
     };
 
     slots.forEach((slot, index) => {
@@ -377,9 +377,14 @@
   function extractYtId(url) {
     try {
       const u = new URL(url);
-      if (u.hostname.includes('youtu.be')) return u.pathname.slice(1).split('?')[0];
-      if (u.pathname.includes('/shorts/')) return u.pathname.split('/shorts/')[1].split('?')[0];
-      return u.searchParams.get('v') || '';
+      const h = u.hostname.replace(/^(www|m)\./, '');
+      let id = '';
+      if (h === 'youtu.be') id = u.pathname.split('/')[1] || '';
+      else if (h === 'youtube.com' || h === 'youtube-nocookie.com') {
+        const m = u.pathname.match(/^\/(?:shorts|live|embed)\/([^/?#]+)/);
+        id = m ? m[1] : (u.searchParams.get('v') || '');
+      }
+      return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : '';
     } catch { return ''; }
   }
   
@@ -1265,7 +1270,7 @@
     'modal-network': 'modal-network (Карта связей // Инструменты)',
     'modal-srbija': 'modal-srbija (Резная плашка SRBIJA — проект Reloca)',
     'modal-trackers': 'modal-trackers (Плашка ТАСК-ТРЕКЕРЫ справа внизу стола)',
-    'modal-manifesto': 'modal-manifesto (Кружка // IDEAS BUILD TEST REPEAT)',
+    'modal-manifesto': 'modal-manifesto (Кружка // HOW I WORK)',
   };
 
   function renderValue(key, value, path, container, file) {

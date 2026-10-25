@@ -19,13 +19,27 @@ const P: any = { ...projects, landings: projects.landings.filter((x: any) => x.s
 function getYouTubeId(url) {
   try {
     const u = new URL(url);
-    if (u.hostname.includes('youtu.be')) return u.pathname.slice(1).split('?')[0];
-    if (u.pathname.includes('/shorts/')) return u.pathname.split('/shorts/')[1].split('?')[0];
-    return u.searchParams.get('v');
+    const h = u.hostname.replace(/^(www|m)\./, '');
+    let id = '';
+    if (h === 'youtu.be') id = u.pathname.split('/')[1] || '';
+    else if (h === 'youtube.com' || h === 'youtube-nocookie.com') {
+      const m = u.pathname.match(/^\/(?:shorts|live|embed)\/([^/?#]+)/);
+      id = m ? m[1] : (u.searchParams.get('v') || '');
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : '';
   } catch { return ''; }
 }
 const W0 = "\n";
 const publishedVideos = (P.videos || []).filter(v => v.status === 'published');
+const aboutVideo = publishedVideos.find((v: any) => v.id === 'profile-oleg') || publishedVideos[0];
+const aboutVideoId = aboutVideo ? getYouTubeId(aboutVideo.youtubeUrl) : '';
+const pub = (arr: any[]) => (arr || []).filter((x: any) => x.status === 'published').length;
+const aboutStats = [
+  [pub(P.bots), 'запущенных Telegram-проекта'],
+  [pub(P.landings), 'сайтов и магазинов (демо)'],
+  [pub(P.trackers), 'трекера задач'],
+  [publishedVideos.length, 'видео в киноплёнке'],
+];
 const hasVideos = publishedVideos.length > 0;
 const W1 = " ";
 
@@ -306,9 +320,24 @@ const stars = Array.from({ length: 34 }, () => ({
           <a href="/" class="scene-brand" aria-label="GONKA.BLOG: цифровая лаборатория — на главную">
             <strong>GONKA<span>.BLOG</span></strong>
             <em>цифровая лаборатория</em>
-            <small>проекты • эксперименты • идеи</small>
+            <small>боты • сайты • сервисы</small>
           </a>
         </h1>
+        {site.hero && (
+          <section class="scene-hero" aria-label="О лаборатории">
+            <span class="hero-tape hero-tape-l" aria-hidden="true"></span>
+            <span class="hero-tape hero-tape-r" aria-hidden="true"></span>
+            <div class="scene-hero-paper">
+              <p class="scene-hero-title">{site.hero.title}</p>
+              <p class="scene-hero-sub">{site.hero.sub}</p>
+              <div class="scene-hero-cta">
+                <button type="button" class="hero-btn hero-btn-main" data-open-drawer="modal-showcase" data-link-target="modal-showcase">{site.hero.ctaProjects}</button>
+                <button type="button" class="hero-btn" data-open-drawer="modal-about" data-link-target="modal-about">{site.hero.ctaAbout}</button>
+                <a class="hero-btn" href={L.telegram} target="_blank" rel="noopener noreferrer">{site.hero.ctaWrite} ↗</a>
+              </div>
+            </div>
+          </section>
+        )}
         <div class="scene-social">
           {socials.filter((x: any) => x.enabled).map((x: any) => (
             <a href={x.url} target={x.newTab ? "_blank" : undefined} rel={x.newTab ? "noopener noreferrer" : undefined} title={x.title} aria-label={x.ariaLabel}>
@@ -333,29 +362,38 @@ const stars = Array.from({ length: 34 }, () => ({
       <nav class="cabinet-menu-nav" aria-label="Оглавление интерактивного стола">
         <div class="cabinet-nav-backdrop" aria-hidden="true"></div>
 
-        <!-- 1. ЧЕРНОВИК -->
-        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-draft" aria-label="Черновик: открыть лабораторные записи и эскизы">
-          <span class="cabinet-nav-label">{site.nav[0].label}</span>
-        </button>
+        {site.exchanges && (
+          <div class="exch" role="group" aria-label={site.exchanges.title}>
+            <span class="exch-title">{site.exchanges.title}</span>
+            {site.exchanges.items.map((x: any) => (
+              <a class="exch-item" href={x.url} target="_blank" rel="noopener noreferrer" title={x.title} aria-label={x.title}>{x.label}</a>
+            ))}
+          </div>
+        )}
 
-        <!-- 2. ЛЕНДИНГИ -->
-        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-sites" aria-label="Лендинги: открыть каталог действующих веб-проектов">
-          <span class="cabinet-nav-label">{site.nav[1].label}</span>
-        </button>
-
-        <!-- 3. СИСТЕМА -->
+        <!-- 1. СИСТЕМА -->
         <button type="button" class="hotspot cabinet-nav-item" data-target="modal-core" aria-label="Система: открыть архитектуру и ядро GONKA.BLOG">
           <span class="cabinet-nav-label">{site.nav[2].label}</span>
         </button>
 
-        <!-- 4. ТРЕКЕРЫ -->
-        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-trackers" aria-label="Трекеры: открыть каталог таск-трекеров">
-          <span class="cabinet-nav-label">{site.nav[3].label}</span>
+        <!-- 2. ИНСТРУМЕНТЫ -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-network" aria-label="Инструменты: открыть стек технологий и связи">
+          <span class="cabinet-nav-label">{site.nav[6].label}</span>
         </button>
 
-        <!-- 5. НЕ ПОШЛО -->
-        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-failures" aria-label="Не пошло: открыть архив закрытых гипотез">
-          <span class="cabinet-nav-label">{site.nav[4].label}</span>
+        <!-- 3. БОТЫ -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-bots" aria-label="Боты: открыть каталог Telegram-ботов лаборатории">
+          <span class="cabinet-nav-label">{site.nav[7].label}</span>
+        </button>
+
+        <!-- 4. ЛЕНДИНГИ -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-sites" aria-label="Лендинги: открыть каталог действующих веб-проектов">
+          <span class="cabinet-nav-label">{site.nav[1].label}</span>
+        </button>
+
+        <!-- 5. ТРЕКЕРЫ -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-trackers" aria-label="Трекеры: открыть каталог таск-трекеров">
+          <span class="cabinet-nav-label">{site.nav[3].label}</span>
         </button>
 
         <!-- 6. ВИДЕО -->
@@ -363,14 +401,14 @@ const stars = Array.from({ length: 34 }, () => ({
           <span class="cabinet-nav-label">{site.nav[5].label}</span>
         </button>
 
-        <!-- 7. ИНСТРУМЕНТЫ -->
-        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-network" aria-label="Инструменты: открыть стек технологий и связи">
-          <span class="cabinet-nav-label">{site.nav[6].label}</span>
+        <!-- 7. ЧЕРНОВИК -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-draft" aria-label="Черновик: открыть лабораторные записи и эскизы">
+          <span class="cabinet-nav-label">{site.nav[0].label}</span>
         </button>
 
-        <!-- 8. БОТЫ -->
-        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-bots" aria-label="Боты: открыть каталог Telegram-ботов лаборатории">
-          <span class="cabinet-nav-label">{site.nav[7].label}</span>
+        <!-- 8. НЕ ПОШЛО -->
+        <button type="button" class="hotspot cabinet-nav-item" data-target="modal-failures" aria-label="Не пошло: открыть архив закрытых гипотез">
+          <span class="cabinet-nav-label">{site.nav[4].label}</span>
         </button>
       </nav>
 
@@ -484,6 +522,28 @@ const stars = Array.from({ length: 34 }, () => ({
           </div>
         </div>
 
+        {bot.promoPreview && (
+          <div class="dossier-screen-preview">
+            <img src={bot.promoPreview} alt={bot.promoAlt || bot.screenAlt} class="dossier-screen-img" loading="lazy" />
+            {bot.promoCaption && (
+              <div class="dossier-screen-caption">
+                <span class="caption-dot">●</span>{W1}{bot.promoCaption}{W0}
+              </div>
+            )}
+          </div>
+        )}
+
+        {bot.screenPreview && (
+          <div class="dossier-screen-preview">
+            <img src={bot.screenPreview} alt={bot.screenAlt} class="dossier-screen-img" loading="lazy" />
+            {bot.caption && (
+              <div class="dossier-screen-caption">
+                <span class="caption-dot">●</span>{W1}{bot.caption}{W0}
+              </div>
+            )}
+          </div>
+        )}
+
         <div class="case-grid">
           <div class="case-col-left">
             <div class="case-section">
@@ -520,6 +580,69 @@ const stars = Array.from({ length: 34 }, () => ({
     </div>
   </aside>
   ))}
+
+  <!-- ВИТРИНА «СМОТРЕТЬ ПРОЕКТЫ»: рабочие проекты в открытом доступе (кнопка на плашке и лампа на столе) -->
+  {site.showcase && (
+  <aside id="modal-showcase" class="workbench-drawer drawer-showcase">
+    <div class="drawer-content">
+
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="drawer-tag text-orange">{site.showcase.header.tag}</span>
+          <span class="case-badge">{site.showcase.header.badge}</span>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак">
+            <span class="expand-icon">⛶</span>
+            <span class="expand-label">НА ВЕСЬ СТОЛ</span>
+          </button>
+          <button class="close-drawer-btn" type="button" title="Положить обратно на стол">
+            <span>✕ ПОЛОЖИТЬ НА СТОЛ</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-hero-strip">
+          <div class="status-live">{site.showcase.hero.status}</div>
+          <h2 class="case-title">{site.showcase.hero.title}</h2>
+          <p class="case-lead">{site.showcase.hero.lead}</p>
+        </div>
+
+        <div class="showcase-grid">
+          {site.showcase.cards.map((c: any) => (
+            <article class="showcase-card">
+              <div class="showcase-shot">
+                <img src={c.image} alt={c.alt} loading="lazy" />
+                <span class="showcase-live"><i aria-hidden="true"></i>{c.status}</span>
+                <span class="showcase-kind">{c.kind}</span>
+                {c.video && /^\/videos\/[A-Za-z0-9._-]+\.mp4$/.test(c.video) && (
+                  <button type="button" class="showcase-play" data-video-src={c.video} data-video-poster={c.image} data-video-title={c.name} aria-label={"Смотреть ролик: " + c.name}><span aria-hidden="true">▶</span></button>
+                )}
+              </div>
+              <div class="showcase-body">
+                <h3 class="showcase-name">{c.name}</h3>
+                <p class="showcase-tagline">{c.tagline}</p>
+                <ul class="showcase-facts">
+                  {c.facts.map((f: string) => <li>{f}</li>)}
+                </ul>
+                <div class="showcase-actions">
+                  {c.links.map((l: any, i: number) => (
+                    <a class={"showcase-btn" + (i === 0 ? " is-primary" : "")} href={l.url} target="_blank" rel="noopener noreferrer">{l.label} ↗</a>
+                  ))}
+                  {c.dossier && (
+                    <button type="button" class="showcase-btn is-ghost" data-open-drawer={c.dossier}>{site.showcase.moreLabel || "Подробнее"}</button>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </aside>
+  )}
 
   <!-- 2.5 КАТАЛОГ TELEGRAM-БОТОВ (ОТКРЫВАЕТСЯ ИЗ ПРАВОГО МЕНЮ «БОТЫ») -->
   <aside id="modal-bots" class="workbench-drawer drawer-bots-catalog">
@@ -674,7 +797,7 @@ const stars = Array.from({ length: 34 }, () => ({
           <div class="case-actions">
             {primaryTracker?.url && (
               <a href={primaryTracker.url} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" title={primaryTracker.urlTitle || `Перейти в ${primaryTracker.name}`}>
-                {W0}ОТКРЫТЬ ТАСК-ТРЕКЕР (tracker-01.gonka.blog) ↗{W0}
+                {W0}ОТКРЫТЬ ДЕМО-ВЕРСИЮ (tracker-01.gonka.blog) ↗{W0}
               </a>
             )}
             {primaryTracker?.telegram && (
@@ -1379,7 +1502,9 @@ const stars = Array.from({ length: 34 }, () => ({
                 {yid ? (
                   <div class="video-embed" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border: 1px solid #783c14; background: #000;">
                     <iframe 
-                      src={`https://www.youtube.com/embed/${yid}`} 
+                      src={`https://www.youtube.com/embed/${yid}`}
+                      title={vid.title}
+                      loading="lazy"
                       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                       allowfullscreen>
@@ -1388,8 +1513,11 @@ const stars = Array.from({ length: 34 }, () => ({
                 ) : (
                   <div style="padding: 16px; border: 1px dashed #783c14; color: #ef4444; font-family: monospace; font-size: 12px; text-align: center;">ОШИБКА: НЕДОПУСТИМАЯ ССЫЛКА НА YOUTUBE</div>
                 )}
-                <div class="video-actions" style="margin-top: auto;">
-                  <a href={vid.youtubeUrl} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary" style="display: inline-block; width: 100%; text-align: center; font-size: 12px;">СМОТРЕТЬ В YOUTUBE ↗</a>
+                <div class="video-actions" style="margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap;">
+                  {yid && (
+                    <button type="button" class="case-action-btn btn-primary video-zoom-btn" data-video-id={yid} data-video-title={vid.title} style="flex: 1 1 200px; box-sizing: border-box; text-align: center;">▶ СМОТРЕТЬ КРУПНО</button>
+                  )}
+                  <a href={vid.youtubeUrl} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary" style="flex: 1 1 200px; box-sizing: border-box; text-align: center;">НА YOUTUBE ↗</a>
                 </div>
               </div>
             );
@@ -1577,6 +1705,22 @@ const stars = Array.from({ length: 34 }, () => ({
               <a href={L.email} class="case-action-btn btn-secondary">{W0}{S['modal-about'].actions[1]}{W0}</a>
             </div>
           </div>
+        </div>
+
+        {aboutVideoId && (
+          <div class="about-video">
+            <div class="about-video-label">// ВИДЕОВИЗИТКА</div>
+            <div class="video-embed" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border: 1px solid #783c14; background: #000;">
+              <iframe src={`https://www.youtube.com/embed/${aboutVideoId}`} title={aboutVideo.title} loading="lazy" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <button type="button" class="case-action-btn btn-secondary video-zoom-btn" data-video-id={aboutVideoId} data-video-title={aboutVideo.title}>▶ СМОТРЕТЬ КРУПНО</button>
+          </div>
+        )}
+
+        <div class="about-stats" aria-label="Лаборатория в цифрах">
+          {aboutStats.map(([n, label]) => (
+            <div class="about-stat"><strong>{n}</strong><span>{label}</span></div>
+          ))}
         </div>
 
         <div class="case-grid">
@@ -4890,6 +5034,13 @@ const stars = Array.from({ length: 34 }, () => ({
     transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 60;
   }
+  /* Лампа стоит у верхнего края, над ней логотип: подпись выходит ниже лампы */
+  .scene-obj[data-obj="lamp"] .obj-tip { top: 100%; transform: translate(calc(-50% + var(--tip-dx, 0px)), 4px); }
+  .scene-obj[data-obj="lamp"] .obj-hit:hover ~ .obj-tip,
+  .scene-obj[data-obj="lamp"].is-hovered .obj-tip,
+  .scene-obj[data-obj="lamp"].is-linked-hover .obj-tip,
+  .scene-obj[data-obj="lamp"]:focus-within .obj-tip { transform: translate(calc(-50% + var(--tip-dx, 0px)), 10px); }
+  .scene-obj[data-obj="lamp"] .obj-tip::after { bottom: auto; top: -5px; border-top: 0; border-bottom: 5px solid rgba(245, 158, 11, 0.7); }
   .obj-tip::after {
     content: '';
     position: absolute;
@@ -5085,6 +5236,276 @@ const stars = Array.from({ length: 34 }, () => ({
     .obj-hit:hover + .obj-lift, .obj-hit:focus-visible + .obj-lift { transform: none !important; }
     .scene-stage .bots-unrolled-wrapper { transition-duration: 0.01s; }
   }
+
+  /* ===== ТИПОГРАФИКА ПАНЕЛЕЙ (крупнее и читаемее): заголовки Space Grotesk, вступление Literata, текст Inter ===== */
+  .workbench-drawer { width: 620px; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+  .workbench-drawer .drawer-content { padding: 30px 36px 40px; }
+  .workbench-drawer .drawer-tag { font-size: 12.5px; letter-spacing: 0.06em; }
+  .workbench-drawer .case-badge { font-size: 11.5px; }
+  .workbench-drawer .status-live { font-size: 12.5px; }
+  .workbench-drawer .case-title { font-size: 38px; line-height: 1.12; letter-spacing: -0.015em; margin: 4px 0 4px; }
+  .workbench-drawer .case-lead { font-family: 'Literata', Georgia, serif; font-size: 19.5px; line-height: 1.62; font-weight: 500; color: #f1ece2; margin: 10px 0 0; }
+  .workbench-drawer .section-heading { font-size: 14px; letter-spacing: 0.09em; margin: 0 0 6px; }
+  .workbench-drawer .section-text,
+  .workbench-drawer .dossier-text { margin: 0; }
+  .workbench-drawer .case-section + .case-section { margin-top: 26px; }
+  .workbench-drawer .case-col-left, .workbench-drawer .case-col-right { gap: 26px; }
+  .workbench-drawer .dossier-screen-img { max-height: 360px; }
+  .workbench-drawer.is-expanded .dossier-screen-img { max-height: 540px; }
+  .workbench-drawer .section-text,
+  .workbench-drawer .dossier-text { font-size: 17.5px; line-height: 1.72; color: #e6e0d4; }
+  .workbench-drawer .facts-list li { font-size: 17px; line-height: 1.68; margin-bottom: 10px; color: #e6e0d4; }
+  .workbench-drawer .tech-spec-box { font-family: 'Inter', system-ui, sans-serif; font-size: 15.5px; }
+  .workbench-drawer .spec-row { font-size: 15.5px; line-height: 1.5; padding: 8px 0; }
+  .workbench-drawer .spec-row strong { font-weight: 600; }
+  .workbench-drawer .case-action-btn { font-size: 14px; padding: 12px 18px; letter-spacing: 0.02em; }
+  .workbench-drawer .catalog-project-name { font-size: 21px; }
+  .workbench-drawer .catalog-badge { font-size: 11.5px; }
+  .workbench-drawer .catalog-project-desc { font-size: 16px; line-height: 1.65; }
+  .workbench-drawer .catalog-block-title { font-size: 12.5px; letter-spacing: 0.08em; }
+  .workbench-drawer .catalog-block-text,
+  .workbench-drawer .catalog-features-list li { font-size: 15px; line-height: 1.62; }
+  .workbench-drawer .catalog-open-btn,
+  .workbench-drawer .catalog-link-btn { font-size: 13.5px; padding: 11px 14px; }
+  .workbench-drawer .dossier-screen-caption { font-size: 12.5px; }
+  .workbench-drawer .dossier-subheading { font-size: 12.5px; letter-spacing: 0.08em; }
+  .workbench-drawer .author-greeting { font-size: 20px; }
+  /* видео-карточки: размеры заданы в разметке, поэтому !important */
+  .workbench-drawer .video-card h3 { font-family: 'Space Grotesk', sans-serif !important; font-size: 20px !important; line-height: 1.25 !important; }
+  .workbench-drawer .video-card p { font-family: 'Inter', sans-serif !important; font-size: 15.5px !important; line-height: 1.6 !important; color: #c9c1b3 !important; }
+  .workbench-drawer .video-card .case-action-btn { font-size: 13.5px !important; }
+  /* «Как я работаю»: компактная записка, увеличиваем пропорционально */
+  #modal-manifesto:not(.is-expanded) { width: 500px; }
+  #modal-manifesto .case-title { font-size: 24px; }
+  #modal-manifesto .case-lead { font-size: 16px; line-height: 1.5; }
+  #modal-manifesto .status-live { font-size: 11.5px; }
+  #modal-manifesto .rule-card { padding: 10px 14px; }
+  #modal-manifesto .rule-num { font-size: 17px; min-width: 26px; }
+  #modal-manifesto .rule-content strong { font-size: 14.5px; }
+  #modal-manifesto .rule-content p { font-size: 14px; line-height: 1.5; }
+  @media (max-width: 860px) {
+    .workbench-drawer { width: 100vw; }
+    .workbench-drawer .drawer-content { padding: 22px 20px 36px; }
+    .workbench-drawer .case-title { font-size: 30px; }
+    .workbench-drawer .case-lead { font-size: 17.5px; }
+    .workbench-drawer .section-text,
+    .workbench-drawer .dossier-text { font-size: 16.5px; }
+    .workbench-drawer .facts-list li { font-size: 16px; }
+    #modal-manifesto:not(.is-expanded) { width: 100vw; }
+  }
+
+  /* ===== «Автор»: видеовизитка и цифры ===== */
+  .workbench-drawer .about-video { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 18px; }
+  .workbench-drawer .about-video-label { font: 700 13px 'JetBrains Mono', monospace; letter-spacing: 0.09em; color: #f97316; }
+  .workbench-drawer .about-video .case-action-btn { align-self: flex-start; }
+  .workbench-drawer .about-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 22px; }
+  .workbench-drawer .about-stat { padding: 12px 10px; border-radius: 8px; text-align: center; background: rgba(245, 158, 11, 0.07); border: 1px solid rgba(245, 158, 11, 0.28); }
+  .workbench-drawer .about-stat strong { display: block; font: 700 32px/1.05 'Space Grotesk', sans-serif; color: #fbbf24; }
+  .workbench-drawer .about-stat span { display: block; margin-top: 6px; font: 500 12.5px/1.35 'Inter', sans-serif; color: #d6cdbd; }
+  @media (max-width: 560px) { .workbench-drawer .about-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  /* ===== Приветствие на главном экране: листок, снятый со стола ===== */
+  .scene-hero { position: relative; pointer-events: auto; flex: 0 1 560px; margin: 6px auto 0; transform: rotate(-1.1deg);
+    filter: drop-shadow(0 16px 20px rgba(30, 14, 4, 0.55)) drop-shadow(0 3px 4px rgba(30, 14, 4, 0.35));
+    animation: hero-in 1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+  .scene-hero:hover { transform: rotate(-0.4deg) translateY(-3px); }
+  .scene-hero-paper { padding: 20px 26px 22px; color: #2b1b0e;
+    background:
+      radial-gradient(ellipse at 18% 12%, rgba(255, 244, 214, 0.28), transparent 55%),
+      radial-gradient(ellipse at 88% 92%, rgba(110, 70, 28, 0.28), transparent 62%),
+      repeating-linear-gradient(0deg, rgba(90, 60, 24, 0.06) 0 1px, transparent 1px 5px),
+      linear-gradient(180deg, #d5c49c 0%, #c4b187 100%);
+    clip-path: polygon(0.6% 3%, 6% 0.8%, 14% 2.4%, 23% 0.6%, 33% 2%, 44% 0.4%, 55% 2.2%, 66% 0.7%, 77% 2.1%, 88% 0.5%, 96% 2%, 99.6% 1.4%,
+      100% 22%, 99.2% 46%, 100% 71%, 99.3% 97%, 94% 99.4%, 84% 98%, 73% 99.6%, 62% 98.1%, 51% 99.7%, 40% 98.2%, 29% 99.6%, 18% 98.3%, 8% 99.5%, 0.4% 98.4%,
+      0.9% 74%, 0% 49%, 0.8% 24%); }
+  .hero-tape { position: absolute; top: -9px; width: 64px; height: 22px; z-index: 2; background: linear-gradient(180deg, rgba(205, 191, 152, 0.82), rgba(184, 168, 128, 0.74));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); opacity: 0.95; }
+  .hero-tape-l { left: 22px; transform: rotate(-7deg); }
+  .hero-tape-r { right: 24px; transform: rotate(6deg); }
+  .scene-hero-title { margin: 0 0 8px; font: 700 clamp(21px, 2.05vw, 29px)/1.18 'Literata', Georgia, serif; letter-spacing: -0.01em; color: #2a1708; }
+  .scene-hero-sub { margin: 0 0 15px; font: 500 clamp(14px, 1.1vw, 16px)/1.55 'Literata', Georgia, serif; color: #3f2c19; }
+  .scene-hero-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .hero-btn { cursor: pointer; text-decoration: none; display: inline-block; padding: 9px 15px; border-radius: 3px; font: 700 12.5px 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em; color: #3d2111; background: rgba(90, 55, 20, 0.10); border: 1.5px solid rgba(90, 50, 18, 0.5);
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; }
+  .hero-btn:hover, .hero-btn:focus-visible { transform: translateY(-2px); background: rgba(120, 70, 25, 0.16); outline: none; box-shadow: 0 5px 10px rgba(60, 30, 10, 0.3); }
+  .hero-btn-main { color: #f6ead2; background: #86371a; border-color: #6a2a12; box-shadow: 0 2px 0 #4b1c0a; }
+  .hero-btn-main:hover, .hero-btn-main:focus-visible { background: #b43c14; }
+  @keyframes hero-in { from { opacity: 0; transform: translateY(28px) rotate(-3.5deg) scale(0.96); } to { opacity: 1; transform: rotate(-1.1deg); } }
+  @media (prefers-reduced-motion: reduce) { .scene-hero { animation: none; } }
+  @media (max-width: 860px) {
+    .scene-hero { flex: none; align-self: stretch; margin: 20px 0 0; max-width: 440px; }
+    .scene-hero-paper { padding: 14px 16px 16px; }
+    .scene-hero-title { font-size: 19px; margin-bottom: 10px; }
+    .scene-hero-sub { display: none; }
+    .scene-hero-cta { gap: 8px; }
+    .hero-btn { padding: 8px 11px; font-size: 12px; }
+  }
+
+  /* ===== Размер сцены: низ всегда виден, без боковых полос ===== */
+  @media (min-width: 768px) {
+    /* сцена вписывается целиком в любое окно (запас 3% по краям), свободные поля закрывает размытая копия фона */
+    .scene-stage { top: 50%; bottom: auto; translate: -50% -50%; width: calc(min(100cqw, calc(100cqh * 1672 / 940)) * 1.03); max-width: none; }
+    .scene-clip::before { content: ""; position: absolute; inset: -4%; background: url('/scene/day.jpg') center / cover; filter: blur(16px) brightness(0.82); }
+    :global([data-theme="night"]) .scene-clip::before { background-image: url('/scene/night.jpg'); }
+  }
+  /* ===== Свитки: чуть крупнее, ряд сдвинут к лупе ===== */
+  .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal { left: 8.3%; top: 79.4%; width: 296px; height: 158px; }
+  .scene-stage .hotspot-scroll-bots.physical-scroll-bots { left: 25.2%; top: 80.3%; }
+  .scene-stage .hotspot-scroll.physical-scroll-object { left: 22.8%; top: 65.1%; }
+  /* раскрытый пергамент «Сайты» шире и выше закрытого свитка, миниатюры в два ряда по три с читаемыми подписями */
+  .scene-stage .sites-unrolled-wrapper { left: -15%; width: 130%; top: -30%; height: 138%; }
+  .scene-stage .sites-unrolled-wrapper .scroll-parchment-sheet { padding: 9px 18px; }
+  .scene-stage .sites-parchment-content { gap: 5px; }
+  .scene-stage .sites-parchment-tag { font-size: 13px; }
+  .scene-stage .sites-parchment-badge { font-size: 10px; padding: 2px 6px; }
+  .scene-stage .sites-screens-strip { flex-wrap: wrap; gap: 5px; margin: 4px 0 3px; }
+  .scene-stage .sites-screen-chip { flex: 0 0 calc(33.333% - 3.5px); border-radius: 3px; }
+  .scene-stage .sites-screen-chip .chip-label { font-size: 11px; padding: 2px 0; letter-spacing: 0.02em; }
+  .scene-stage .sites-parchment-sub { font-size: 11.5px; }
+
+  /* ===== Десктоп: меню прижато к низу колонки; листок-приветствие лежит в правом верхнем углу окна (над горами и листьями), небрежно ===== */
+  @media (min-width: 861px) {
+    .scene-frame .cabinet-menu-nav { justify-content: flex-start; }
+    .scene-frame .exch { margin-bottom: 50px; }
+    .scene-hud .scene-hero {
+      /* положение считается от размеров сцены, поэтому листок всегда лежит в одном и том же месте окна */
+      --cw: calc(100vw - var(--menu-w));
+      --ch: max(520px, calc(100svh - 42px));
+      --sw: calc(min(var(--cw), calc(var(--ch) * 1672 / 940)) * 1.03);
+      --sh: calc(var(--sw) * 940 / 1672);
+      position: absolute; right: auto; margin: 0; flex: none;
+      left: calc(var(--cw) / 2 + var(--sw) * 0.205 - 16px);
+      top: calc(var(--ch) / 2 + var(--sh) * -0.365 - 10px);
+      width: clamp(150px, calc(var(--sw) * 0.158), 236px);
+      transform: rotate(2.3deg) skewY(-1.6deg); transform-origin: 12% 0;
+      filter: drop-shadow(0 9px 10px rgba(20, 8, 2, 0.5)) drop-shadow(0 1px 2px rgba(20, 8, 2, 0.4)); }
+    .scene-hud .scene-hero:hover { transform: rotate(1deg) skewY(-0.6deg) translateY(-2px); }
+    .scene-hud .scene-hero-paper { padding: 17px 13px 12px 16px;
+      clip-path: polygon(1.5% 4%, 9% 0.4%, 17% 3.2%, 29% 0%, 41% 2.8%, 53% 0.3%, 66% 3.4%, 79% 0.2%, 90% 2.6%, 98.5% 0.8%, 99.6% 14%, 98.4% 31%, 100% 52%, 98.8% 73%, 99.8% 91%, 96% 99.6%, 86% 97.2%, 74% 99.8%, 61% 97.6%, 47% 100%, 34% 97.4%, 21% 99.6%, 9% 97.8%, 1.2% 99.3%, 0.2% 82%, 1.6% 61%, 0% 40%, 1.4% 21%); }
+    .scene-hud .scene-hero-title { font-size: clamp(14px, calc(var(--sw) * 0.0122), 18px); line-height: 1.22; margin-bottom: 10px; }
+    .scene-hud .scene-hero-sub { display: none; }
+    .scene-hud .scene-hero-cta { flex-direction: column; gap: 6px; }
+    .scene-hud .hero-btn { text-align: center; padding: 7px 5px; font-size: 11px; letter-spacing: 0.02em; border-radius: 2px; }
+    .scene-hud .hero-tape { height: 16px; width: 40px; opacity: 0.85; }
+    .scene-hud .hero-tape-l { left: -6px; top: -4px; transform: rotate(-29deg); }
+    .scene-hud .hero-tape-r { right: 9px; top: -7px; transform: rotate(11deg); width: 32px; }
+  }
+  @media (min-width: 861px) and (max-height: 640px) {
+    .scene-hud .scene-hero-cta .hero-btn:nth-child(3) { display: none; }
+  }
+
+  /* ===== «Где меня найти»: тихий блок ссылок на профили над меню ===== */
+  .exch { margin-bottom: auto; display: flex; flex-direction: column; gap: 5px; padding: 2px 0 12px; position: relative; z-index: 2; }
+  .exch-title { margin: 0 0 3px; font: 700 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; text-align: center; color: #b99a63; opacity: 0.9; }
+  .exch-item { box-sizing: border-box; display: flex; align-items: center; justify-content: center; min-height: 28px; padding: 3px 6px; text-align: center; text-decoration: none; cursor: pointer;
+    font: 600 11.5px/1.15 'Inter', system-ui, sans-serif; letter-spacing: 0.01em; color: #eadfc6;
+    background: rgba(237, 227, 210, 0.10); border: 1px solid rgba(245, 158, 11, 0.26); border-radius: 3px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
+  .exch-item { position: relative; letter-spacing: 0; }
+  @media (min-width: 861px) and (max-width: 1500px) { .exch-item { padding: 3px 3px; font-size: 11px; } }
+  .exch-item::after { content: "\2197"; position: absolute; right: 6px; top: 50%; translate: 0 -50%; font-size: 10px; opacity: 0; transition: opacity 0.2s ease; }
+  .exch-item:hover::after, .exch-item:focus-visible::after { opacity: 0.8; }
+  .exch-item:hover, .exch-item:focus-visible { background: rgba(237, 227, 210, 0.26); border-color: rgba(251, 191, 36, 0.7); color: #fff; outline: none; transform: translateY(-1px); }
+  @media (max-width: 860px) {
+    .scene-frame .exch { grid-column: 1 / -1; order: 99; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 6px 0 0; padding: 12px 0 4px; border-top: 1px dashed rgba(245, 158, 11, 0.25); }
+    .scene-frame .exch-title { flex: 0 0 100%; margin-bottom: 4px; }
+    .scene-frame .exch-item { flex: 1 1 calc(33.333% - 8px); min-height: 36px; padding: 6px 8px; }
+  }
+  @media (min-width: 861px) and (max-height: 640px) {
+    .scene-frame .cabinet-menu-nav { gap: 4px; padding-top: 10px; }
+    .scene-frame .cabinet-nav-item { height: 29px; min-height: 29px; }
+    .scene-frame .cabinet-nav-item .cabinet-nav-label { font-size: 11px; }
+  }
+  @media (min-width: 861px) and (max-height: 640px) { .scene-frame .exch { margin-bottom: 26px; } .exch { gap: 4px; padding-bottom: 8px; } .exch-item { min-height: 25px; font-size: 11px; } .exch-title { margin-bottom: 1px; } }
+
+  /* ===== Панель «Смотреть проекты» ===== */
+  .workbench-drawer .showcase-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; margin-top: 6px; }
+  .workbench-drawer.is-expanded .showcase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .showcase-card { border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; overflow: hidden;
+    background: linear-gradient(180deg, #211a14 0%, #15110e 100%); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease; }
+  .showcase-card:hover { transform: translateY(-3px); border-color: rgba(251, 191, 36, 0.6); box-shadow: 0 20px 44px rgba(0, 0, 0, 0.6), 0 0 28px rgba(245, 158, 11, 0.12); }
+  .showcase-shot { position: relative; aspect-ratio: 16 / 9; background: #0e0b09; overflow: hidden; }
+  .showcase-shot img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+  .showcase-card:hover .showcase-shot img { transform: scale(1.04); }
+  .showcase-shot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 42%; pointer-events: none; background: linear-gradient(180deg, transparent, rgba(21, 17, 14, 0.9)); }
+  .showcase-live { position: absolute; z-index: 2; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px;
+    font: 700 11.5px 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #d1fae5;
+    background: rgba(4, 36, 26, 0.86); border: 1px solid rgba(52, 211, 153, 0.6); backdrop-filter: blur(4px); }
+  .showcase-live i { width: 8px; height: 8px; border-radius: 50%; background: #34d399; animation: sc-pulse 2.2s ease-out infinite; }
+  @keyframes sc-pulse { 0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.75); } 70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
+  .showcase-kind { position: absolute; z-index: 2; right: 12px; top: 12px; padding: 5px 11px; border-radius: 4px;
+    font: 700 10.5px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: #fde68a; background: rgba(20, 14, 9, 0.82); border: 1px solid rgba(245, 158, 11, 0.45); }
+  .showcase-body { padding: 16px 20px 20px; }
+  .showcase-name { margin: 0 0 6px; font: 700 27px/1.15 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.01em; color: #fff; }
+  .showcase-tagline { margin: 0 0 12px; font: 500 17px/1.5 'Literata', Georgia, serif; color: #f1ece2; }
+  .showcase-facts { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 6px; }
+  .showcase-facts li { position: relative; padding-left: 16px; font: 400 15px/1.55 'Inter', system-ui, sans-serif; color: #d9d1c2; }
+  .showcase-facts li::before { content: ""; position: absolute; left: 2px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: #f97316; }
+  .showcase-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .showcase-play { position: absolute; z-index: 3; left: 50%; top: 46%; transform: translate(-50%, -50%); width: 68px; height: 68px; border-radius: 50%; cursor: pointer; display: grid; place-items: center;
+    background: rgba(234, 88, 12, 0.92); color: #fff; border: 2px solid rgba(255, 237, 213, 0.85); font-size: 26px; padding: 0 0 0 5px; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.55); transition: transform 0.2s ease, background 0.2s ease; }
+  .showcase-play:hover, .showcase-play:focus-visible { transform: translate(-50%, -50%) scale(1.1); background: #f97316; outline: none; }
+  .showcase-btn { display: inline-block; padding: 9px 14px; border-radius: 5px; cursor: pointer; text-decoration: none; font: 700 12.5px 'JetBrains Mono', monospace; letter-spacing: 0.03em;
+    color: #fde9c4; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(245, 158, 11, 0.5); transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease; }
+  .showcase-btn:hover, .showcase-btn:focus-visible { transform: translateY(-2px); background: rgba(255, 255, 255, 0.13); border-color: #fbbf24; outline: none; }
+  .showcase-btn.is-primary { color: #fff; background: #ea580c; border-color: #fb923c; }
+  .showcase-btn.is-primary:hover, .showcase-btn.is-primary:focus-visible { background: #f97316; }
+  .showcase-btn.is-ghost { border-style: dashed; color: #d9c9a8; }
+  @media (prefers-reduced-motion: reduce) { .showcase-live i { animation: none; } .showcase-card, .showcase-shot img { transition: none; } }
+
+  /* ===== Бирки на свитках: бумажные, как плашка ===== */
+  .sites-closed-tag, .bots-closed-tag, .scroll-closed-tag { background: none; border: 0; box-shadow: none; padding: 6px 15px 5px; bottom: -9px;
+    filter: drop-shadow(0 3px 3px rgba(20, 8, 2, 0.55)); }
+  .sites-closed-tag::before, .bots-closed-tag::before, .scroll-closed-tag::before { content: ""; position: absolute; inset: 0; z-index: -1;
+    background: radial-gradient(ellipse at 20% 15%, rgba(255, 244, 214, 0.28), transparent 60%), linear-gradient(180deg, #d9c8a0 0%, #c4b187 100%);
+    clip-path: polygon(1.5% 6%, 12% 0%, 26% 7%, 41% 0%, 57% 6%, 72% 0%, 88% 6%, 99% 1%, 100% 40%, 98% 70%, 100% 96%, 86% 100%, 70% 93%, 54% 100%, 38% 94%, 22% 100%, 8% 94%, 0% 98%, 1.5% 66%, 0% 32%); }
+  .sites-closed-tag::after, .bots-closed-tag::after, .scroll-closed-tag::after { content: ""; position: absolute; left: -7px; top: -6px; width: 22px; height: 9px; transform: rotate(-30deg);
+    background: rgba(205, 191, 152, 0.85); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
+  .sites-closed-tag span, .bots-closed-tag span, .scroll-closed-tag span { font-size: 13.5px; letter-spacing: 0.1em; font-weight: 800; color: #2a1708; position: relative; }
+  .sites-closed-tag { transform: translateX(-50%) rotate(-3.5deg); }
+  .bots-closed-tag { transform: translateX(-50%) rotate(2.5deg); }
+  .scroll-closed-tag { transform: translateX(-50%) rotate(-2deg); }
+
+  /* ===== Подъём свитков и связанных кнопок (как у предметов на столе) ===== */
+  .scene-stage .hotspot-scroll-sites, .scene-stage .hotspot-scroll-bots, .scene-stage .hotspot-scroll.physical-scroll-object {
+    transition: translate 0.32s cubic-bezier(0.16, 1, 0.3, 1), filter 0.32s ease; }
+  .scene-stage .hotspot-scroll-sites.is-linked, .scene-stage .hotspot-scroll-bots.is-linked, .scene-stage .hotspot-scroll.physical-scroll-object.is-linked {
+    translate: 0 -9px; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.5)) brightness(1.08); }
+  @media (hover: hover) {
+    .scene-stage .hotspot-scroll-sites:hover, .scene-stage .hotspot-scroll-bots:hover, .scene-stage .hotspot-scroll.physical-scroll-object:hover {
+      translate: 0 -9px; filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.5)) brightness(1.08); }
+  }
+  .hero-btn.is-linked { transform: translateY(-2px); background: rgba(90, 55, 20, 0.2); box-shadow: 0 5px 10px rgba(60, 30, 10, 0.3); }
+  .hero-btn-main.is-linked { background: #9a4220; }
+  .cabinet-nav-item.is-linked { transform: translateY(-1px); }
+
+  /* ===== Крупный просмотр: видео и скриншоты ===== */
+  .workbench-drawer .dossier-screen-preview img.dossier-screen-img { cursor: zoom-in; }
+  .workbench-drawer .dossier-screen-preview { position: relative; }
+  .workbench-drawer .dossier-screen-preview::after {
+    content: "+ УВЕЛИЧИТЬ"; position: absolute; top: 10px; right: 10px; padding: 5px 10px; border-radius: 4px;
+    font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .06em; color: #fde68a;
+    background: rgba(15,12,10,.82); border: 1px solid rgba(245,158,11,.4); pointer-events: none;
+  }
+</style>
+
+<style is:global>
+  #gk-lightbox { position: fixed; inset: 0; z-index: 400; display: none; align-items: center; justify-content: center;
+    background: rgba(8,6,5,.92); backdrop-filter: blur(6px); padding: 3vh 3vw; }
+  #gk-lightbox.is-open { display: flex; }
+  #gk-lightbox .gk-lb-stage { width: min(94vw, calc(86vh * 16 / 9)); max-height: 90vh; display: flex; flex-direction: column; gap: 12px; }
+  #gk-lightbox .gk-lb-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border: 1px solid rgba(245,158,11,.45);
+    box-shadow: 0 30px 90px rgba(0,0,0,.8), 0 0 60px rgba(245,158,11,.12); }
+  #gk-lightbox video { position: absolute; inset: 0; width: 100%; height: 100%; background: #000; }
+  #gk-lightbox iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #gk-lightbox .gk-lb-img { max-width: 94vw; max-height: 82vh; object-fit: contain; display: block; margin: 0 auto;
+    border: 1px solid rgba(245,158,11,.45); box-shadow: 0 30px 90px rgba(0,0,0,.8); background: #0f0d0b; }
+  #gk-lightbox .gk-lb-caption { color: #e6e0d4; font: 500 15px/1.5 'Inter', sans-serif; text-align: center; }
+  #gk-lightbox .gk-lb-close { position: absolute; z-index: 5; top: 14px; right: 18px; width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+    font: 400 22px/1 'Inter', sans-serif; color: #fde68a; background: rgba(28,22,17,.9); border: 1px solid rgba(245,158,11,.5); }
+  #gk-lightbox .gk-lb-close:hover, #gk-lightbox .gk-lb-close:focus-visible { background: #ea580c; color: #fff; outline: none; }
 </style>
 
 <script>
@@ -5485,4 +5906,95 @@ const stars = Array.from({ length: 34 }, () => ({
   }
 
   initSpatialWorkbench();
+</script>
+
+<script>
+  // Крупный просмотр: ролик в большом плеере (YouTube сам выбирает высокое качество) и скриншоты
+  function initLightbox() {
+    let box: HTMLElement | null = null;
+    let lastFocus: HTMLElement | null = null;
+    function ensure() {
+      if (box) return box;
+      box = document.createElement('div');
+      box.id = 'gk-lightbox';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      box.innerHTML = '<button type="button" class="gk-lb-close" aria-label="Закрыть">✕</button><div class="gk-lb-stage"></div>';
+      document.body.appendChild(box);
+      box.addEventListener('click', (e) => { const t = e.target as HTMLElement; if (t === box || t.classList.contains('gk-lb-close')) close(); });
+      return box;
+    }
+    function open(html: string) {
+      const b = ensure();
+      lastFocus = document.activeElement as HTMLElement | null;
+      (b.querySelector('.gk-lb-stage') as HTMLElement).innerHTML = html;
+      b.classList.add('is-open');
+      (b.querySelector('.gk-lb-close') as HTMLElement).focus();
+    }
+    function close() {
+      if (!box) return;
+      box.classList.remove('is-open');
+      (box.querySelector('.gk-lb-stage') as HTMLElement).innerHTML = '';
+      lastFocus?.focus?.();
+    }
+    const esc = (t: string) => t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as any)[c]);
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const sp = t.closest?.('.showcase-play') as HTMLElement | null;
+      if (sp) {
+        const src = sp.getAttribute('data-video-src') || '';
+        if (!/^\/videos\/[A-Za-z0-9._-]+\.mp4$/.test(src)) return;
+        const title = sp.getAttribute('data-video-title') || '';
+        const poster = sp.getAttribute('data-video-poster') || '';
+        open('<div class="gk-lb-frame"><video src="' + esc(src) + '" poster="' + esc(poster) + '" controls autoplay playsinline preload="auto"></video></div><div class="gk-lb-caption">' + esc(title) + '</div>');
+        return;
+      }
+      const vb = t.closest?.('.video-zoom-btn') as HTMLElement | null;
+      if (vb) {
+        const id = vb.getAttribute('data-video-id') || '';
+        if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return;
+        const title = vb.getAttribute('data-video-title') || '';
+        open('<div class="gk-lb-frame"><iframe src="https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="' + esc(title) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div><div class="gk-lb-caption">' + esc(title) + '</div>');
+        return;
+      }
+      const im = t.closest?.('.dossier-screen-preview img') as HTMLImageElement | null;
+      if (im) {
+        const cap = im.parentElement?.querySelector('.dossier-screen-caption')?.textContent?.replace(/^\s*●\s*/, '').trim() || im.alt || '';
+        open('<img class="gk-lb-img" src="' + esc(im.currentSrc || im.src) + '" alt="' + esc(im.alt) + '"><div class="gk-lb-caption">' + esc(cap) + '</div>');
+      }
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && box?.classList.contains('is-open')) { e.stopPropagation(); close(); } }, true);
+  }
+  initLightbox();
+</script>
+
+<script>
+  // Связи «кнопка ↔ предмет»: наведение на одно приподнимает другое (свитки «Сайты», «Боты», «Автор», лампа)
+  function initLinks() {
+    const stage = document.getElementById('scene-stage');
+    if (!stage) return;
+    const scrolls = Array.from(stage.querySelectorAll<HTMLElement>('.hotspot-scroll-sites, .hotspot-scroll-bots, .hotspot-scroll.physical-scroll-object'));
+    const objs = Array.from(stage.querySelectorAll<HTMLElement>('.scene-obj'));
+    const triggers = Array.from(document.querySelectorAll<HTMLElement>('[data-link-target], .cabinet-nav-item[data-target]'));
+    const idOfTrigger = (t: HTMLElement) => t.getAttribute('data-link-target') || t.getAttribute('data-target') || '';
+    const idOfObj = (o: HTMLElement) => o.querySelector('[data-scene-target]')?.getAttribute('data-scene-target') || '';
+    const on = (id: string, state: boolean) => {
+      scrolls.filter((s) => s.getAttribute('data-target') === id).forEach((s) => s.classList.toggle('is-linked', state));
+      objs.filter((o) => idOfObj(o) === id).forEach((o) => o.classList.toggle('is-linked-hover', state));
+    };
+    triggers.forEach((t) => {
+      const id = idOfTrigger(t);
+      if (!id) return;
+      ['mouseenter', 'focus'].forEach((ev) => t.addEventListener(ev, () => on(id, true)));
+      ['mouseleave', 'blur'].forEach((ev) => t.addEventListener(ev, () => on(id, false)));
+    });
+    const back = (el: HTMLElement, id: string) => {
+      const set = (state: boolean) => triggers.filter((t) => idOfTrigger(t) === id).forEach((t) => t.classList.toggle(t.classList.contains('cabinet-nav-item') ? 'is-hovered' : 'is-linked', state));
+      el.addEventListener('mouseenter', () => set(true));
+      el.addEventListener('mouseleave', () => set(false));
+    };
+    scrolls.forEach((s) => back(s, s.getAttribute('data-target') || ''));
+    objs.forEach((o) => back(o, idOfObj(o)));
+  }
+  initLinks();
 </script>

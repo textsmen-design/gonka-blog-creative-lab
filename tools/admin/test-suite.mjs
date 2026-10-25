@@ -91,13 +91,13 @@ it('projects.json содержит 5 действующих лендингов �
   assert.equal(p.trackers[0].url, 'https://tracker-01.gonka.blog/');
 });
 
-it('Плашка SRBIJA корректно перенесена в site.json и sections.json, фраза «Релокант Сербия» отсутствует', () => {
+it('Плашка SERBIA корректно перенесена в site.json и sections.json, фраза «Релокант Сербия» отсутствует', () => {
   const site = store.readJSON('site');
   const sections = store.readJSON('sections');
   assert.ok(site.desk['modal-srbija'], 'site.desk.modal-srbija должна существовать');
-  assert.equal(site.desk['modal-srbija'].tag, 'SRBIJA');
+  assert.equal(site.desk['modal-srbija'].tag, 'SERBIA');
   assert.ok(sections['modal-srbija'], 'sections.modal-srbija должна существовать');
-  assert.equal(sections['modal-srbija'].hero.title, 'SRBIJA');
+  assert.equal(sections['modal-srbija'].hero.title, 'SERBIA');
   
   const rawSite = JSON.stringify(site);
   const rawSections = JSON.stringify(sections);
@@ -216,7 +216,7 @@ await itAsync('Обратная совместимость: сохранение
   assert.ok(savedSite.desk['modal-trackers'], 'modal-trackers должен быть создан');
   assert.equal(savedSite.desk['modal-trackers'].tag, 'ТАСК-ТРЕКЕРЫ');
   assert.ok(savedSite.desk['modal-srbija'], 'modal-srbija должен быть сохранён');
-  assert.equal(savedSite.desk['modal-srbija'].tag, 'SRBIJA');
+  assert.equal(savedSite.desk['modal-srbija'].tag, 'SERBIA');
   assert.equal(savedSite.desk['modal-serbia-wip'], undefined, 'modal-serbia-wip должен быть удалён после миграции');
 });
 

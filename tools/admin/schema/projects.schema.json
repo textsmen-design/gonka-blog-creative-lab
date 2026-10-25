@@ -164,6 +164,15 @@
         "caption": {
           "$ref": "#/$defs/str"
         },
+        "promoPreview": {
+          "$ref": "#/$defs/str"
+        },
+        "promoAlt": {
+          "$ref": "#/$defs/str"
+        },
+        "promoCaption": {
+          "$ref": "#/$defs/str"
+        },
         "chipLabel": {
           "$ref": "#/$defs/str"
         },

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /archive-v1/
+
+Sitemap: https://gonka.blog/sitemap.xml

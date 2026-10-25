@@ -180,7 +180,7 @@ export function withLock(fn) {
   }
 }
 
-const BACKUP_RE = /^(site|links|media|sections)\.[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9-]+Z\.json$/;
+const BACKUP_RE = /^(site|links|media|sections|projects|scene)\.[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9-]+Z\.json$/;
 
 export function createBackup(name) {
   ensureDirs();

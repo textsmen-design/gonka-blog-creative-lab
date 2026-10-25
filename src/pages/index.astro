@@ -18,6 +18,8 @@ const description = site.meta.description;
   <meta name="description" content={description} />
   <link rel="canonical" href="https://gonka.blog/" />
   <meta name="robots" content="index, follow" />
+  <meta name="author" content="Олег" />
+  <meta name="theme-color" content="#1c1b19" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -29,6 +31,7 @@ const description = site.meta.description;
   <meta property="og:image" content="https://gonka.blog/scene/day.jpg" />
   <meta property="og:image:width" content="1672" />
   <meta property="og:image:height" content="940" />
+  <meta property="og:image:alt" content="GONKA.BLOG: рабочий стол цифровой лаборатории с проектами Олега" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -54,9 +57,49 @@ const description = site.meta.description;
         "@id": "https://gonka.blog/#author",
         "name": "Олег",
         "url": "https://gonka.blog/",
+        "jobTitle": "Разработчик Telegram-ботов, сайтов и веб-сервисов",
+        "description": "Делаю Telegram-системы, лендинги и веб-сервисы: от разбора задачи до запуска и проверки.",
+        "knowsAbout": ["Telegram-боты", "Python", "Node.js", "TypeScript", "PHP", "Astro", "Лендинги", "Веб-сервисы", "Автоматизация", "ИИ-ассистенты"],
         "sameAs": [
           "https://t.me/lonelysvobodny",
-          "https://www.youtube.com/@gnkgonkai"
+          "https://www.youtube.com/@gnkgonkai",
+          "https://www.fl.ru/users/textsmen/",
+          "https://kwork.ru/user/textsmen",
+          "https://uslugi.yandex.ru/profile/OlegB-3420530",
+          "https://marketplace.zerocoder.ru/zerocoder/22058",
+          "https://github.com/textsmen-design"
+        ]
+      },
+      {
+        "@type": "ProfessionalService",
+        "@id": "https://gonka.blog/#service",
+        "name": "GONKA.BLOG — разработка Telegram-ботов, сайтов и веб-сервисов",
+        "url": "https://gonka.blog/",
+        "provider": { "@id": "https://gonka.blog/#author" },
+        "areaServed": "RU",
+        "serviceType": [
+          "Разработка Telegram-ботов и каналов",
+          "Разработка лендингов и сайтов-визиток",
+          "Разработка веб-сервисов и трекеров задач",
+          "Видео с ИИ-ведущим"
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://gonka.blog/#projects",
+        "name": "Проекты GONKA.BLOG",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "item": { "@type": "CreativeWork", "name": "Мясная Троица: Telegram-бот, канал и чат о ценах на продукты", "url": "https://t.me/myasnaya_troitsa_bot" } },
+          { "@type": "ListItem", "position": 2, "item": { "@type": "CreativeWork", "name": "Politpersona: автоматический новостной канал в Telegram", "url": "https://t.me/politpersona" } },
+          { "@type": "ListItem", "position": 3, "item": { "@type": "CreativeWork", "name": "Детективный клуб: игровой Telegram-бот", "url": "https://t.me/AI_CH_BOT_univers_bot" } },
+          { "@type": "ListItem", "position": 4, "item": { "@type": "CreativeWork", "name": "RELOCA: платформа для переезда в Сербию", "url": "https://reloca.gonka.blog" } },
+          { "@type": "ListItem", "position": 5, "item": { "@type": "CreativeWork", "name": "English Teacher: лендинг преподавателя (демо)", "url": "https://english.gonka.blog" } },
+          { "@type": "ListItem", "position": 6, "item": { "@type": "CreativeWork", "name": "TwoHearts: лендинг вечеров знакомств (демо)", "url": "https://twohearts.gonka.blog" } },
+          { "@type": "ListItem", "position": 7, "item": { "@type": "CreativeWork", "name": "Siteviza: сайт-визитка автора (демо)", "url": "https://siteviza.gonka.blog" } },
+          { "@type": "ListItem", "position": 8, "item": { "@type": "CreativeWork", "name": "Atelier: лендинг студии пошива (демо)", "url": "https://atelier.gonka.blog" } },
+          { "@type": "ListItem", "position": 9, "item": { "@type": "CreativeWork", "name": "LandAsset5: лендинг земельного актива (демо)", "url": "https://landasset5.gonka.blog" } },
+          { "@type": "ListItem", "position": 10, "item": { "@type": "CreativeWork", "name": "Stopa: трекер задач (демо)", "url": "https://tracker-01.gonka.blog/" } },
+          { "@type": "ListItem", "position": 11, "item": { "@type": "CreativeWork", "name": "TaskFlow: учёт задач и сотрудников (демо)", "url": "https://tracker-02.gonka.blog/" } }
         ]
       }
     ]

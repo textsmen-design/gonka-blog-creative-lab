@@ -213,6 +213,25 @@ export function businessRules(name, data) {
     const integrity = checkIntegrity(data);
     errors.push(...integrity.errors);
     warnings.push(...integrity.warnings);
+    // ссылки лендингов, трекеров, ботов и видео попадают в href на сайте: тот же allowlist, что и у links.json
+    const checkLink = (at, v) => {
+      if (typeof v !== 'string' || !v) return;
+      if (DANGEROUS_RE.test(v)) errors.push({ path: at, message: 'запрещённая схема ссылки (javascript/data/vbscript/file)' });
+      else if (!LINK_RE.test(v)) errors.push({ path: at, message: 'ссылка вне allowlist (https:// | mailto: | #якорь | /путь)' });
+    };
+    for (const g of ['landings', 'trackers', 'bots']) {
+      (data[g] || []).forEach((x, i) => {
+        if (!x || typeof x !== 'object') return;
+        checkLink(`${g}[${i}].url`, x.url);
+        checkLink(`${g}[${i}].telegram`, x.telegram);
+      });
+    }
+    (data.videos || []).forEach((v, i) => {
+      const u = v && v.youtubeUrl;
+      if (typeof u === 'string' && u && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtube-nocookie\.com|youtu\.be)\//.test(u)) {
+        errors.push({ path: `videos[${i}].youtubeUrl`, message: 'нужна ссылка https:// на YouTube (youtube.com или youtu.be)' });
+      }
+    });
     (data.bots || []).forEach((b, i) => {
       const at = `bots[${i}]`;
       if (!b || typeof b !== 'object') return;
@@ -235,6 +254,10 @@ export function businessRules(name, data) {
       for (const [f, msg] of shape) errors.push({ path: `${at}.${f}`, message: msg });
       for (const key of ['botUrl']) {
         if (typeof b[key] === 'string' && b[key] && DANGEROUS_RE.test(b[key])) errors.push({ path: `${at}.${key}`, message: 'запрещённая схема ссылки' });
+      }
+      if (typeof b.promoPreview === 'string' && b.promoPreview) {
+        if (!MEDIA_PATH_RE.test(b.promoPreview)) errors.push({ path: `${at}.promoPreview`, message: 'путь вне allowlist /previews/<имя>.jpg|png|webp' });
+        else if (!fs.existsSync(path.join(p.publicDir, b.promoPreview))) errors.push({ path: `${at}.promoPreview`, message: 'файл не найден в public/' });
       }
       if (typeof b.screenPreview === 'string' && b.screenPreview) {
         if (!MEDIA_PATH_RE.test(b.screenPreview)) errors.push({ path: `${at}.screenPreview`, message: 'путь вне allowlist /previews/<имя>.jpg|png|webp' });
@@ -279,6 +302,31 @@ export function businessRules(name, data) {
     warnLong('meta.description', data.meta.description, 160);
   }
 
+  if (name === 'site' && data && data.exchanges && Array.isArray(data.exchanges.items)) {
+    data.exchanges.items.forEach((x, i) => {
+      if (x && typeof x.url === 'string' && !/^https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?(\/[^\s]*)?$/.test(x.url)) {
+        errors.push({ path: `exchanges.items[${i}].url`, message: 'ссылка на профиль должна быть https://' });
+      }
+    });
+  }
+
+  if (name === 'site' && data && data.showcase && Array.isArray(data.showcase.cards)) {
+    data.showcase.cards.forEach((c, i) => {
+      if (!c || typeof c !== 'object') return;
+      if (typeof c.image === 'string') {
+        if (!MEDIA_PATH_RE.test(c.image)) errors.push({ path: `showcase.cards[${i}].image`, message: 'путь вне allowlist /previews/<имя>.jpg|png|webp' });
+        else if (!fs.existsSync(path.join(p.publicDir, c.image))) errors.push({ path: `showcase.cards[${i}].image`, message: 'файл не найден в public/' });
+      }
+      if (c.video !== undefined) {
+        if (typeof c.video !== 'string' || !/^\/videos\/[A-Za-z0-9._-]+\.mp4$/.test(c.video)) errors.push({ path: `showcase.cards[${i}].video`, message: 'путь вне allowlist /videos/<имя>.mp4' });
+        else if (!fs.existsSync(path.join(p.publicDir, c.video))) errors.push({ path: `showcase.cards[${i}].video`, message: 'файл не найден в public/' });
+      }
+      (c.links || []).forEach((l, j) => {
+        if (l && typeof l.url === 'string' && !/^https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?(\/[^\s]*)?$/.test(l.url)) errors.push({ path: `showcase.cards[${i}].links[${j}].url`, message: 'ссылка должна быть https://' });
+      });
+    });
+  }
+
   // общие предупреждения по всем файлам
   walk(data, '', (node, at) => {
     if (typeof node === 'string') {
@@ -303,7 +351,7 @@ export function normalizeSiteData(data) {
       }
       if (!data.desk['modal-srbija']) {
         data.desk['modal-srbija'] = {
-          tag: 'SRBIJA',
+          tag: 'SERBIA',
           statement: '«Полевое исследование и личный R&D.»',
         };
       }

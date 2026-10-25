@@ -5,6 +5,74 @@
   "additionalProperties": false,
   "required": ["meta", "topbar", "footer", "desk", "nav", "scrolls", "chips"],
   "properties": {
+    "showcase": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "панель «Смотреть проекты» (необязательная)",
+      "required": ["header", "hero", "cards"],
+      "properties": {
+        "header": { "type": "object", "additionalProperties": false, "required": ["tag", "badge"],
+          "properties": { "tag": { "$ref": "#/$defs/str" }, "badge": { "$ref": "#/$defs/str" } } },
+        "hero": { "type": "object", "additionalProperties": false, "required": ["status", "title", "lead"],
+          "properties": { "status": { "$ref": "#/$defs/str" }, "title": { "$ref": "#/$defs/str" }, "lead": { "$ref": "#/$defs/str" } } },
+        "moreLabel": { "$ref": "#/$defs/str" },
+        "cards": {
+          "type": "array", "minItems": 1, "maxItems": 8,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["id", "name", "kind", "status", "image", "alt", "tagline", "facts", "links"],
+            "properties": {
+              "id": { "$ref": "#/$defs/str" }, "name": { "$ref": "#/$defs/str" }, "kind": { "$ref": "#/$defs/str" },
+              "status": { "$ref": "#/$defs/str" }, "image": { "$ref": "#/$defs/str" }, "alt": { "$ref": "#/$defs/str" },
+              "tagline": { "$ref": "#/$defs/str" },
+              "facts": { "type": "array", "minItems": 1, "maxItems": 5, "items": { "$ref": "#/$defs/str" } },
+              "links": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "type": "object", "additionalProperties": false, "required": ["label", "url"],
+                "properties": { "label": { "$ref": "#/$defs/str" }, "url": { "$ref": "#/$defs/str" } } } },
+              "dossier": { "$ref": "#/$defs/str" },
+              "video": { "$ref": "#/$defs/str" }
+            }
+          }
+        }
+      }
+    },
+    "exchanges": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "блок «Где меня найти»: ссылки на профили (необязательный)",
+      "required": ["title", "items"],
+      "properties": {
+        "title": { "$ref": "#/$defs/str" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "title", "url"],
+            "properties": {
+              "label": { "$ref": "#/$defs/str" },
+              "title": { "$ref": "#/$defs/str" },
+              "url": { "$ref": "#/$defs/str" }
+            }
+          }
+        }
+      }
+    },
+    "hero": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "карточка-приветствие на главном экране (необязательная)",
+      "required": ["title", "sub", "ctaProjects", "ctaAbout", "ctaWrite"],
+      "properties": {
+        "kicker": { "$ref": "#/$defs/str" },
+        "title": { "$ref": "#/$defs/str" },
+        "sub": { "$ref": "#/$defs/str" },
+        "ctaProjects": { "$ref": "#/$defs/str" },
+        "ctaAbout": { "$ref": "#/$defs/str" },
+        "ctaWrite": { "$ref": "#/$defs/str" }
+      }
+    },
     "meta": {
       "type": "object",
       "additionalProperties": false,
@@ -55,6 +123,7 @@
         "modal-srbija": { "$ref": "#/$defs/deskWithStatement" },
         "modal-trackers": { "$ref": "#/$defs/deskWithStatement" },
         "modal-video": { "$ref": "#/$defs/deskWithStatement" },
+        "modal-showcase": { "$ref": "#/$defs/deskWithStatement" },
         "modal-serbia-wip": {
           "type": "object",
           "properties": {

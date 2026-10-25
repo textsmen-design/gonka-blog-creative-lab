@@ -178,6 +178,8 @@ export function checkBindings({ data, component, page } = {}) {
     'media.previews.tracker01',
     'site.topbar.brandSub',
     'site.footer',
+    'site.exchanges', // список ссылок выводится циклом
+    'site.showcase', // панель «Смотреть проекты» выводится циклом
   ];
   for (const leaf of allLeaves) {
     if (migratedPrefixes.some((p) => leaf === p || leaf.startsWith(p + '.'))) continue;
