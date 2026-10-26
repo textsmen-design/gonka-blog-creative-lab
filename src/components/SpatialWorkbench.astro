@@ -742,7 +742,7 @@ const stars = Array.from({ length: 34 }, () => ({
         <div class="sites-catalog-grid">
           {P.landings.filter((l: any) => l.status === 'published').map((landing: any) => (
             <div class="catalog-project-card">
-              <div class="catalog-card-screen">
+              <div class={landing.id === 'velomed' ? "catalog-card-screen" : "catalog-card-screen catalog-card-screen--wide"}>
                 <img src={landing.screenPreview} alt={`${landing.name} — реальный первый экран`} class="catalog-screen-img" loading="lazy" />
                 <div class="catalog-screen-overlay">
                   <span class="screen-url-badge">{landing.screenBadge}</span>
@@ -4350,6 +4350,9 @@ const stars = Array.from({ length: 34 }, () => ({
     border: 1px solid rgba(245, 158, 11, 0.25);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
   }
+
+  /* Скриншоты лендингов шире 16:9: рамка под их пропорцию, чтобы края не обрезались */
+  .catalog-card-screen--wide { aspect-ratio: 1000 / 508; }
 
   .catalog-screen-img {
     width: 100%;
