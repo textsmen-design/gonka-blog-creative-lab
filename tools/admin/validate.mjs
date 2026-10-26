@@ -213,6 +213,19 @@ export function businessRules(name, data) {
     const integrity = checkIntegrity(data);
     errors.push(...integrity.errors);
     warnings.push(...integrity.warnings);
+    (Array.isArray(data.slots) ? data.slots : []).forEach((slot, si) => {
+      const gal = slot && slot.project && slot.project.gallery;
+      if (!Array.isArray(gal)) return;
+      gal.forEach((g, gi) => {
+        const at = `slots[${si}].project.gallery[${gi}].src`;
+        if (!g || typeof g.src !== 'string' || !MEDIA_PATH_RE.test(g.src)) errors.push({ path: at, message: 'путь вне allowlist /previews/<имя>.jpg|png|webp' });
+        else {
+          const abs = path.join(p.publicDir, g.src);
+          if (!fs.existsSync(abs)) errors.push({ path: at, message: 'файл не найден в public/' });
+          else if (fs.statSync(abs).size > 2 * 1024 * 1024) errors.push({ path: at, message: 'файл больше 2 МБ' });
+        }
+      });
+    });
     // ссылки лендингов, трекеров, ботов и видео попадают в href на сайте: тот же allowlist, что и у links.json
     const checkLink = (at, v) => {
       if (typeof v !== 'string' || !v) return;
@@ -267,6 +280,20 @@ export function businessRules(name, data) {
           else if (fs.statSync(abs).size > 2 * 1024 * 1024) errors.push({ path: `${at}.screenPreview`, message: 'файл больше 2 МБ' });
         }
       }
+    });
+  }
+
+  if (name === 'sections' && data && data['modal-draft'] && Array.isArray(data['modal-draft'].timeline)) {
+    data['modal-draft'].timeline.forEach((ch, ci) => {
+      (Array.isArray(ch && ch.images) ? ch.images : []).forEach((g, gi) => {
+        const at = `modal-draft.timeline[${ci}].images[${gi}].src`;
+        if (!g || typeof g.src !== 'string' || !MEDIA_PATH_RE.test(g.src)) errors.push({ path: at, message: 'путь вне allowlist /previews/<имя>.jpg|png|webp' });
+        else {
+          const abs = path.join(paths().publicDir, g.src);
+          if (!fs.existsSync(abs)) errors.push({ path: at, message: 'файл не найден в public/' });
+          else if (fs.statSync(abs).size > 2 * 1024 * 1024) errors.push({ path: at, message: 'файл больше 2 МБ' });
+        }
+      });
     });
   }
 

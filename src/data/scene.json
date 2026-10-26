@@ -52,7 +52,7 @@
     },
     {
       "id": "photo-right",
-      "label": "Фотографии",
+      "label": "Фотография",
       "target": "modal-slot-photos",
       "tipKey": "",
       "visible": true
@@ -80,14 +80,14 @@
     },
     {
       "id": "notebook",
-      "label": "Блокнот: черновик",
+      "label": "Блокнот: черновики",
       "target": "modal-draft",
       "tipKey": "modal-draft",
       "visible": true
     },
     {
       "id": "book-right",
-      "label": "Книга: не пошло",
+      "label": "Книга: под сукно",
       "target": "modal-failures",
       "tipKey": "modal-failures",
       "visible": true

@@ -158,6 +158,23 @@
         "screenPreview": {
           "$ref": "#/$defs/str"
         },
+        "statusLabel": {
+          "$ref": "#/$defs/str"
+        },
+        "gallery": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["src", "alt"],
+            "properties": {
+              "src": { "$ref": "#/$defs/str" },
+              "alt": { "$ref": "#/$defs/str" },
+              "caption": { "$ref": "#/$defs/str" }
+            }
+          }
+        },
         "screenBadge": {
           "$ref": "#/$defs/str"
         },

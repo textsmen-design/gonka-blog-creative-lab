@@ -50,3 +50,6 @@ tools/admin/screenshots/
 tools/admin/.password-hash
 tools/admin/.password-hash.tmp
 src/data/projects.backup.json
+
+# одноразовые скрипты и черновики, вынесенные из корня (26.10.2026)
+_archive/

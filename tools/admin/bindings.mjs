@@ -180,6 +180,8 @@ export function checkBindings({ data, component, page } = {}) {
     'site.footer',
     'site.exchanges', // список ссылок выводится циклом
     'site.showcase', // панель «Смотреть проекты» выводится циклом
+    'sections.modal-draft.timeline', // хроника выводится циклом
+    'sections.modal-draft.fate', // исходы черновика выводятся циклом
   ];
   for (const leaf of allLeaves) {
     if (migratedPrefixes.some((p) => leaf === p || leaf.startsWith(p + '.'))) continue;
