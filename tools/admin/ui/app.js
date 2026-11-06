@@ -8,6 +8,8 @@
     { id: 'landings', label: 'Лендинги' },
     { id: 'trackers', label: 'Трекеры' },
     { id: 'bots', label: 'Боты' }, { id: 'videos', label: 'Киноплёнка' },
+    { id: 'news', label: 'Новости — левая страница' },
+    { id: 'book-stories', label: 'Истории — правая страница' },
     { id: 'site', label: 'Сайт' },
     { id: 'links', label: 'Ссылки' },
     { id: 'media', label: 'Медиа' },
@@ -92,7 +94,7 @@
     if (msg) err.textContent = msg;
   }
 
-  const REQUIRED_API = 4;
+  const REQUIRED_API = 7;
   // Работающий процесс админки мог быть запущен на старой версии кода (интерфейс читается с диска каждый раз, а сервер живёт в памяти).
   async function checkServerVersion() {
     try {
@@ -595,6 +597,7 @@
     { k: 'accent', label: 'Цвет акцента', type: 'select', options: [['emerald', 'Зелёный'], ['purple', 'Фиолетовый'], ['blue', 'Синий'], ['amber', 'Янтарный']] }, { k: 'badge', label: 'Бейдж в каталоге' },
     { k: 'botUrl', label: 'Ссылка на бота (https://t.me/…)', req: true, full: true }, { k: 'launchTitle', label: 'Подсказка кнопки запуска', full: true },
     { k: 'screenPreview', label: 'Превью (путь /previews/имя.png|jpg|webp)', full: true }, { k: 'screenAlt', label: 'Описание превью (alt)', full: true }, { k: 'screenBadge', label: 'Подпись на превью' },
+    { k: 'promoPreview', label: 'Обложка досье и каталога (/previews/...)', full: true }, { k: 'promoAlt', label: 'Описание обложки', full: true }, { k: 'promoCaption', label: 'Подпись обложки', full: true },
     { k: 'catalogDesc', label: 'Краткое описание (каталог)', type: 'textarea', full: true },
     { k: 'catalogSections.0.title', label: 'Каталог: заголовок блока 1' }, { k: 'catalogSections.0.text', label: 'Каталог: текст блока 1', type: 'textarea', full: true },
     { k: 'catalogSections.1.title', label: 'Каталог: заголовок блока 2' }, { k: 'catalogSections.1.items', label: 'Каталог: пункты блока 2 (по строке)', type: 'lines', full: true },
@@ -638,7 +641,8 @@
       if (id) { 
         pv.src = `https://www.youtube-nocookie.com/embed/${id}`; 
         pv.style.display = 'block'; 
-        fallback.innerHTML = `<div style="text-align:center; padding: 8px; font-family: monospace; font-size: 11px; color: #a3a3a3;">Ошибка или пустой экран? <a href="${urlInput.value.replace(/"/g, '&quot;')}" target="_blank" style="color: #f59e0b; text-decoration: none;">Смотреть оригинал на YouTube ↗</a></div>`;
+        fallback.textContent = '';
+        fallback.append(el('a', { href: `https://www.youtube.com/watch?v=${id}`, target: '_blank', rel: 'noopener noreferrer' }, 'Смотреть оригинал на YouTube ↗'));
       } else { 
         pv.src = ''; 
         pv.style.display = 'none'; 
@@ -674,6 +678,12 @@
       const el = $('#video-fields').querySelector(`[data-k="${f.k}"]`);
       if (el) setDot(obj, f.k, el.value.trim());
     }
+    if (!obj.id || !obj.title || !/^https:\/\//.test(obj.youtubeUrl) || !extractYtId(obj.youtubeUrl)) {
+      clearNotices(); notice('err', 'Видео не добавлено', [{ message: 'Заполните ID и название и укажите корректную HTTPS-ссылку на ролик YouTube.' }]); return;
+    }
+    if ((state.work.projects.videos || []).some((v, i) => i !== index && v.id === obj.id)) {
+      clearNotices(); notice('err', 'Видео не добавлено', [{ message: 'Видео с таким ID уже существует.' }]); return;
+    }
     if (index < 0) {
       if (!state.work.projects.videos) state.work.projects.videos = [];
       state.work.projects.videos.unshift(obj);
@@ -703,6 +713,7 @@
       grid.append(el('div', { class: 'field' + (f.full ? ' full' : '') }, el('label', {}, f.label + (f.req ? ' *' : '')), input));
     }
     addUploadButton($('#bot-fields [data-k="screenPreview"]'));
+    addUploadButton($('#bot-fields [data-k="promoPreview"]'));
     $('#bot-modal').hidden = false;
   }
 
@@ -1223,7 +1234,7 @@
   }
 
   async function doExport() {
-    const res = await fetch('/api/export', { headers: {} });
+    const res = await fetch('/api/export', { headers: { 'X-Admin-Token': state.token } });
     if (res.status !== 200) { notice('err', 'Экспорт не выполнен', [{ message: 'ошибка ' + res.status }]); return; }
     const blob = await res.blob();
     const m = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') || '');
@@ -1274,6 +1285,7 @@
   };
 
   function renderValue(key, value, path, container, file) {
+    if (file === 'site' && path.join('.') === 'hero.ctaAbout') return; // кнопка удалена, поле оставлено для совместимости экспорта
     if (typeof value === 'string') {
       let fieldLabel = key;
       if (file === 'site' && path.length === 2 && path[0] === 'desk') {
@@ -1333,6 +1345,62 @@
     const host = $('#editor');
     host.textContent = '';
     const file = state.tab;
+    if (file === 'book-stories' && !state.rawMode) {
+      const stories = state.work[file].items;
+      const card = el('div', { class: 'file-card' }, el('h2', {}, 'Истории книги — раздел «Заметки»'), el('p', { class: 'muted' }, 'Редактируйте истории, которые перелистываются в книге. После сохранения черновика нажмите «Опубликовать». Каждый абзац отделяйте пустой строкой.'));
+      card.append(el('button', { type: 'button', onclick: () => { stories.push({ title: '', paragraphs: [''], moral: '' }); markDirty(file); render(); } }, '+ Добавить историю'));
+      stories.forEach((story, index) => {
+        const box = el('div', { class: 'obj' }, el('div', { class: 'obj-key' }, `История ${index + 1}`));
+        for (const [key, label, rows] of [['title', 'Заголовок', 0], ['paragraphs', 'Текст истории', 8], ['moral', 'Мораль', 3]]) {
+          const input = rows ? el('textarea', { rows: String(rows) }) : el('input', { type: 'text' });
+          input.value = key === 'paragraphs' ? story.paragraphs.join('\n\n') : story[key];
+          input.addEventListener('input', () => { story[key] = key === 'paragraphs' ? input.value.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean) : input.value; markDirty(file); });
+          box.append(el('div', { class: 'field full' }, el('label', {}, label), input));
+        }
+        box.append(el('button', { type: 'button', class: 'ghost', onclick: () => { if (stories.length <= 1) { alert('Оставьте хотя бы одну историю.'); return; } if (confirm('Удалить эту историю?')) { stories.splice(index, 1); markDirty(file); render(); } } }, 'Удалить историю'));
+        card.append(box);
+      });
+      host.append(card); return;
+    }
+    if (file === 'news' && !state.rawMode) {
+      const card = el('div', { class: 'file-card' }, el('h2', {}, 'Новости лаборатории — левая страница книги'), el('p', { class: 'muted' }, 'Добавьте новость, выберите «NewGonkaLab — левая страница», укажите дату и отметьте «Опубликовать запись». Затем сохраните черновик и нажмите общую кнопку «Опубликовать».'));
+      card.append(el('button', { type: 'button', onclick: () => {
+        state.work.news.items.unshift({ section: 'lab', title: '', summary: '', date: new Date().toLocaleDateString('en-CA'), published: false, url: '' });
+        markDirty('news'); render();
+      } }, '+ Добавить запись'));
+      state.work.news.items.forEach((item, index) => {
+        const box = el('div', { class: 'obj' }, el('div', { class: 'obj-key' }, `Запись ${index + 1}`));
+        const select = el('select');
+        for (const [value, label] of [['lab', 'NewGonkaLab — левая страница'], ['notes', 'Заметки — правая страница']]) { const option = el('option', { value }, label); option.selected = item.section === value; select.append(option); }
+        select.addEventListener('change', () => { item.section = select.value; markDirty('news'); });
+        box.append(el('div', { class: 'field' }, el('label', {}, 'Раздел'), select));
+        for (const [key, label, type] of [['title', 'Название', 'text'], ['summary', 'Текст записи', 'textarea'], ['date', 'Дата', 'date'], ['url', 'Ссылка на материал HTTPS (необязательно)', 'url'], ['videoUrl', 'Ссылка на видео HTTPS (необязательно)', 'url']]) {
+          const input = type === 'textarea' ? el('textarea', { rows: '4' }) : el('input', { type });
+          input.value = item[key] || ''; input.addEventListener('input', () => { item[key] = input.value; markDirty('news'); });
+          box.append(el('div', { class: 'field' }, el('label', {}, label), input));
+        }
+        const fileInfo = el('span', { class: 'muted' }, item.attachment ? `Прикреплено: ${item.attachment.split('/').pop()}` : 'Файл не выбран');
+        const picker = el('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,video/mp4,video/webm,application/pdf' });
+        picker.addEventListener('change', async () => {
+          const selected = picker.files[0]; if (!selected) return;
+          if (selected.size > 25 * 1024 * 1024) { alert('Файл больше 25 МБ.'); return; }
+          picker.disabled = true; fileInfo.textContent = 'Загрузка файла…';
+          try {
+            const result = await fetch('/api/news-upload', { method: 'POST', headers: { 'Content-Type': selected.type || 'application/octet-stream' }, body: selected });
+            const json = await result.json(); if (!result.ok) throw new Error(json.error || `Ошибка ${result.status}`);
+            item.attachment = json.path; markDirty('news'); fileInfo.textContent = `Прикреплено: ${selected.name}`;
+          } catch (err) { fileInfo.textContent = item.attachment ? `Прикреплено: ${item.attachment.split('/').pop()}` : 'Файл не выбран'; alert('Не удалось загрузить файл: ' + err.message); }
+          finally { picker.disabled = false; picker.value = ''; }
+        });
+        const remove = el('button', { type: 'button', class: 'ghost', onclick: () => { item.attachment = ''; fileInfo.textContent = 'Файл не выбран'; markDirty('news'); } }, 'Убрать вложение');
+        box.append(el('div', { class: 'field full' }, el('label', {}, 'Фото, видео или PDF (один файл; видео и PDF до 25 МБ, фото до 2 МБ)'), picker, fileInfo, remove));
+        const published = el('input', { type: 'checkbox' }); published.checked = item.published;
+        published.addEventListener('change', () => { item.published = published.checked; markDirty('news'); });
+        box.append(el('label', {}, published, ' Опубликовать запись'), el('button', { type: 'button', class: 'ghost', onclick: () => { if (confirm('Удалить эту запись?')) { state.work.news.items.splice(index, 1); markDirty('news'); render(); } } }, 'Удалить запись'));
+        card.append(box);
+      });
+      host.append(card); return;
+    }
     const card = el('div', { class: 'file-card' },
       el('h2', {}, `${file}.json`));
 

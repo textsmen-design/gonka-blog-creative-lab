@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(HERE, '..', '..');
 
-export const FILE_NAMES = ['site', 'links', 'media', 'sections', 'projects', 'scene'];
+export const FILE_NAMES = ['site', 'links', 'media', 'sections', 'projects', 'scene', 'news', 'book-stories'];
 const LOCK_STALE_MS = 30_000;
 const BACKUP_MAX_COUNT = 100;
 const BACKUP_MAX_AGE_MS = 30 * 24 * 3600 * 1000;

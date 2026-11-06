@@ -15,7 +15,7 @@ const execFileAsync = promisify(execFile);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..');
 const NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
-const DATA_FILES = ['site', 'links', 'media', 'sections', 'projects'].map((n) => `src/data/${n}.json`);
+const DATA_FILES = ['site', 'links', 'media', 'sections', 'projects', 'scene', 'news', 'book-stories'].map((n) => `src/data/${n}.json`);
 
 export function config() {
   const releasesDir = process.env.ADMIN_RELEASES_DIR ? path.resolve(process.env.ADMIN_RELEASES_DIR) : null;

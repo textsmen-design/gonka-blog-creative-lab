@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { paths } from './store.mjs';
 import { checkIntegrity } from './lib/project-ops.mjs';
+import { objects as sceneObjects } from '../../src/scene/objects.mjs';
 
 const LINK_RE =
   /^(https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?(\/[^\s]*)?|mailto:[^\s@]+@[^\s@]+\.[A-Za-z]{2,}|#[A-Za-z0-9_-]+|\/[^\s]*)$/;
@@ -159,6 +160,16 @@ export function businessRules(name, data) {
   const warnings = [];
   const p = paths();
 
+  if (name === 'news' && Array.isArray(data?.items)) {
+    data.items.forEach((item, i) => {
+      if (!item || typeof item !== 'object') return;
+      if (typeof item.date === 'string' && (!/^\d{4}-\d{2}-\d{2}$/.test(item.date) || !Number.isFinite(Date.parse(item.date + 'T00:00:00Z')) || new Date(item.date + 'T00:00:00Z').toISOString().slice(0, 10) !== item.date)) errors.push({ path: `items[${i}].date`, message: 'укажите существующую дату в формате ГГГГ-ММ-ДД' });
+      if (item.url && (typeof item.url !== 'string' || !/^https:\/\//.test(item.url) || !LINK_RE.test(item.url))) errors.push({ path: `items[${i}].url`, message: 'нужна ссылка https:// или пустое поле' });
+      if (item.videoUrl && (typeof item.videoUrl !== 'string' || !/^https:\/\//.test(item.videoUrl) || !LINK_RE.test(item.videoUrl))) errors.push({ path: `items[${i}].videoUrl`, message: 'нужна ссылка https:// или пустое поле' });
+      if (item.attachment && (typeof item.attachment !== 'string' || !/^\/news-media\/[a-z0-9][a-z0-9._-]*\.(png|jpg|webp|mp4|webm|pdf)$/.test(item.attachment) || !fs.existsSync(path.join(p.publicDir, item.attachment)))) errors.push({ path: `items[${i}].attachment`, message: 'выберите загруженный файл новости' });
+    });
+  }
+
   const warnLong = (at, s, limit) => {
     if (typeof s === 'string' && s.length > limit) {
       warnings.push({ path: at, message: `длинная строка: ${s.length} симв. (рекомендуется ≤ ${limit})` });
@@ -241,9 +252,9 @@ export function businessRules(name, data) {
     }
     (data.videos || []).forEach((v, i) => {
       const u = v && v.youtubeUrl;
-      if (typeof u === 'string' && u && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtube-nocookie\.com|youtu\.be)\//.test(u)) {
-        errors.push({ path: `videos[${i}].youtubeUrl`, message: 'нужна ссылка https:// на YouTube (youtube.com или youtu.be)' });
-      }
+      let valid = false;
+      try { const link = new URL(u); const host = link.hostname.replace(/^(www|m)\./, ''); const id = host === 'youtu.be' ? link.pathname.split('/')[1] : ['youtube.com', 'youtube-nocookie.com'].includes(host) ? (link.pathname.match(/^\/(?:shorts|live|embed)\/([^/]+)/)?.[1] || link.searchParams.get('v')) : ''; valid = link.protocol === 'https:' && /^[A-Za-z0-9_-]{11}$/.test(id || ''); } catch { /* некорректный URL */ }
+      if (!valid) errors.push({ path: `videos[${i}].youtubeUrl`, message: 'нужна ссылка https:// на ролик YouTube с корректным ID' });
     });
     (data.bots || []).forEach((b, i) => {
       const at = `bots[${i}]`;
@@ -301,6 +312,7 @@ export function businessRules(name, data) {
     const seen = new Set();
     data.items.forEach((it, i) => {
       if (it && seen.has(it.id)) errors.push({ path: `items[${i}].id`, message: `повторяющийся предмет «${it.id}»` });
+      if (it?.visible && !sceneObjects.some((object) => object.id === it.id)) errors.push({ path: `items[${i}].visible`, message: 'этот предмет пока не подготовлен для текущей сцены' });
       if (it) seen.add(it.id);
     });
   }

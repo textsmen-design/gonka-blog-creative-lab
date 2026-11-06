@@ -152,7 +152,7 @@ export function checkBindings({ data, component, page } = {}) {
   // неиспользуемые листья (для статически связанных файлов)
   const allLeaves = new Set();
   for (const name of FILE_NAMES) {
-    if (name === 'projects' || name === 'scene') continue; // projects/scene рендерятся в коде (циклы и сцена), поля проверяются схемой
+    if (name === 'projects' || name === 'scene' || name === 'news' || name === 'book-stories') continue; // динамические данные проверяются схемой
     markLeaves(d0[name], [name], allLeaves);
   }
   const migratedPrefixes = [
@@ -178,6 +178,8 @@ export function checkBindings({ data, component, page } = {}) {
     'media.previews.tracker01',
     'site.topbar.brandSub',
     'site.footer',
+    'site.hero.ctaAbout', // прежняя кнопка удалена, поле сохранено для совместимости старых экспортов
+    'sections.modal-video.blocks.1.specs', // строки параметров выводятся циклом
     'site.exchanges', // список ссылок выводится циклом
     'site.showcase', // панель «Смотреть проекты» выводится циклом
     'sections.modal-draft.timeline', // хроника выводится циклом

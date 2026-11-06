@@ -850,6 +850,9 @@
       "screenBadge": "@myasnaya_troitsa_bot",
       "screenPreview": "/previews/preview-myasnaya-troitsa.jpg",
       "screenAlt": "Мясная Троица — Telegram-бот",
+      "promoPreview": "/previews/showcase-myaso.jpg",
+      "promoAlt": "Мясная Троица: герои проекта — курица, свинья и корова",
+      "promoCaption": "МЯСНАЯ ТРОИЦА // БОТ, КАНАЛ И ЧАТ",
       "catalogDesc": "Telegram-бот про цены на продукты: три героя отвечают на вопросы, цифры только из открытых данных, у каждой есть источник и период.",
       "catalogSections": [
         {
@@ -941,6 +944,9 @@
       "screenBadge": "@AI_CH_BOT_univers_bot",
       "screenPreview": "/previews/preview-bot-detective.jpg",
       "screenAlt": "Детективный клуб — интерактивные детективные истории в Telegram",
+      "promoPreview": "/previews/showcase-detective.jpg",
+      "promoAlt": "Детективный клуб: расследование и улики",
+      "promoCaption": "ДЕТЕКТИВНЫЙ КЛУБ // ИГРОВОЙ TELEGRAM-БОТ",
       "catalogDesc": "Игровой Telegram-бот: выберите дело, осмотрите место, изучите улики, допросите подозреваемых и назовите виновного.",
       "catalogSections": [
         {
@@ -1106,12 +1112,20 @@
         }
       ],
       "caption": "Реальный ответ бота ПолитНовости: блоки «Мир» и «Россия», у каждой новости источник // @ru_politics_news_bot",
-      "promoPreview": "/previews/promo-politpersona.jpg",
-      "promoAlt": "Рекламный постер Politpersona: канал, чат и бот, ежедневный дайджест 13+13 в 09:00 МСК",
-      "promoCaption": "РЕКЛАМНЫЙ ПОСТЕР // КАНАЛ, ЧАТ И БОТ POLITPERSONA"
+      "promoPreview": "/previews/showcase-politpersona.jpg",
+      "promoAlt": "Politpersona: обложка новостного проекта",
+      "promoCaption": "POLITPERSONA // КАНАЛ, ЧАТ И БОТ"
     }
   ],
   "videos": [
+    {
+      "type": "video",
+      "id": "video-4041",
+      "title": "Скандалы Open AI, будущее Claude Code, появление человека-гибрида|Основатель Zerocoder",
+      "youtubeUrl": "https://www.youtube.com/watch?v=f6OoOKStdl4",
+      "desc": "16 окт. 2026 г.\nКак построить крупнейший IT-бизнес в России? Чему учат в Zerocoder? Что такое концепция no-code? Зачем создан венчурный фонд для ИИ-бизнесов? И как будет эволюционировать использование AI?\n\nВ новом выпуске обсуждаем, что ждет человека в эпоху ИИ-революции и почему выжить сможет только человек-гибрид.\n\nГость Екатерины Лапшиной - Кирилл Пшинник, российский предприниматель, генеральный директор и сооснователь компании Zerocoder.",
+      "status": "published"
+    },
     {
       "type": "video",
       "id": "profile-oleg",
@@ -1164,9 +1178,9 @@
       "type": "video",
       "id": "promo-detective",
       "title": "Детективный клуб — истории с уликами и допросами в Telegram",
-      "youtubeUrl": "https://youtu.be/_DjBJpfODw8",
+      "youtubeUrl": "https://youtu.be/tQD3M2tr0lM?si=btgn1EWETTGP49qI",
       "desc": "Осмотри место, собери улики, допроси подозреваемых и назови виновного. Ролик сгенерирован нейросетью.",
-      "status": "hidden"
+      "status": "published"
     },
     {
       "type": "video",

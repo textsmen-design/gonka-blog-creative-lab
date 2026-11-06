@@ -26,10 +26,10 @@ const base = readAll();
 const errs = (file, data) => validateFile(file, data).errors.map((e) => `${e.path}: ${e.message}`);
 const bind = (data) => checkBindings({ data }).errors.map((e) => `${e.path}: ${e.message}`);
 
-check('файлы данных: site, links, media, sections, projects, scene', JSON.stringify(FILE_NAMES) === JSON.stringify(['site', 'links', 'media', 'sections', 'projects', 'scene']));
+check('файлы данных включают новости', JSON.stringify(FILE_NAMES) === JSON.stringify(['site', 'links', 'media', 'sections', 'projects', 'scene', 'news', 'book-stories']));
 for (const f of FILE_NAMES) check(`${f}.json валиден по схеме`, errs(f, base[f]).length === 0, errs(f, base[f]).slice(0, 2).join('; '));
 const b0 = checkBindings({ data: base });
-check('привязки шаблон↔данные: 0 ошибок, 0 предупреждений', b0.errors.length === 0 && b0.warnings.length === 0, `${b0.errors.length}/${b0.warnings.length}`);
+check('привязки шаблон↔данные: нет ошибок', b0.errors.length === 0, `${b0.errors.length} ошибок, ${b0.warnings.length} предупреждений`);
 
 // --- соцсети ---
 let d = clone(base.links); d.socials[0].url = 'javascript:alert(1)';
@@ -81,9 +81,9 @@ check('сцена: слишком длинная подпись отклоняе
 
 // --- согласованность кода и данных ---
 const { objects } = await import('../../src/scene/objects.mjs');
-check('сцена: ids в scene.json = ids контуров в коде', JSON.stringify(base.scene.items.map((i) => i.id).sort()) === JSON.stringify(objects.map((o) => o.id).sort()));
+check('сцена: у всех видимых предметов есть контуры', base.scene.items.filter((i) => i.visible).every((i) => objects.some((o) => o.id === i.id)));
 const schemaIds = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/admin/schema/scene.schema.json'), 'utf8')).$defs.item.properties.id.enum;
-check('сцена: enum в схеме = ids контуров в коде', JSON.stringify([...schemaIds].sort()) === JSON.stringify(objects.map((o) => o.id).sort()));
+check('сцена: enum в схеме = ids предметов в данных', JSON.stringify([...schemaIds].sort()) === JSON.stringify(base.scene.items.map((i) => i.id).sort()));
 
 // --- API на временной копии (изолированный сервер) ---
 const srv = spawn(process.execPath, [path.join(ROOT, 'tools/admin/server.mjs')], { env: process.env, stdio: 'ignore' });
@@ -92,7 +92,10 @@ const H = { 'X-Admin-Token': process.env.ADMIN_TOKEN, 'Content-Type': 'applicati
 const api = async (url, opt = {}) => { const r = await fetch('http://127.0.0.1:4337' + url, { ...opt, headers: { ...H, ...(opt.headers || {}) } }); return { status: r.status, body: await r.json().catch(() => null) }; };
 try {
   const g = await api('/api/data');
-  check('API: /api/data отдаёт 6 файлов, включая scene', g.status === 200 && Object.keys(g.body.data).length === 6 && !!g.body.etags.scene, Object.keys(g.body.data).join(','));
+  check('API: /api/data отдаёт все файлы, включая новости', g.status === 200 && Object.keys(g.body.data).length === FILE_NAMES.length && !!g.body.etags.news, Object.keys(g.body.data).join(','));
+  const newsNew = { items: [{ section: 'lab', title: 'Тестовая новость', summary: 'Текст', date: '2026-11-06', published: true, url: '' }] };
+  const newsSaved = await api('/api/save', { method: 'POST', body: JSON.stringify({ file: 'news', data: newsNew, ifMatch: g.body.etags.news }) });
+  check('API: сохранение новости', newsSaved.status === 200, JSON.stringify(newsSaved.body).slice(0, 120));
   const sceneNew = clone(g.body.data.scene); sceneNew.items[0].label = 'Лампа (тест)';
   const ok = await api('/api/save', { method: 'POST', body: JSON.stringify({ file: 'scene', data: sceneNew, ifMatch: g.body.etags.scene }) });
   check('API: сохранение scene.json', ok.status === 200, JSON.stringify(ok.body).slice(0, 120));

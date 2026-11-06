@@ -6,6 +6,12 @@ import media from '../data/media.json';
 import sections from '../data/sections.json';
 import projects from '../data/projects.json';
 import scene from '../data/scene.json';
+import news from '../data/news.json';
+import bookStoryData from '../data/book-stories.json';
+const bookStories = bookStoryData.items;
+const visibleBookEntries = (news.items as any[]).filter((item: any) => item.published && item.date && item.date <= new Date().toISOString().slice(0, 10)).sort((a: any, b: any) => b.date.localeCompare(a.date));
+const labEntries = visibleBookEntries.filter((item: any) => item.section === 'lab');
+const noteEntries = visibleBookEntries.filter((item: any) => item.section === 'notes');
 import { objects as sceneObjects, geometry as sceneGeometry } from '../scene/objects.mjs';
 
 const S = sections;
@@ -78,7 +84,7 @@ const sceneItems = scene.items
     const slotId = typeof cfg.target === 'string' && cfg.target.startsWith('modal-slot-') ? cfg.target.slice('modal-slot-'.length) : null;
     const slot = slotId ? slotById[slotId] : null;
     const published = !!(slot?.assigned && slot?.project?.status === 'published');
-    const desk = cfg.tipKey ? deskTips[cfg.tipKey] : null;
+    const desk = cfg.id === 'lamp' ? { tag: 'В РАЗРАБОТКЕ', statement: 'Идеи, над которыми я работаю' } : (cfg.tipKey ? deskTips[cfg.tipKey] : null);
     return {
       ...geo,
       target: cfg.target,
@@ -149,8 +155,8 @@ const stars = Array.from({ length: 34 }, () => ({
       <div class="scene-clip">
         <div id="scene-stage" class="scene-stage">
 
-          <img src="/scene/day.jpg" alt="GONKA.BLOG: деревянный рабочий стол у окна с видом на залив" class="scene-bg scene-bg-day" width="1672" height="940" decoding="async" fetchpriority="high" />
-          <img src="/scene/night.jpg" alt="" aria-hidden="true" class="scene-bg scene-bg-night" width="1672" height="940" decoding="async" />
+          <img src="/scene/cabinet-ink-right.png" alt="GONKA.BLOG: деревянный рабочий стол у окна с видом на залив" class="scene-bg scene-bg-day" width="1672" height="940" decoding="async" fetchpriority="high" />
+          <img src="/scene/cabinet-ink-right.png" alt="" aria-hidden="true" class="scene-bg scene-bg-night" width="1672" height="940" decoding="async" />
 
           <!-- Свет сцены: солнце днём, луна и лампа ночью -->
           <div class="scene-fx scene-fx-sun" aria-hidden="true"></div>
@@ -166,13 +172,19 @@ const stars = Array.from({ length: 34 }, () => ({
           {sceneItems.map((it: any) => (
             <div class={`scene-obj kind-${it.kind}`} data-obj={it.id}
               style={`left:${it.g.left}%;top:${it.g.top}%;width:${it.g.width}%;height:${it.g.height}%;z-index:${it.z};--tilt:${it.tilt}deg`}>
-              <button type="button" class="obj-hit" data-scene-target={it.target} aria-label={it.aria}
+              <button type="button" class="obj-hit" data-scene-target={it.target} aria-label={it.id === 'notebook' ? 'Большая книга: открыть NewGonkaLab' : it.aria}
                 style={`clip-path:${it.g.poly}`}></button>
               <div class="obj-lift" aria-hidden="true">
                 <div class="obj-art" style={`clip-path:${it.g.poly};background-size:${it.g.bgSize};background-position:${it.g.bgPos}`}></div>
               </div>
               {it.tip && (
                 <span class="obj-tip" aria-hidden="true"><b>{it.tip}</b>{it.sub && <i>{it.sub}</i>}</span>
+              )}
+              {it.id === 'notebook' && (
+                <div class="book-menu" aria-label="Разделы большой книги">
+                  <div class="book-menu-page"><span>ЗАПИСИ ЛАБОРАТОРИИ</span><button type="button" data-open-drawer="modal-news">NewGonkaLab <small>Новости лаборатории →</small></button></div>
+                  <div class="book-menu-page"><span>СТРАНИЦЫ КНИГИ</span><button type="button" data-open-drawer="modal-book-notes">Заметки <small>Истории из мира разработки →</small></button></div>
+                </div>
               )}
             </div>
           ))}
@@ -315,6 +327,21 @@ const stars = Array.from({ length: 34 }, () => ({
       </button>
 
 
+          <section class="dossier-shelf" aria-label="Избранные проекты">
+            <h2>ДОСЬЕ ПРОЕКТОВ</h2>
+            <div class="dossier-cards">
+              {P.bots.filter((project: any) => project.status === 'published').slice(0, 3).map((project: any, i: number) => (
+                <button type="button" class="dossier-card" data-open-drawer={project.drawerId} aria-label={`${project.name}: открыть досье`}>
+                  <img src={project.promoPreview || project.screenPreview} alt="" loading="lazy" />
+                  <span class="dossier-card-copy"><small>ДЕЛО № 0{i + 1}</small><strong>{project.name}</strong><em>{project.badge}</em><span>Открыть досье →</span></span>
+                </button>
+              ))}
+              <button type="button" class="dossier-card" data-open-drawer="modal-srbija" aria-label="RELOCA: открыть досье">
+                <img src="/previews/showcase-reloca.jpg" alt="" loading="lazy" />
+                <span class="dossier-card-copy"><small>ДЕЛО № 04</small><strong>RELOCA · Сербия</strong><em>ВЕБ-ПЛАТФОРМА</em><span>Открыть досье →</span></span>
+              </button>
+            </div>
+          </section>
         </div>
       </div>
 
@@ -336,7 +363,6 @@ const stars = Array.from({ length: 34 }, () => ({
               <p class="scene-hero-sub">{site.hero.sub}</p>
               <div class="scene-hero-cta">
                 <button type="button" class="hero-btn hero-btn-main" data-open-drawer="modal-showcase" data-link-target="modal-showcase">{site.hero.ctaProjects}</button>
-                <button type="button" class="hero-btn" data-open-drawer="modal-about" data-link-target="modal-about">{site.hero.ctaAbout}</button>
                 <a class="hero-btn" href={L.telegram} target="_blank" rel="noopener noreferrer">{site.hero.ctaWrite} ↗</a>
               </div>
             </div>
@@ -420,6 +446,38 @@ const stars = Array.from({ length: 34 }, () => ({
   </main>
 
   <!-- ВЫДВИЖНЫЕ ПРАВЫЕ ПАНЕЛИ (КРАТКИЕ ФАКТЫ, БЕЗ ВОДЫ И МАРКЕТИНГА) -->
+
+  <aside id="modal-building" class="workbench-drawer" aria-label="В разработке">
+    <div class="drawer-content">
+      <div class="drawer-header"><div class="drawer-header-left"><span class="drawer-tag text-orange">МАСТЕРСКАЯ ИДЕЙ</span></div><div class="drawer-header-actions"><button class="close-drawer-btn" type="button">✕ ПОЛОЖИТЬ НА СТОЛ</button></div></div>
+      <div class="case-body"><div class="case-hero-strip"><div class="status-live">В РАБОТЕ</div><h2 class="case-title">В разработке</h2><p class="case-lead">Здесь появятся проекты и идеи, над которыми я работаю сейчас.</p></div></div>
+    </div>
+  </aside>
+  <aside id="modal-news" class="workbench-drawer" aria-label="Новость дня">
+    <div class="drawer-content">
+      <div class="drawer-header"><div class="drawer-header-left"><span class="drawer-tag text-orange">БОЛЬШАЯ КНИГА</span></div><div class="drawer-header-actions"><button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак"><span class="expand-icon">⛶</span><span class="expand-label">НА ВЕСЬ СТОЛ</span></button><button class="close-drawer-btn" type="button">✕ ПОЛОЖИТЬ НА СТОЛ</button></div></div>
+      <div class="case-body"><div class="case-hero-strip"><div class="status-live">НОВОСТЬ ДНЯ</div>
+        <h2 class="case-title">NewGonkaLab</h2>{labEntries.length ? labEntries.map((item: any) => <article class="case-section"><h3 class="section-heading">{item.title}</h3><p class="section-text">{item.summary}</p><p class="section-text">{item.date}</p>{item.videoUrl && (getYouTubeId(item.videoUrl) ? <div class="news-video"><iframe src={`https://www.youtube-nocookie.com/embed/${getYouTubeId(item.videoUrl)}`} title={`Видео: ${item.title}`} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div> : <p><a class="case-action-btn btn-secondary" href={item.videoUrl} target="_blank" rel="noopener noreferrer">Смотреть видео ↗</a></p>)}{item.attachment && (/\.(png|jpg|webp)$/.test(item.attachment) ? <img class="news-attachment" src={item.attachment} alt={item.title} loading="lazy" /> : /\.(mp4|webm)$/.test(item.attachment) ? <video class="news-attachment" src={item.attachment} controls preload="metadata"></video> : <p><a class="case-action-btn btn-secondary" href={item.attachment} target="_blank" rel="noopener noreferrer">Открыть PDF ↗</a></p>)}{item.url && <a class="case-action-btn btn-primary" href={item.url} target="_blank" rel="noopener noreferrer">Читать подробнее ↗</a>}</article>) : <p class="case-lead">Здесь появится актуальная запись из лаборатории.</p>}
+      </div></div>
+    </div>
+  </aside>
+  <aside id="modal-book-notes" class="workbench-drawer" aria-label="Заметки лаборатории">
+    <div class="drawer-content">
+      <div class="drawer-header"><span class="drawer-tag">[ КНИГА // ЗАМЕТКИ ]</span><div class="drawer-header-actions"><button class="expand-drawer-btn" type="button" title="Развернуть на весь верстак"><span class="expand-icon">⛶</span><span class="expand-label">НА ВЕСЬ СТОЛ</span></button><button class="close-drawer-btn" type="button">✕ ПОЛОЖИТЬ НА СТОЛ</button></div></div>
+      <div class="case-body"><div class="case-hero-strip"><div class="status-live">ЗАПИСИ ЛАБОРАТОРИИ</div><h2 class="case-title">Заметки</h2>
+        <div class="book-stories" data-book-stories aria-label="Истории из мира разработки">
+          <div class="book-stories-top"><span>ИСТОРИИ ИЗ МИРА РАЗРАБОТКИ</span><span data-story-count>01 / {String(bookStories.length).padStart(2, '0')}</span></div>
+          {bookStories.map((story, index) => <article class="book-story" data-story hidden={index !== 0}>
+            <h3>{story.title}</h3>{story.paragraphs.map((paragraph) => <p>{paragraph}</p>)}<p class="book-story-moral"><strong>Мораль:</strong> {story.moral}</p>
+          </article>)}
+          <div class="book-story-controls"><button type="button" data-story-prev aria-label="Предыдущая история">← Назад</button><button type="button" data-story-pause aria-pressed="false">Пауза</button><button type="button" data-story-next aria-label="Следующая история">Далее →</button></div>
+        </div>
+        {noteEntries.map((item: any) => <article class="case-section"><h3 class="section-heading">{item.title}</h3><p class="section-text">{item.summary}</p><p class="section-text">{item.date}</p>{item.videoUrl && (getYouTubeId(item.videoUrl) ? <div class="news-video"><iframe src={`https://www.youtube-nocookie.com/embed/${getYouTubeId(item.videoUrl)}`} title={`Видео: ${item.title}`} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div> : <p><a class="case-action-btn btn-secondary" href={item.videoUrl} target="_blank" rel="noopener noreferrer">Смотреть видео ↗</a></p>)}{item.attachment && (/\.(png|jpg|webp)$/.test(item.attachment) ? <img class="news-attachment" src={item.attachment} alt={item.title} loading="lazy" /> : /\.(mp4|webm)$/.test(item.attachment) ? <video class="news-attachment" src={item.attachment} controls preload="metadata"></video> : <p><a class="case-action-btn btn-secondary" href={item.attachment} target="_blank" rel="noopener noreferrer">Открыть PDF ↗</a></p>)}{item.url && <a class="case-action-btn btn-primary" href={item.url} target="_blank" rel="noopener noreferrer">Читать подробнее ↗</a>}</article>)}
+      </div></div>
+    </div>
+  </aside>
+  <div class="cabinet-art cabinet-art-about" aria-hidden="true"><img src="/scene/about-cabinet.png" alt="" /></div>
+  <div class="cabinet-art cabinet-art-system" aria-hidden="true"><img src="/scene/system-cabinet.png" alt="" /></div>
 
   <!-- 1. СИСТЕМА // GONKA.BLOG CORE -->
   <aside id="modal-core" class="workbench-drawer">
@@ -679,7 +737,7 @@ const stars = Array.from({ length: 34 }, () => ({
           {P.bots.filter((bot: any) => bot.status === 'published').map((bot: any) => (
             <div class={"catalog-project-card " + bot.cardClass}>
               <div class="catalog-card-screen">
-                <img src={bot.screenPreview} alt={bot.screenAlt} class="catalog-screen-img" loading="lazy" />
+                <img src={bot.promoPreview || bot.screenPreview} alt={bot.promoAlt || bot.screenAlt} class="catalog-screen-img" loading="lazy" />
                 <div class="catalog-screen-overlay">
                   <span class="screen-url-badge">{bot.screenBadge}</span>
                 </div>
@@ -1529,6 +1587,8 @@ const stars = Array.from({ length: 34 }, () => ({
           </div>
         </div>
 
+        <div class="case-section"><h3 class="section-heading">{S['modal-video'].blocks[0].heading}</h3><p class="section-text">{S['modal-video'].blocks[0].text}</p></div>
+        <div class="case-section"><h3 class="section-heading">{S['modal-video'].blocks[1].heading}</h3><div class="tech-spec-box">{S['modal-video'].blocks[1].specs.map((spec: string[]) => <div class="spec-row"><span>{spec[0]}</span><strong>{spec[1]}</strong></div>)}</div></div>
         <div class="video-list" style="display: flex; flex-direction: column; gap: 32px; padding-top: 16px;">
           {publishedVideos.map((vid) => {
             const yid = getYouTubeId(vid.youtubeUrl);
@@ -1848,6 +1908,19 @@ const stars = Array.from({ length: 34 }, () => ({
 
 <!-- СТИЛИ ПРОСТРАНСТВЕННОГО ВЕРСТАКА И ПРАВЫХ ВЫДВИЖНЫХ ПАНЕЛЕЙ -->
 <style>
+  .news-attachment { display: block; max-width: 100%; height: auto; margin: 20px 0; border-radius: 4px; }
+  .news-video { position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 20px 0; background: #000; }
+  .news-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .book-stories { margin-top: 28px; border-top: 1px solid rgba(199, 151, 74, .32); }
+  .book-stories-top { display: flex; justify-content: space-between; gap: 16px; padding: 17px 0; color: #c49b63; font: 600 11px/1.4 monospace; letter-spacing: .08em; }
+  .book-story[hidden] { display: none; }
+  .book-story h3 { margin: 12px 0 20px; color: #f4e8d7; font-size: clamp(22px, 2vw, 30px); line-height: 1.2; }
+  .book-story p { color: #d8cec0; font: 17px/1.65 Georgia, serif; overflow-wrap: anywhere; }
+  .book-story .book-story-moral { margin-top: 24px; padding: 15px 18px; border-left: 2px solid #c38d48; background: rgba(195, 141, 72, .08); color: #eed9b8; }
+  .book-story-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0; }
+  .book-story-controls button { padding: 9px 13px; border: 1px solid rgba(195, 141, 72, .4); border-radius: 5px; background: rgba(195, 141, 72, .08); color: #ead9c1; cursor: pointer; }
+  .book-story-controls button:hover, .book-story-controls button:focus-visible { border-color: #d8aa69; background: rgba(195, 141, 72, .18); }
+
   .spatial-root {
     width: 100vw;
     min-height: 100vh;
@@ -5113,7 +5186,7 @@ const stars = Array.from({ length: 34 }, () => ({
 
   .scene-stage {
     --k: 1;
-    --scene-img: url('/scene/day.jpg');
+    --scene-img: url('/scene/cabinet-ink-right.png');
     position: absolute;
     left: 50%;
     top: 50%;
@@ -5124,7 +5197,7 @@ const stars = Array.from({ length: 34 }, () => ({
     user-select: none;
     -webkit-user-select: none;
   }
-  :global([data-theme="night"]) .scene-stage { --scene-img: url('/scene/night.jpg'); }
+  :global([data-theme="night"]) .scene-stage { --scene-img: url('/scene/cabinet-ink-right.png'); }
 
   .scene-bg {
     position: absolute;
@@ -5180,6 +5253,30 @@ const stars = Array.from({ length: 34 }, () => ({
   .scene-obj { position: absolute; pointer-events: none; --lift: 0px; --pop: 1; --tilt: 0deg; }
   .scene-obj.kind-big { --lift: 0px; --pop: 1; }
   .scene-obj.kind-flat { --lift: 0px; --pop: 1; }
+  .scene-obj[data-obj="notebook"]:hover,
+  .scene-obj[data-obj="notebook"]:focus-within,
+  .scene-obj[data-obj="notebook"].is-book-open { z-index: 650 !important; }
+  .book-menu {
+    position: absolute; left: -18%; top: -24%; width: 136%; min-height: 125%;
+    display: grid; grid-template-columns: 1fr 1fr; box-sizing: border-box;
+    opacity: 0; visibility: hidden; pointer-events: none; perspective: 900px;
+    transform: rotate(-2deg); transition: opacity .2s ease, visibility .4s;
+  }
+  .scene-obj[data-obj="notebook"]:hover .book-menu,
+  .scene-obj[data-obj="notebook"]:focus-within .book-menu,
+  .scene-obj[data-obj="notebook"].is-book-open .book-menu { opacity: 1; visibility: visible; }
+  .book-menu-page { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 10%; text-align: center; color: #57351d;
+    background: linear-gradient(100deg, #d2b384, #f7e9c9 65%, #c5a174); border: 3px solid #674222;
+    box-shadow: 0 12px 18px #1d0e08aa, inset 0 0 12px #76502e88; backface-visibility: hidden; transition: transform .55s cubic-bezier(.2,.75,.2,1); }
+  .book-menu-page:first-child { border-radius: 12px 2px 2px 12px; transform-origin: right center; transform: rotateY(88deg); }
+  .book-menu-page:last-child { border-radius: 2px 12px 12px 2px; transform-origin: left center; transform: rotateY(-88deg); }
+  .scene-obj[data-obj="notebook"]:hover .book-menu-page,
+  .scene-obj[data-obj="notebook"]:focus-within .book-menu-page { transform: rotateY(0); }
+  .book-menu-page > span { font: 700 clamp(7px, .65vw, 10px) Georgia, serif; letter-spacing: .09em; }
+  .book-menu-page button { width: 100%; padding: 9px 4px; cursor: pointer; pointer-events: auto; color: #4d2917; background: #a77c472b; border: 1px solid #8a603d; border-radius: 3px; font: 700 clamp(10px, 1vw, 15px) Georgia, serif; }
+  .book-menu-page button:hover, .book-menu-page button:focus-visible { background: #a77c4755; outline: 2px solid #8a603d; }
+  .book-menu-page small { display: block; margin-top: 6px; font: 600 clamp(8px, .7vw, 11px) system-ui, sans-serif; }
+  @media (hover: none) { .scene-obj[data-obj="notebook"]:hover:not(.is-book-open):not(:focus-within) .book-menu { opacity: 0; visibility: hidden; pointer-events: none; } }
 
   /* Деликатный сигнал кликабельности (affordance beacon): мягкий отблеск контура при первом знакомстве со сценой */
   .scene-obj::after {
@@ -5212,6 +5309,27 @@ const stars = Array.from({ length: 34 }, () => ({
     position: absolute; inset: 0;
     background-image: var(--scene-img);
     background-repeat: no-repeat;
+  }
+  /* Печать поднимается отдельным силуэтом, без фрагментов карты вокруг неё. */
+  .scene-obj[data-obj="bell"] .obj-art {
+    background-image: url('/scene/objects/stamp-cutout.png');
+    background-size: 368% 119% !important;
+    background-position: center !important;
+    clip-path: none !important;
+  }
+  .scene-obj[data-obj="lamp"] .obj-art,
+  .scene-obj[data-obj="globe"] .obj-art {
+    background-size: 100% 100% !important;
+    background-position: center !important;
+  }
+  .scene-obj[data-obj="lamp"] .obj-art {
+    background-image: url('/scene/objects/bust.png');
+    clip-path: none !important;
+  }
+  .scene-obj[data-obj="globe"] .obj-art {
+    background-image: url('/scene/objects/globe.png');
+    /* Кружка стоит перед основанием глобуса и остаётся на переднем плане. */
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 93% 100%, 93% 75%, 32% 75%, 32% 100%, 0 100%) !important;
   }
 
   @media (hover: hover) {
@@ -5261,10 +5379,10 @@ const stars = Array.from({ length: 34 }, () => ({
     transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 60;
   }
-  /* Лампа стоит у верхнего края, над ней логотип: подпись выходит ниже лампы.
-     Кружка: подпись сверху заходила под листок-приветствие в окне, поэтому тоже снизу */
+  /* Подписи этих предметов размещены снизу, чтобы не попадать под листок в окне. */
   .scene-obj[data-obj="lamp"] .obj-tip,
-  .scene-obj[data-obj="mug"] .obj-tip { top: 100%; transform: translate(calc(-50% + var(--tip-dx, 0px)), 4px); }
+  .scene-obj[data-obj="mug"] .obj-tip,
+  .scene-obj[data-obj="globe"] .obj-tip { top: 100%; transform: translate(calc(-50% + var(--tip-dx, 0px)), 4px); }
   .scene-obj[data-obj="lamp"] .obj-hit:hover ~ .obj-tip,
   .scene-obj[data-obj="lamp"].is-hovered .obj-tip,
   .scene-obj[data-obj="lamp"].is-linked-hover .obj-tip,
@@ -5272,11 +5390,14 @@ const stars = Array.from({ length: 34 }, () => ({
   .scene-obj[data-obj="mug"] .obj-hit:hover ~ .obj-tip,
   .scene-obj[data-obj="mug"].is-hovered .obj-tip,
   .scene-obj[data-obj="mug"].is-linked-hover .obj-tip,
-  .scene-obj[data-obj="mug"]:focus-within .obj-tip { transform: translate(calc(-50% + var(--tip-dx, 0px)), 10px); }
+  .scene-obj[data-obj="mug"]:focus-within .obj-tip,
+  .scene-obj[data-obj="globe"] .obj-hit:hover ~ .obj-tip,
+  .scene-obj[data-obj="globe"].is-hovered .obj-tip,
+  .scene-obj[data-obj="globe"].is-linked-hover .obj-tip,
+  .scene-obj[data-obj="globe"]:focus-within .obj-tip { transform: translate(calc(-50% + var(--tip-dx, 0px)), 10px); }
   .scene-obj[data-obj="lamp"] .obj-tip::after,
-  .scene-obj[data-obj="mug"] .obj-tip::after { bottom: auto; top: -5px; border-top: 0; border-bottom: 5px solid rgba(245, 158, 11, 0.7); }
-  /* Глобус без всплывающей подсказки: панель открывается по клику как сюрприз (и она не мешается рядом с кружкой) */
-  .scene-obj[data-obj="globe"] .obj-tip { display: none; }
+  .scene-obj[data-obj="mug"] .obj-tip::after,
+  .scene-obj[data-obj="globe"] .obj-tip::after { bottom: auto; top: -5px; border-top: 0; border-bottom: 5px solid rgba(245, 158, 11, 0.7); }
   .obj-tip::after {
     content: '';
     position: absolute;
@@ -5459,7 +5580,7 @@ const stars = Array.from({ length: 34 }, () => ({
   @media (max-width: 767px) {
     .scene-frame.workbench-frame { display: flex; flex-direction: column; height: auto; min-height: calc(100svh - 42px); overflow: visible; }
     .scene-clip { flex: none; height: min(66svh, 560px); overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
-    .scene-stage { position: relative; left: auto; top: auto; translate: none; width: calc(min(66svh, 560px) * 1672 / 940); height: min(66svh, 560px); }
+    .scene-stage { position: relative; left: auto; top: auto; translate: none; width: max(100%, calc(min(66svh, 560px) * 1672 / 940)); max-width: none; height: auto; }
     .scene-hud { right: 16px; flex-direction: column; align-items: flex-start; }
     .scene-social a { width: 44px; height: 44px; }
     .scene-frame .cabinet-menu-nav { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 12px 20px; border-left: 0; box-shadow: none; }
@@ -5578,12 +5699,9 @@ const stars = Array.from({ length: 34 }, () => ({
     .hero-btn { padding: 8px 11px; font-size: 12px; }
   }
 
-  /* ===== Размер сцены: низ всегда виден, без боковых полос ===== */
+  /* ===== Сцена занимает всю область рядом с меню ===== */
   @media (min-width: 768px) {
-    /* сцена вписывается целиком в любое окно (запас 3% по краям), свободные поля закрывает размытая копия фона */
-    .scene-stage { top: 50%; bottom: auto; translate: -50% -50%; width: calc(min(100cqw, calc(100cqh * 1672 / 940)) * 1.03); max-width: none; }
-    .scene-clip::before { content: ""; position: absolute; inset: -4%; background: url('/scene/day.jpg') center / cover; filter: blur(16px) brightness(0.82); }
-    :global([data-theme="night"]) .scene-clip::before { background-image: url('/scene/night.jpg'); }
+    .scene-stage { top: 50%; bottom: auto; translate: -50% -50%; width: 100cqw; height: 100cqh; max-width: none; aspect-ratio: auto; }
   }
   /* ===== Свитки: чуть крупнее, ряд сдвинут к лупе ===== */
   .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal { left: 8.3%; top: 79.4%; width: 296px; height: 158px; }
@@ -5608,8 +5726,8 @@ const stars = Array.from({ length: 34 }, () => ({
       /* положение считается от размеров сцены, поэтому листок всегда лежит в одном и том же месте окна */
       --cw: calc(100vw - var(--menu-w));
       --ch: max(520px, calc(100svh - 42px));
-      --sw: calc(min(var(--cw), calc(var(--ch) * 1672 / 940)) * 1.03);
-      --sh: calc(var(--sw) * 940 / 1672);
+      --sw: var(--cw);
+      --sh: var(--ch);
       position: absolute; right: auto; margin: 0; flex: none;
       left: calc(var(--cw) / 2 + var(--sw) * 0.205 - 16px);
       top: calc(var(--ch) / 2 + var(--sh) * -0.365 - 10px);
@@ -5626,9 +5744,6 @@ const stars = Array.from({ length: 34 }, () => ({
     .scene-hud .hero-tape { height: 16px; width: 40px; opacity: 0.85; }
     .scene-hud .hero-tape-l { left: -6px; top: -4px; transform: rotate(-29deg); }
     .scene-hud .hero-tape-r { right: 9px; top: -7px; transform: rotate(11deg); width: 32px; }
-  }
-  @media (min-width: 861px) and (max-height: 640px) {
-    .scene-hud .scene-hero-cta .hero-btn:nth-child(3) { display: none; }
   }
 
   /* ===== «Где меня найти»: тихий блок ссылок на профили над меню ===== */
@@ -5725,6 +5840,49 @@ const stars = Array.from({ length: 34 }, () => ({
     font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .06em; color: #fde68a;
     background: rgba(15,12,10,.82); border: 1px solid rgba(245,158,11,.4); pointer-events: none;
   }
+
+  /* GONKA 2.0: separate physical scene and real, accessible controls. */
+  .scene-stage { --scene-img: url('/scene/cabinet-ink-right.png'); }
+  :global([data-theme="night"]) .scene-stage { --scene-img: url('/scene/cabinet-ink-right.png'); }
+  .scene-bg-night { filter: brightness(.50) saturate(.58) hue-rotate(175deg); }
+  :global([data-theme="night"]) .obj-art { filter: brightness(.6) saturate(.7); }
+  .scene-fx-sun, .scene-fx-rays { opacity: .12; }
+  .scene-stage .hotspot-scroll-sites.physical-scroll-horizontal { left: 9%; top: 46%; }
+  .scene-stage .hotspot-scroll-bots.physical-scroll-bots { left: 46%; top: 46%; }
+  .scene-stage .hotspot-scroll.physical-scroll-object { left: 75%; top: 50%; }
+  .dossier-shelf { position:absolute; left:3%; right:3%; top:65%; z-index:20; text-align:center; color:#f4d8a1; }
+  .dossier-shelf h2 { margin:0 0 .7em; font:700 clamp(12px, 1.2vw, 19px) Georgia,serif; letter-spacing:.18em; text-shadow:0 2px 7px #000; }
+  .dossier-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1.2%; }
+  .dossier-card { display:flex; min-width:0; gap:8px; text-align:left; padding:clamp(6px,.8vw,14px); border:2px solid #a47b44; border-radius:4px 10px 5px 5px; background:linear-gradient(135deg,#f5dfb2,#ccae7c 75%,#ae8753); color:#342315; box-shadow:0 7px 8px #1a0d08aa,inset 0 0 0 3px #f8e6ba; cursor:pointer; transform:rotate(-1deg); transition:transform .28s,box-shadow .28s; }
+  .dossier-card:nth-child(even) { transform:rotate(1deg); }
+  .dossier-card:hover,.dossier-card:focus-visible { transform:translateY(-10px) rotate(0); box-shadow:0 18px 20px #100904cc,inset 0 0 0 3px #f8e6ba; outline:2px solid #f9d58c; }
+  .dossier-card img { width:32%; aspect-ratio:1; object-fit:cover; align-self:flex-start; border:2px solid #7b4c28; }
+  .dossier-card-copy { display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .dossier-card small { font:700 clamp(8px,.65vw,10px) Georgia,serif; }
+  .dossier-card strong { font:700 clamp(10px,1vw,16px) Georgia,serif; }
+  .dossier-card em { font:700 clamp(7px,.6vw,10px) system-ui,sans-serif; font-style:normal; }
+  .dossier-card-copy > span { font:600 clamp(8px,.65vw,11px) system-ui,sans-serif; }
+  .dossier-focus { position:fixed; left:5vw; top:34vh; width:min(43vw,570px); z-index:56; opacity:0; pointer-events:none; transform:translateY(60px) scale(.65) rotate(-3deg); transition:transform .65s cubic-bezier(.2,.8,.2,1),opacity .4s; padding:25px; }
+  .dossier-focus.is-shown { opacity:1; transform:translateY(0) scale(1) rotate(0); }
+  .dossier-focus strong { font-size:clamp(20px,2vw,30px); }
+  .dossier-focus small,.dossier-focus em,.dossier-focus .dossier-card-copy > span { font-size:13px; }
+  /* Physical paper dossiers: actual clickable content remains HTML. */
+  .dossier-card { border:0; border-radius:0; background:transparent url('/scene/dossier-paper.png') center/100% 100% no-repeat; box-shadow:none; padding:clamp(12px,1.3vw,20px) clamp(10px,1.2vw,20px) clamp(16px,1.6vw,24px) clamp(25px,2.7vw,42px); min-height:clamp(120px,13vw,200px); }
+  .dossier-card:hover,.dossier-card:focus-visible { box-shadow:none; filter:drop-shadow(0 12px 10px #160a05b0); }
+  .dossier-card img { width:32%; aspect-ratio:1.1; }
+  .dossier-card-copy { padding-top:2%; }
+  .dossier-focus { padding:32px 30px 38px 65px; }
+  .object-focus { position:fixed; left:5vw; top:50%; width:min(40vw,560px); max-height:56vh; z-index:56; opacity:0; pointer-events:none; transform:translateY(-35%) scale(.76); transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .4s; filter:drop-shadow(0 20px 18px #000b); }
+  .object-focus .obj-art { position:absolute; inset:0; background-image:url('/scene/cabinet-ink-right.png'); background-repeat:no-repeat; }
+  .object-focus img { display:block; width:100%; height:100%; position:absolute; inset:0; object-fit:contain; }
+  .object-focus.is-shown { opacity:1; transform:translateY(-50%) scale(1); }
+  .cabinet-art { position:fixed; left:3vw; top:50%; width:min(43vw,630px); z-index:56; opacity:0; pointer-events:none; transform:translateY(-43%) scale(.92); transition:opacity .5s ease,transform .65s cubic-bezier(.2,.8,.2,1); background:#d3ad72; padding:12px; box-shadow:0 18px 48px #000a; }
+  .cabinet-art img { display:block; width:100%; }
+  .cabinet-art-about { clip-path:polygon(2% 2%,98% 1%,99% 5%,98% 96%,95% 99%,3% 98%,1% 94%,2% 5%); border-top:10px solid #c39960; border-bottom:10px solid #a57543; }
+  .cabinet-art-system { clip-path:polygon(1% 3%,9% 1%,18% 3%,27% 1%,38% 2%,50% 0,61% 2%,72% 1%,83% 3%,98% 1%,99% 13%,97% 25%,100% 38%,98% 53%,100% 67%,98% 84%,99% 98%,89% 97%,80% 100%,68% 98%,59% 100%,47% 98%,36% 100%,25% 98%,13% 100%,1% 98%,2% 85%,0 73%,2% 59%,0 46%,2% 34%,0 18%); }
+  :global(html[data-artifact="about"]) .cabinet-art-about, :global(html[data-artifact="system"]) .cabinet-art-system { opacity:1; transform:translateY(-50%) scale(1); }
+  @media (max-width:900px) { .cabinet-art, .dossier-focus, .object-focus { display:none; } .dossier-card-copy > span,.dossier-card em { display:none; } }
+  @media (prefers-reduced-motion:reduce) { .cabinet-art,.dossier-card,.object-focus { transition:none; } }
 </style>
 
 <style is:global>
@@ -5742,6 +5900,31 @@ const stars = Array.from({ length: 34 }, () => ({
   #gk-lightbox .gk-lb-close { position: absolute; z-index: 5; top: 14px; right: 18px; width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
     font: 400 22px/1 'Inter', sans-serif; color: #fde68a; background: rgba(28,22,17,.9); border: 1px solid rgba(245,158,11,.5); }
   #gk-lightbox .gk-lb-close:hover, #gk-lightbox .gk-lb-close:focus-visible { background: #ea580c; color: #fff; outline: none; }
+
+  /* Увеличенный свиток «Сайты / Лендинги» слева, пока справа открыта панель каталога или досье лендинга */
+  body .sites-focus { position: fixed; left: 3vw; top: 50%; z-index: 57; width: min(calc(100vw - 620px - 5vw), 480px);
+    opacity: 0; transform: translateY(-46%) scale(.9); transform-origin: left center;
+    transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+  body .sites-focus.is-shown { opacity: 1; transform: translateY(-50%) scale(1); pointer-events: auto; }
+  body .sites-focus.is-instant { transition: none; }
+  body .sites-focus .sites-unrolled-wrapper { position: relative; inset: auto; width: 100%; height: auto; opacity: 1; transform: none;
+    clip-path: none; pointer-events: auto; display: flex; align-items: stretch; filter: drop-shadow(0 22px 40px rgba(0,0,0,.85)); }
+  body .sites-focus .scroll-roll-left, body .sites-focus .scroll-roll-right { width: 20px; }
+  body .sites-focus .scroll-parchment-sheet { padding: 22px 30px 20px; }
+  body .sites-focus .sites-parchment-content { gap: 12px; }
+  body .sites-focus .sites-parchment-tag { font-size: 20px; }
+  body .sites-focus .sites-parchment-badge { font-size: 13px; padding: 4px 10px; }
+  body .sites-focus .sites-screens-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 4px 0; pointer-events: auto; }
+  body .sites-focus .sites-screen-chip { flex: none; width: 100%; border-radius: 6px; border-width: 1.5px; pointer-events: auto; }
+  body .sites-focus .sites-screen-chip:hover, body .sites-focus .sites-screen-chip:focus-visible { transform: translateY(-3px); border-color: #ea580c;
+    box-shadow: 0 8px 18px rgba(0,0,0,.45); }
+  body .sites-focus .sites-screen-chip.is-current { border-color: #ea580c; box-shadow: 0 0 0 3px rgba(234,88,12,.55), 0 8px 18px rgba(0,0,0,.45); }
+  body .sites-focus .sites-screen-chip .chip-label { font-size: 15px; padding: 5px 0; letter-spacing: .02em; }
+  body .sites-focus .sites-parchment-sub { font-size: 17px; cursor: pointer; white-space: normal; }
+  body .sites-focus .sites-parchment-sub:hover, body .sites-focus .sites-parchment-sub:focus-visible { color: #c2410c; outline: none; }
+  body .sites-focus .sites-wax-seal { transform: scale(1.5); }
+  @media (max-width: 860px) { body .sites-focus { display: none; } }
+  @media (prefers-reduced-motion: reduce) { body .sites-focus { transition: none; } }
 </style>
 
 <script>
@@ -5839,12 +6022,77 @@ const stars = Array.from({ length: 34 }, () => ({
     const closeButtons = document.querySelectorAll('.close-drawer-btn');
     const expandButtons = document.querySelectorAll('.expand-drawer-btn');
 
+    // Свиток «Сайты / Лендинги»: при открытии каталога или досье лендинга слева показываем тот же пергамент в увеличенном виде
+    const sitesScroll = document.querySelector<HTMLElement>('.hotspot-scroll-sites .sites-unrolled-wrapper');
+    const sitesDrawerIds = new Set<string>(['modal-sites']);
+    sitesScroll?.querySelectorAll<HTMLElement>('.sites-screen-chip[data-open-drawer]').forEach((chip) => {
+      const id = chip.getAttribute('data-open-drawer');
+      if (id) sitesDrawerIds.add(id);
+    });
+
+    function showSitesFocus(targetId: string, instant: boolean) {
+      if (!sitesScroll) return;
+      const focus = document.createElement('div');
+      focus.className = instant ? 'sites-focus is-instant' : 'sites-focus';
+      focus.setAttribute('role', 'navigation');
+      focus.setAttribute('aria-label', 'Сайты / Лендинги: выбор проекта');
+      const sheet = sitesScroll.cloneNode(true) as HTMLElement;
+      sheet.removeAttribute('aria-hidden');
+      sheet.querySelectorAll<HTMLElement>('.sites-screen-chip').forEach((chip) => {
+        chip.classList.toggle('is-current', chip.getAttribute('data-open-drawer') === targetId);
+      });
+      const sub = sheet.querySelector<HTMLElement>('.sites-parchment-sub');
+      if (sub) { sub.setAttribute('role', 'button'); sub.setAttribute('tabindex', '0'); sub.dataset.openDrawer = 'modal-sites'; }
+      focus.appendChild(sheet);
+      focus.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-open-drawer]');
+        const id = btn?.getAttribute('data-open-drawer');
+        if (!id) return;
+        e.stopPropagation();
+        openDrawer(id);
+      });
+      focus.addEventListener('keydown', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLElement>('.sites-parchment-sub[data-open-drawer]');
+        if (btn && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDrawer('modal-sites'); }
+      });
+      document.body.appendChild(focus);
+      if (instant) focus.classList.add('is-shown');
+      else requestAnimationFrame(() => focus.classList.add('is-shown'));
+    }
+
     function openDrawer(targetId: string) {
+      const sitesWasShown = !!document.querySelector('.sites-focus');
       closeAllDrawers();
       const target = document.getElementById(targetId);
+      if (target && sitesDrawerIds.has(targetId)) showSitesFocus(targetId, sitesWasShown);
       if (target && backdrop) {
         target.classList.remove('is-expanded');
         target.classList.add('is-open');
+        document.documentElement.dataset.artifact = targetId === 'modal-about' ? 'about' : targetId === 'modal-core' ? 'system' : '';
+        // Show the same physical object the visitor selected, without a rectangular backdrop.
+        if (targetId !== 'modal-about' && targetId !== 'modal-core' && !sitesDrawerIds.has(targetId)) {
+          const source = targetId === 'modal-book-notes' ? document.querySelector<HTMLElement>('.scene-obj[data-obj="notebook"]') : document.querySelector<HTMLElement>(`.scene-obj:has([data-scene-target="${targetId}"])`);
+          const art = source?.querySelector<HTMLElement>('.obj-art');
+          if (source && art) {
+            const rect = source.getBoundingClientRect();
+            const focus = document.createElement('div');
+            focus.className = 'object-focus';
+            for (const name of source.getAttributeNames()) if (name.startsWith('data-astro-cid-')) focus.setAttribute(name, '');
+            focus.setAttribute('aria-hidden', 'true');
+            focus.style.aspectRatio = `${Math.max(rect.width, 1)} / ${Math.max(rect.height, 1)}`;
+            const names: Record<string, string> = { lamp: 'bust', books: 'drafts', notebook: 'news', magnifier: 'magnifier', camera: 'camera', compass: 'compass', pencilcup: 'ink', bell: 'stamp', mug: 'mug', globe: 'globe' };
+            const asset = names[source.dataset.obj || ''];
+            if (asset) {
+              const image = document.createElement('img');
+              for (const name of source.getAttributeNames()) if (name.startsWith('data-astro-cid-')) image.setAttribute(name, '');
+              image.src = `/scene/objects/${asset}.png`;
+              image.alt = '';
+              focus.appendChild(image);
+            } else focus.appendChild(art.cloneNode(true));
+            document.body.appendChild(focus);
+            requestAnimationFrame(() => focus.classList.add('is-shown'));
+          }
+        }
         backdrop.classList.add('is-active');
       }
       document.querySelectorAll('.cabinet-nav-item').forEach((item) => {
@@ -5875,6 +6123,10 @@ const stars = Array.from({ length: 34 }, () => ({
     }
 
     function closeAllDrawers() {
+      document.querySelector('.dossier-focus')?.remove();
+      document.querySelector('.object-focus')?.remove();
+      document.querySelector('.sites-focus')?.remove();
+      delete document.documentElement.dataset.artifact;
       drawers.forEach((d) => {
         d.classList.remove('is-open');
         d.classList.remove('is-expanded');
@@ -5935,9 +6187,18 @@ const stars = Array.from({ length: 34 }, () => ({
     document.querySelectorAll('[data-open-drawer]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const targetId = btn.getAttribute('data-open-drawer');
+        const targetId = btn.closest('.hotspot-scroll-sites') ? 'modal-sites' : btn.getAttribute('data-open-drawer');
         if (targetId) {
           openDrawer(targetId);
+          if (btn.classList.contains('dossier-card')) {
+            document.querySelector('.object-focus')?.remove();
+            const focus = btn.cloneNode(true) as HTMLElement;
+            focus.classList.add('dossier-focus');
+            focus.setAttribute('aria-hidden', 'true');
+            focus.setAttribute('tabindex', '-1');
+            document.body.appendChild(focus);
+            requestAnimationFrame(() => focus.classList.add('is-shown'));
+          }
         }
       });
     });
@@ -6233,4 +6494,40 @@ const stars = Array.from({ length: 34 }, () => ({
     objs.forEach((o) => back(o, idOfObj(o)));
   }
   initLinks();
+</script>
+
+<script>
+  const storyBook = document.querySelector<HTMLElement>('[data-book-stories]');
+  const storyDrawer = document.getElementById('modal-book-notes');
+  if (storyBook && storyDrawer) {
+    const stories = Array.from(storyBook.querySelectorAll<HTMLElement>('[data-story]'));
+    const counter = storyBook.querySelector<HTMLElement>('[data-story-count]');
+    const pauseButton = storyBook.querySelector<HTMLButtonElement>('[data-story-pause]');
+    let current = 0;
+    let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const updatePause = () => {
+      if (pauseButton) { pauseButton.textContent = paused ? 'Продолжить' : 'Пауза'; pauseButton.setAttribute('aria-pressed', String(paused)); }
+    };
+    const schedule = () => {
+      clearTimeout(timer);
+      if (!paused && storyDrawer.classList.contains('is-open') && !document.hidden && !storyBook.matches(':hover') && !storyBook.contains(document.activeElement)) timer = setTimeout(() => show(current + 1), 30000);
+    };
+    const show = (index: number) => {
+      current = (index + stories.length) % stories.length;
+      stories.forEach((story, i) => { story.hidden = i !== current; });
+      if (counter) counter.textContent = `${String(current + 1).padStart(2, '0')} / ${String(stories.length).padStart(2, '0')}`;
+      schedule();
+    };
+    storyBook.querySelector('[data-story-prev]')?.addEventListener('click', () => show(current - 1));
+    storyBook.querySelector('[data-story-next]')?.addEventListener('click', () => show(current + 1));
+    pauseButton?.addEventListener('click', () => { paused = !paused; updatePause(); schedule(); });
+    storyBook.addEventListener('mouseenter', schedule);
+    storyBook.addEventListener('mouseleave', schedule);
+    storyBook.addEventListener('focusin', schedule);
+    storyBook.addEventListener('focusout', () => setTimeout(schedule, 0));
+    document.addEventListener('visibilitychange', schedule);
+    new MutationObserver(schedule).observe(storyDrawer, { attributes: true, attributeFilter: ['class'] });
+    updatePause(); schedule();
+  }
 </script>

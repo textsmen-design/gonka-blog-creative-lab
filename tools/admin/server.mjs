@@ -31,7 +31,7 @@ const PORT = Number(process.env.ADMIN_PORT || 4310);
 const HOST = '127.0.0.1';
 const MAX_BODY = 1024 * 1024; // 1 МБ
 const MAX_IMPORT = 8 * 1024 * 1024; // пакет импорта: до 8 МБ
-export const API_VERSION = 4; // 4: загрузка изображений, экспорт/импорт, /api/health
+export const API_VERSION = 7; // записи большой книги доступны через API
 const STARTED_AT = new Date().toISOString();
 const MAX_UPLOADS = 300;
 // Публичный адрес за nginx (например https://admin.gonka.blog). Слушаем по-прежнему только 127.0.0.1.
@@ -453,6 +453,33 @@ async function handleApi(req, res, url) {
     } finally { try { fs.unlinkSync(tmp); } catch { /* нет файла */ } }
     appendAudit('upload', name, '', crypto.createHash('sha256').update(r.data).digest('hex'));
     return send(res, 200, { ok: true, path: '/previews/' + name, name, width: r.width, height: r.height, bytes: r.data.length, originalBytes: buf.length, cleaned: r.data.length !== buf.length });
+  }
+
+  // Вложения новостей хранятся в public и попадают в следующие статические релизы.
+  if (req.method === 'POST' && url.pathname === '/api/news-upload') {
+    if (rateLimited(ip)) return send(res, 429, { error: 'слишком много попыток' });
+    if (!authOk(req)) { registerFail(ip); return send(res, 401, { error: 'нет доступа' }); }
+    resetFails(ip);
+    const limit = 25 * 1024 * 1024;
+    let buf;
+    try { buf = await readBody(req, limit); }
+    catch (e) { return send(res, e.code === 'toolarge' ? 413 : 400, { error: 'файл больше 25 МБ или не прочитан' }); }
+    const mime = (req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+    let ext, data = buf;
+    if (['image/png', 'image/jpeg', 'image/webp'].includes(mime)) {
+      const img = inspectImage(buf, mime);
+      if (!img.ok) return send(res, 422, { error: img.error });
+      ext = img.ext; data = img.data;
+    } else if (mime === 'application/pdf' && buf.subarray(0, 5).toString() === '%PDF-') ext = 'pdf';
+    else if (mime === 'video/mp4' && buf.length >= 12 && buf.subarray(4, 8).toString() === 'ftyp') ext = 'mp4';
+    else if (mime === 'video/webm' && buf.length >= 4 && buf.subarray(0, 4).equals(Buffer.from([0x1a,0x45,0xdf,0xa3]))) ext = 'webm';
+    else return send(res, 422, { error: 'разрешены PNG, JPEG, WebP, MP4, WebM и PDF с корректным содержимым' });
+    const dir = path.join(paths().publicDir, 'news-media'); fs.mkdirSync(dir, { recursive: true });
+    const name = `news-${crypto.randomBytes(12).toString('hex')}.${ext}`;
+    try { fs.writeFileSync(path.join(dir, name), data, { mode: 0o644, flag: 'wx' }); }
+    catch { return send(res, 500, { error: 'не удалось сохранить файл' }); }
+    appendAudit('news-upload', name, '', crypto.createHash('sha256').update(data).digest('hex'));
+    return send(res, 200, { ok: true, path: '/news-media/' + name, bytes: data.length });
   }
 
   // ---- экспорт всех данных контента одним файлом ----
