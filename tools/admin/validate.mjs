@@ -170,6 +170,17 @@ export function businessRules(name, data) {
     });
   }
 
+  // Панель саги (пергамент на стене): кнопка — только https, графика — только загруженные через админку файлы
+  if (name === 'saga' && data && typeof data === 'object') {
+    const url = data.cta?.url;
+    if (typeof url === 'string' && (!/^https:\/\//.test(url) || !LINK_RE.test(url))) errors.push({ path: 'cta.url', message: 'нужна ссылка https://' });
+    (Array.isArray(data.blocks) ? data.blocks : []).forEach((b, i) => {
+      if (!b || typeof b !== 'object') return;
+      if (!b.heading && !b.text && !(b.list || []).length && !b.media) errors.push({ path: `blocks[${i}]`, message: 'пустой блок: добавьте заголовок, текст, список или файл' });
+      if (b.media && (typeof b.media !== 'string' || !/^\/(news-media|previews)\/[a-z0-9][a-z0-9._-]*\.(png|jpg|webp|mp4|webm)$/.test(b.media) || !fs.existsSync(path.join(p.publicDir, b.media)))) errors.push({ path: `blocks[${i}].media`, message: 'файл не найден: загрузите фото или видео через админку' });
+    });
+  }
+
   const warnLong = (at, s, limit) => {
     if (typeof s === 'string' && s.length > limit) {
       warnings.push({ path: at, message: `длинная строка: ${s.length} симв. (рекомендуется ≤ ${limit})` });

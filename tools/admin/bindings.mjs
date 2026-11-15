@@ -152,7 +152,7 @@ export function checkBindings({ data, component, page } = {}) {
   // неиспользуемые листья (для статически связанных файлов)
   const allLeaves = new Set();
   for (const name of FILE_NAMES) {
-    if (name === 'projects' || name === 'scene' || name === 'news' || name === 'book-stories') continue; // динамические данные проверяются схемой
+    if (name === 'projects' || name === 'scene' || name === 'news' || name === 'book-stories' || name === 'saga') continue; // динамические данные проверяются схемой
     markLeaves(d0[name], [name], allLeaves);
   }
   const migratedPrefixes = [

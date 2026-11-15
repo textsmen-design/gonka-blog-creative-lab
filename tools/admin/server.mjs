@@ -684,13 +684,14 @@ const server = http.createServer(async (req, res) => {
       console.log(`${ts} ${req.method} ${url.pathname} ${res.statusCode}`);
       return;
     }
-    // изображения из public/previews для миниатюр в админке (только безопасные имена, только PNG/JPEG/WebP)
-    const pm = req.method === 'GET' && url.pathname.match(/^\/previews\/([a-z0-9][a-z0-9._-]*\.(png|jpg|webp))$/);
+    // изображения из public/previews и public/news-media для миниатюр в админке (только безопасные имена, только PNG/JPEG/WebP)
+    const pm = req.method === 'GET' && url.pathname.match(/^\/(previews|news-media)\/([a-z0-9][a-z0-9._-]*\.(png|jpg|webp))$/);
     if (pm) {
+      const [, dirName, fileName, ext] = pm;
       if (!hostOk(req)) { send(res, 403, { error: 'запрос не с localhost' }); return; }
-      const file = path.join(paths().publicDir, 'previews', pm[1]);
+      const file = path.join(paths().publicDir, dirName, fileName);
       if (!fs.existsSync(file)) { send(res, 404, { error: 'not found' }); return; }
-      const type = { png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp' }[pm[2]];
+      const type = { png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp' }[ext];
       sendFile(res, file, type);
       return;
     }

@@ -61,7 +61,7 @@ async function itAsync(name, fn) {
 console.log('\n[1/5] Проверка валидации схем и структуры данных:');
 
 it('Все файлы контента, включая новости, присутствуют в FILE_NAMES', () => {
-  assert.deepEqual(store.FILE_NAMES, ['site', 'links', 'media', 'sections', 'projects', 'scene', 'news', 'book-stories']);
+  assert.deepEqual(store.FILE_NAMES, ['site', 'links', 'media', 'sections', 'projects', 'scene', 'news', 'book-stories', 'saga']);
 });
 
 it('Все файлы проходят валидацию без ошибок', () => {
@@ -422,6 +422,27 @@ await itAsync('Редактирование истории книги и про�
   assert.equal(rejected.status, 422);
   after.body.data['book-stories'].items[0].title = original;
   const restore = await req('/api/save', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_TOKEN}` }, body: { file: 'book-stories', data: after.body.data['book-stories'], ifMatch: after.body.etags['book-stories'] } });
+  assert.equal(restore.status, 200);
+});
+
+await itAsync('Панель саги: редактирование текста, блоков и проверка ссылки и файлов', async () => {
+  const auth = { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_TOKEN}` };
+  const before = await req('/api/data', { headers: { Authorization: `Bearer ${TEST_TOKEN}` } });
+  const original = structuredClone(before.body.data.saga);
+  const edited = structuredClone(original);
+  edited.title = 'Проверка саги';
+  edited.blocks.push({ heading: 'Новый блок', text: 'Абзац 1\n\nАбзац 2', list: ['Пункт'], media: '', mediaAlt: '' });
+  const saved = await req('/api/save', { method: 'POST', headers: auth, body: { file: 'saga', data: edited, ifMatch: before.body.etags.saga } });
+  assert.equal(saved.status, 200, JSON.stringify(saved.body));
+  const httpUrl = structuredClone(edited); httpUrl.cta.url = 'http://example.com/';
+  assert.equal((await req('/api/save', { method: 'POST', headers: auth, body: { file: 'saga', data: httpUrl, ifMatch: saved.body.etag } })).status, 422);
+  const jsUrl = structuredClone(edited); jsUrl.cta.url = 'javascript:alert(1)';
+  assert.equal((await req('/api/save', { method: 'POST', headers: auth, body: { file: 'saga', data: jsUrl, ifMatch: saved.body.etag } })).status, 422);
+  const missing = structuredClone(edited); missing.blocks[0].media = '/news-media/news-net-takogo-fajla.webp';
+  assert.equal((await req('/api/save', { method: 'POST', headers: auth, body: { file: 'saga', data: missing, ifMatch: saved.body.etag } })).status, 422);
+  const foreign = structuredClone(edited); foreign.blocks[0].media = 'https://evil.example/x.png';
+  assert.equal((await req('/api/save', { method: 'POST', headers: auth, body: { file: 'saga', data: foreign, ifMatch: saved.body.etag } })).status, 422);
+  const restore = await req('/api/save', { method: 'POST', headers: auth, body: { file: 'saga', data: original, ifMatch: saved.body.etag } });
   assert.equal(restore.status, 200);
 });
 

@@ -26,7 +26,7 @@ const base = readAll();
 const errs = (file, data) => validateFile(file, data).errors.map((e) => `${e.path}: ${e.message}`);
 const bind = (data) => checkBindings({ data }).errors.map((e) => `${e.path}: ${e.message}`);
 
-check('файлы данных включают новости', JSON.stringify(FILE_NAMES) === JSON.stringify(['site', 'links', 'media', 'sections', 'projects', 'scene', 'news', 'book-stories']));
+check('файлы данных включают новости', JSON.stringify(FILE_NAMES) === JSON.stringify(['site', 'links', 'media', 'sections', 'projects', 'scene', 'news', 'book-stories', 'saga']));
 for (const f of FILE_NAMES) check(`${f}.json валиден по схеме`, errs(f, base[f]).length === 0, errs(f, base[f]).slice(0, 2).join('; '));
 const b0 = checkBindings({ data: base });
 check('привязки шаблон↔данные: нет ошибок', b0.errors.length === 0, `${b0.errors.length} ошибок, ${b0.warnings.length} предупреждений`);

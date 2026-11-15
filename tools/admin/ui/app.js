@@ -10,6 +10,7 @@
     { id: 'bots', label: 'Боты' }, { id: 'videos', label: 'Киноплёнка' },
     { id: 'news', label: 'Новости — левая страница' },
     { id: 'book-stories', label: 'Истории — правая страница' },
+    { id: 'saga', label: 'Сага на стене' },
     { id: 'site', label: 'Сайт' },
     { id: 'links', label: 'Ссылки' },
     { id: 'media', label: 'Медиа' },
@@ -1399,6 +1400,60 @@
         box.append(el('label', {}, published, ' Опубликовать запись'), el('button', { type: 'button', class: 'ghost', onclick: () => { if (confirm('Удалить эту запись?')) { state.work.news.items.splice(index, 1); markDirty('news'); render(); } } }, 'Удалить запись'));
         card.append(box);
       });
+      host.append(card); return;
+    }
+    if (file === 'saga' && !state.rawMode) {
+      // Панель, которая выезжает справа по клику на пергамент «Не пролистывай меня» над лампой
+      const saga = state.work.saga;
+      const dirty = () => markDirty('saga');
+      const input = (obj, key, label, rows = 0, type = 'text') => {
+        const node = rows ? el('textarea', { rows: String(rows) }) : el('input', { type });
+        node.value = obj[key] || '';
+        node.addEventListener('input', () => { obj[key] = node.value; dirty(); });
+        return el('div', { class: 'field full' }, el('label', {}, label), node);
+      };
+      const card = el('div', { class: 'file-card' }, el('h2', {}, 'Сага на стене — панель справа'),
+        el('p', { class: 'muted' }, 'Эта панель открывается по клику на пергамент «Не пролистывай меня» над лампой. Добавляйте блоки с текстом, списком, фото или видео. Абзацы в тексте разделяйте пустой строкой. Затем «Сохранить черновик» и «Опубликовать».'));
+      const head = el('div', { class: 'obj' }, el('div', { class: 'obj-key' }, 'Шапка панели'));
+      head.append(input(saga, 'tag', 'Надпись в шапке'), input(saga, 'status', 'Зелёная строка над заголовком (можно оставить пустой)'), input(saga, 'title', 'Заголовок'), input(saga, 'lead', 'Подзаголовок', 3));
+      card.append(head);
+      card.append(el('button', { type: 'button', onclick: () => { saga.blocks.push({ heading: '', text: '', list: [], media: '', mediaAlt: '' }); dirty(); render(); } }, '+ Добавить блок'));
+      saga.blocks.forEach((block, index) => {
+        block.list = block.list || []; block.media = block.media || ''; block.mediaAlt = block.mediaAlt || '';
+        const box = el('div', { class: 'obj' }, el('div', { class: 'obj-key' }, `Блок ${index + 1}`));
+        box.append(input(block, 'heading', 'Заголовок блока'), input(block, 'text', 'Текст (абзацы — через пустую строку)', 5));
+        const list = el('textarea', { rows: '4' }); list.value = block.list.join('\n');
+        list.addEventListener('input', () => { block.list = list.value.split('\n').map((s) => s.trim()).filter(Boolean); dirty(); });
+        box.append(el('div', { class: 'field full' }, el('label', {}, 'Нумерованный список (каждый пункт с новой строки, можно оставить пустым)'), list));
+        const info = el('span', { class: 'muted' }, block.media ? `Прикреплено: ${block.media.split('/').pop()}` : 'Файл не выбран');
+        const preview = el('div', {});
+        const showPreview = () => { preview.textContent = ''; if (block.media && /\.(png|jpg|webp)$/.test(block.media)) preview.append(el('img', { src: block.media, alt: '', style: 'max-width:220px;max-height:160px;display:block;margin-top:8px;border-radius:4px' })); };
+        showPreview();
+        const picker = el('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,video/mp4,video/webm' });
+        picker.addEventListener('change', async () => {
+          const selected = picker.files[0]; if (!selected) return;
+          const isImage = /^image\//.test(selected.type);
+          if (selected.size > (isImage ? 2 : 25) * 1024 * 1024) { alert(isImage ? 'Фото больше 2 МБ.' : 'Видео больше 25 МБ.'); return; }
+          picker.disabled = true; info.textContent = 'Загрузка файла…';
+          try {
+            const result = await fetch('/api/news-upload', { method: 'POST', headers: { 'Content-Type': selected.type || 'application/octet-stream' }, body: selected });
+            const json = await result.json(); if (!result.ok) throw new Error(json.error || `Ошибка ${result.status}`);
+            if (!/\.(png|jpg|webp|mp4|webm)$/.test(json.path)) throw new Error('в саге можно показывать только фото и видео');
+            block.media = json.path; dirty(); info.textContent = `Прикреплено: ${selected.name}`; showPreview();
+          } catch (err) { info.textContent = block.media ? `Прикреплено: ${block.media.split('/').pop()}` : 'Файл не выбран'; alert('Не удалось загрузить файл: ' + err.message); }
+          finally { picker.disabled = false; picker.value = ''; }
+        });
+        const remove = el('button', { type: 'button', class: 'ghost', onclick: () => { block.media = ''; info.textContent = 'Файл не выбран'; showPreview(); dirty(); } }, 'Убрать файл');
+        box.append(el('div', { class: 'field full' }, el('label', {}, 'Фото или видео (фото PNG/JPEG/WebP до 2 МБ, видео MP4/WebM до 25 МБ)'), picker, info, remove, preview));
+        box.append(input(block, 'mediaAlt', 'Описание картинки для незрячих (необязательно)'));
+        const move = (d) => { const j = index + d; if (j < 0 || j >= saga.blocks.length) return; [saga.blocks[index], saga.blocks[j]] = [saga.blocks[j], saga.blocks[index]]; dirty(); render(); };
+        box.append(el('button', { type: 'button', class: 'ghost', onclick: () => move(-1) }, '↑ Выше'), el('button', { type: 'button', class: 'ghost', onclick: () => move(1) }, '↓ Ниже'),
+          el('button', { type: 'button', class: 'ghost', onclick: () => { if (confirm('Удалить этот блок?')) { saga.blocks.splice(index, 1); dirty(); render(); } } }, 'Удалить блок'));
+        card.append(box);
+      });
+      const cta = el('div', { class: 'obj' }, el('div', { class: 'obj-key' }, 'Кнопка внизу панели'));
+      cta.append(input(saga.cta, 'label', 'Текст кнопки'), input(saga.cta, 'url', 'Ссылка (только https://)', 0, 'url'));
+      card.append(cta);
       host.append(card); return;
     }
     const card = el('div', { class: 'file-card' },
