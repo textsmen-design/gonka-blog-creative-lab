@@ -40,7 +40,7 @@ d = clone(base.links); d.socials.push({ ...d.socials[2], label: 'Копия' });
 check('соцсети: повторяющийся id отклоняется', errs('links', d).some((e) => /повторяющийся id/.test(e)));
 d = clone(base.links); d.socials[2].icon = 'tiktok';
 check('соцсети: иконка вне белого списка отклоняется', errs('links', d).length > 0);
-d = clone(base.links); d.socials[1].newTab = true;
+d = clone(base.links); d.socials[1].url = 'mailto:test@example.com'; d.socials[1].newTab = true;
 check('соцсети: «в новой вкладке» только для https', errs('links', d).some((e) => /newTab/.test(e)));
 d = clone(base.links); d.socials[3].enabled = false; d.socials.push({ id: 'github', label: 'GitHub', url: 'https://github.com/example', enabled: true, icon: 'link', newTab: true, title: 'GitHub', ariaLabel: 'GitHub профиль' });
 check('соцсети: отключение и новая сеть допустимы', errs('links', d).length === 0);

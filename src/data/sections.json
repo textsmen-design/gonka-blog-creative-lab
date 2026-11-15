@@ -417,7 +417,7 @@
           ],
           [
             "Уведомления:",
-            "Email textsmen@gmail.com"
+            "Email-уведомления"
           ]
         ]
       },
@@ -501,7 +501,7 @@
     },
     "actions": [
       "ОТКРЫТЬ ПРОЕКТ (reloca.site) ↗",
-      "ОБСУДИТЬ В TELEGRAM (@lonelysvobodny) ↗"
+      "ОБСУДИТЬ В TELEGRAM (@gonka_blog) ↗"
     ],
     "blocks": [
       {
@@ -535,7 +535,7 @@
           ],
           [
             "Связь:",
-            "@lonelysvobodny"
+            "@gonka_blog"
           ]
         ]
       }
@@ -549,11 +549,11 @@
     "hero": {
       "status": "● СТАТУС: НА СВЯЗИ",
       "title": "Прямая связь",
-      "lead": "Есть задача или идея? Опишите её в Telegram или на почту — обсудим объём, срок и стоимость. Цена по запросу."
+      "lead": "Есть задача или идея? Опишите её в Telegram или ВКонтакте — обсудим объём, срок и стоимость. Цена по запросу."
     },
     "actions": [
-      "НАПИСАТЬ В TELEGRAM (@lonelysvobodny) ↗",
-      "ОТПРАВИТЬ EMAIL ↗"
+      "НАПИСАТЬ В TELEGRAM (@gonka_blog) ↗",
+      "НАПИСАТЬ ВО ВКОНТАКТЕ ↗"
     ],
     "blocks": [
       {
@@ -570,11 +570,11 @@
         "specs": [
           [
             "Telegram:",
-            "@lonelysvobodny"
+            "@gonka_blog"
           ],
           [
-            "Email:",
-            "textsmen@gmail.com"
+            "ВКонтакте:",
+            "vk.ru/id869032284"
           ],
           [
             "Формат:",
@@ -1024,8 +1024,8 @@
       "lead": "Разработчик Telegram-ботов, сайтов и веб-сервисов: беру задачу целиком и довожу до запуска и проверки."
     },
     "actions": [
-      "НАПИСАТЬ В TELEGRAM (@lonelysvobodny) ↗",
-      "ОТПРАВИТЬ EMAIL ↗"
+      "НАПИСАТЬ В TELEGRAM (@gonka_blog) ↗",
+      "НАПИСАТЬ ВО ВКОНТАКТЕ ↗"
     ],
     "blocks": [
       {
@@ -1066,11 +1066,11 @@
           ],
           [
             "Telegram:",
-            "@lonelysvobodny"
+            "@gonka_blog"
           ],
           [
-            "Email:",
-            "textsmen@gmail.com"
+            "ВКонтакте:",
+            "vk.ru/id869032284"
           ]
         ]
       }

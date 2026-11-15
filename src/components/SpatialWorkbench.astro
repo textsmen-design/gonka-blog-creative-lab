@@ -56,10 +56,8 @@ const slotPhotos = P.slots.find((s) => s.slotId === 'photos');
 const slotMagnifier = P.slots.find((s) => s.slotId === 'magnifier');
 const slotPencilcup = P.slots.find((s) => s.slotId === 'pencilcup');
 const primaryTracker = P.trackers?.[0];
-// Адрес почты в строках параметров панелей «Автор» и «Связь» — тот же текст из данных, но ссылкой mailto:
-const aboutMail = S['modal-about'].blocks[2].specs[4][1];
-const incomingMail = S['modal-incoming'].blocks[1].specs[1][1];
-const isMail = (v: string) => /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(v);
+const aboutVk = S['modal-about'].blocks[2].specs[4][1];
+const incomingVk = S['modal-incoming'].blocks[1].specs[1][1];
 // Широкое фото автора (кадр avtor.png целиком) для развёрнутой записи; боковая панель использует M.authorPortrait
 const AUTHOR_WIDE = '/previews/author-wide.jpg';
 // кнопки на экране телефона свитка «Боты» (картинка содержит две карточки) работают только для опубликованных ботов
@@ -373,6 +371,7 @@ const stars = Array.from({ length: 34 }, () => ({
             <a href={x.url} target={x.newTab ? "_blank" : undefined} rel={x.newTab ? "noopener noreferrer" : undefined} title={x.title} aria-label={x.ariaLabel}>
               {x.icon === "telegram" && (<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 2.7 11.6c-.9.3-.9 1.1-.2 1.4l4.9 1.5 1.9 5.8c.2.6.4.8.9.8s.7-.2 1-.5l2.5-2.4 4.9 3.6c.9.5 1.5.2 1.8-.8l3.2-15.2c.3-1.3-.5-1.9-1.4-1.5ZM9 14.3l9.4-5.9c.4-.3.8-.1.5.2L11 15.6l-.3 3.3-1.7-4.6Z"/></svg>)}
               {x.icon === "email" && (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3.5 7 8.5 6.5L20.5 7"/></svg>)}
+              {x.icon === "vk" && (<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.8 18.5h1.4s.4 0 .6-.3c.2-.2.2-.6.2-.6s0-1.8.8-2.1c.8-.2 1.8 1.8 2.9 2.5.8.5 1.4.4 1.4.4l2.9-.1s1.5-.1.8-1.3c-.1-.1-.4-.9-2.1-2.5-1.8-1.7-1.6-1.4.6-4.3 1.4-1.8 1.9-2.9 1.7-3.3-.1-.3-1-.2-1-.2l-3.3.1s-.2 0-.4.1c-.1.1-.2.3-.2.3s-.5 1.3-1.2 2.4c-1.5 2.6-2.1 2.8-2.4 2.7-.7-.4-.5-1.6-.5-2.4 0-2.7.4-3.8-.8-4.1-.4-.1-.7-.2-1.7-.2H7.6s-.5 0-.6.2c-.1.2 0 .5 0 .5s1.8 4.2 3.9 6.3c1.9 2 4.1 1.9 4.1 1.9Z"/></svg>)}
               {x.icon === "youtube" && (<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
         </svg>)}
@@ -1375,7 +1374,7 @@ const stars = Array.from({ length: 34 }, () => ({
           <p class="case-lead">{S['modal-incoming'].hero.lead}</p>
           <div class="case-actions">
             <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-incoming'].actions[0]}{W0}</a>
-            <a href={L.email} class="case-action-btn btn-secondary">{W0}{S['modal-incoming'].actions[1]}{W0}</a>
+            <a href={L.vk} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-incoming'].actions[1]}{W0}</a>
           </div>
         </div>
 
@@ -1397,7 +1396,7 @@ const stars = Array.from({ length: 34 }, () => ({
               <h3 class="section-heading">{S['modal-incoming'].blocks[1].heading}</h3>
               <div class="tech-spec-box">
                 <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[0][0]}</span><strong>{S['modal-incoming'].blocks[1].specs[0][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[1][0]}</span><strong>{isMail(incomingMail) ? <a href={"mailto:" + incomingMail} class="mail-link">{incomingMail}</a> : incomingMail}</strong></div>
+                <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[1][0]}</span><strong><a href={L.vk} target="_blank" rel="noopener noreferrer" class="mail-link">{incomingVk}</a></strong></div>
                 <div class="spec-row"><span>{S['modal-incoming'].blocks[1].specs[2][0]}</span><strong>{S['modal-incoming'].blocks[1].specs[2][1]}</strong></div>
               </div>
             </div>
@@ -1803,7 +1802,7 @@ const stars = Array.from({ length: 34 }, () => ({
             <p class="case-lead">{S['modal-about'].hero.lead}</p>
             <div class="case-actions">
               <a href={L.telegram} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-primary">{W0}{S['modal-about'].actions[0]}{W0}</a>
-              <a href={L.email} class="case-action-btn btn-secondary">{W0}{S['modal-about'].actions[1]}{W0}</a>
+              <a href={L.vk} target="_blank" rel="noopener noreferrer" class="case-action-btn btn-secondary">{W0}{S['modal-about'].actions[1]}{W0}</a>
             </div>
           </div>
         </div>
@@ -1890,7 +1889,7 @@ const stars = Array.from({ length: 34 }, () => ({
                 <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[1][0]}</span><strong>{S['modal-about'].blocks[2].specs[1][1]}</strong></div>
                 <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[2][0]}</span><strong>{S['modal-about'].blocks[2].specs[2][1]}</strong></div>
                 <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[3][0]}</span><strong>{S['modal-about'].blocks[2].specs[3][1]}</strong></div>
-                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[4][0]}</span><strong>{isMail(aboutMail) ? <a href={"mailto:" + aboutMail} class="mail-link">{aboutMail}</a> : aboutMail}</strong></div>
+                <div class="spec-row"><span>{S['modal-about'].blocks[2].specs[4][0]}</span><strong><a href={L.vk} target="_blank" rel="noopener noreferrer" class="mail-link">{aboutVk}</a></strong></div>
               </div>
             </div>
 
@@ -5118,7 +5117,7 @@ const stars = Array.from({ length: 34 }, () => ({
   [data-state="granted"] #live-coords { color: #e7f5d9; }
   .meta-src { display: inline-block; width: 98px; font-style: normal; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: #78716c; }
 
-  /* адрес почты в строках параметров — ссылка mailto: без изменения вида (цвет и начертание наследуются) */
+  /* контактная ссылка в строках параметров наследует цвет и начертание */
   .mail-link { color: inherit; text-decoration: none; }
   .mail-link:hover, .mail-link:focus-visible { text-decoration: underline; text-underline-offset: 3px; outline: none; }
   /* ---- фото автора и фото Белграда в панелях ---- */

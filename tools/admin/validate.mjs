@@ -214,7 +214,7 @@ export function businessRules(name, data) {
       }
       warnTrim(`${at}.label`, s.label);
     });
-    for (const must of ['telegram', 'email']) {
+    for (const must of ['telegram', 'vk']) {
       if (!seen.has(must)) errors.push({ path: 'socials', message: `нельзя удалять «${must}»: эта ссылка используется в кнопках разделов` });
     }
   }

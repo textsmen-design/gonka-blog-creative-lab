@@ -3,22 +3,22 @@
     {
       "id": "telegram",
       "label": "Telegram",
-      "url": "https://t.me/lonelysvobodny",
+      "url": "https://t.me/gonka_blog",
       "enabled": true,
       "icon": "telegram",
       "newTab": true,
-      "title": "Telegram (@lonelysvobodny)",
-      "ariaLabel": "Связаться в Telegram: @lonelysvobodny"
+      "title": "Telegram (@gonka_blog)",
+      "ariaLabel": "Связаться в Telegram: @gonka_blog"
     },
     {
-      "id": "email",
-      "label": "Email",
-      "url": "mailto:textsmen@gmail.com",
+      "id": "vk",
+      "label": "ВКонтакте",
+      "url": "https://vk.ru/id869032284",
       "enabled": true,
-      "icon": "email",
-      "newTab": false,
-      "title": "Email (textsmen@gmail.com)",
-      "ariaLabel": "Написать на почту: textsmen@gmail.com"
+      "icon": "vk",
+      "newTab": true,
+      "title": "ВКонтакте",
+      "ariaLabel": "Связаться ВКонтакте"
     },
     {
       "id": "youtube",

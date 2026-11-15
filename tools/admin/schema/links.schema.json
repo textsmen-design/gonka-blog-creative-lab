@@ -18,7 +18,7 @@
       "type": "array",
       "minItems": 2,
       "maxItems": 12,
-      "description": "Соцсети и контакты. id telegram и email обязательны (используются в кнопках разделов). Порядок массива = порядок значков.",
+      "description": "Соцсети и контакты. id telegram и vk обязательны (используются в кнопках разделов). Порядок массива = порядок значков.",
       "items": {
         "$ref": "#/$defs/social"
       }
@@ -85,6 +85,7 @@
           "enum": [
             "telegram",
             "email",
+            "vk",
             "youtube",
             "instagram",
             "link"
